@@ -12,6 +12,7 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 const whiteList = [
   '/login',
   '/demo/form',
+  '/demo/testForm',
   '/personnel/todo',
   '/personnel/done',
   '/personnel/task'

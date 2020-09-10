@@ -10,25 +10,30 @@
       <el-button type="primary">下推招标计划</el-button>
     </div>
     <el-tabs v-model="activeName" type="card">
-      <el-tab-pane label="合同策划单" name="form">
-        <el-form ref="form" :model="form" :rules="rules" :hide-required-asterisk="true">
+      <el-tab-pane label="单据信息" name="form">
+        <el-form
+          ref="form"
+          :model="form"
+          :rules="rules"
+          :hide-required-asterisk="true"
+        >
           <div class="table-border">
             <table cellspacing="0" cellpadding="0" border="0" width="100%">
               <tr>
-                <td>
-                  <div class="label is-required">标段名称：</div>
+                <td class="border-cell">
+                  <div class="label required">标段名称</div>
                 </td>
-                <td>
+                <td class="border-cell">
                   <div class="cell">
                     <el-form-item prop="bidName">
                       <el-input v-model="form.bidName" />
                     </el-form-item>
                   </div>
                 </td>
-                <td>
-                  <div class="label">标段编号：</div>
+                <td class="border-cell">
+                  <div class="label">标段编号</div>
                 </td>
-                <td>
+                <td class="border-cell">
                   <div class="cell">
                     <el-form-item prop="bidCode">
                       <el-input v-model="form.bidCode" />
@@ -37,42 +42,20 @@
                 </td>
               </tr>
               <tr>
-                <td>
-                  <div class="label is-required">项目名称：</div>
+                <td class="border-cell">
+                  <div class="label required">项目名称</div>
                 </td>
-                <td>
+                <td class="border-cell">
                   <div class="cell">
                     <el-form-item>
                       <el-input />
                     </el-form-item>
                   </div>
                 </td>
-                <td>
-                  <div class="label is-required">招标人：</div>
+                <td class="border-cell">
+                  <div class="label required">招标人</div>
                 </td>
-                <td>
-                  <div class="cell">
-                    <el-form-item>
-                      <el-input />
-                    </el-form-item>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="label is-required">估算金额（元）：</div>
-                </td>
-                <td>
-                  <div class="cell">
-                    <el-form-item>
-                      <el-input />
-                    </el-form-item>
-                  </div>
-                </td>
-                <td>
-                  <div class="label is-required">合同产生方式：</div>
-                </td>
-                <td>
+                <td class="border-cell">
                   <div class="cell">
                     <el-form-item>
                       <el-input />
@@ -81,20 +64,42 @@
                 </td>
               </tr>
               <tr>
-                <td>
-                  <div class="label is-required">估算金额（大写）：</div>
+                <td class="border-cell">
+                  <div class="label required">估算金额（元）</div>
                 </td>
-                <td>
+                <td class="border-cell">
+                  <div class="cell">
+                    <el-form-item>
+                      <el-input />
+                    </el-form-item>
+                  </div>
+                </td>
+                <td class="border-cell">
+                  <div class="label required">合同产生方式</div>
+                </td>
+                <td class="border-cell">
+                  <div class="cell">
+                    <el-form-item>
+                      <el-input />
+                    </el-form-item>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="border-cell">
+                  <div class="label required">估算金额（大写）</div>
+                </td>
+                <td class="border-cell">
                   <div class="cell">
                     <el-form-item>
                       <el-input type="textarea" :rows="2" />
                     </el-form-item>
                   </div>
                 </td>
-                <td>
-                  <div class="label is-required">建设地点：</div>
+                <td class="border-cell">
+                  <div class="label required">建设地点</div>
                 </td>
-                <td>
+                <td class="border-cell">
                   <div class="cell">
                     <el-form-item>
                       <el-input />
@@ -103,10 +108,10 @@
                 </td>
               </tr>
               <tr>
-                <td>
-                  <div class="label is-required">标段范围：</div>
+                <td class="border-cell">
+                  <div class="label required">标段范围</div>
                 </td>
-                <td colspan="3">
+                <td class="border-cell" colspan="3">
                   <div class="cell">
                     <el-form-item>
                       <el-input type="textarea" :rows="3" />
@@ -115,10 +120,10 @@
                 </td>
               </tr>
               <tr>
-                <td>
-                  <div class="label">标段内容：</div>
+                <td class="border-cell">
+                  <div class="label">标段内容</div>
                 </td>
-                <td colspan="3">
+                <td class="border-cell" colspan="3">
                   <div class="cell">
                     <el-form-item>
                       <el-input type="textarea" :rows="2" />
@@ -127,10 +132,10 @@
                 </td>
               </tr>
               <tr>
-                <td>
-                  <div class="label">备注：</div>
+                <td class="border-cell">
+                  <div class="label">备注</div>
                 </td>
-                <td colspan="3">
+                <td class="border-cell" colspan="3">
                   <div class="cell">
                     <el-form-item>
                       <el-input type="textarea" :rows="1" />
@@ -138,12 +143,48 @@
                   </div>
                 </td>
               </tr>
+              <tr>
+                <td class="border-cell" rowspan="3">
+                  <div class="label">评价情况</div>
+                </td>
+                <td class="border-cell">
+                  <div class="label required">及时性</div>
+                </td>
+                <td class="border-cell" colspan="2">
+                  <div class="cell">
+                    <el-rate></el-rate>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="border-cell">
+                  <div class="label required">及时性</div>
+                </td>
+                <td class="border-cell" colspan="2">
+                  <div class="cell">
+                    <el-rate></el-rate>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="border-cell">
+                  <div class="label required">及时性</div>
+                </td>
+                <td class="border-cell" colspan="2">
+                  <div class="cell">
+                    <el-rate></el-rate>
+                  </div>
+                </td>
+              </tr>
             </table>
           </div>
         </el-form>
       </el-tab-pane>
-      <el-tab-pane label="概算" name="desc">
-        <keep-alive>概算</keep-alive>
+      <el-tab-pane label="基本信息" name="baseInfo">
+        <keep-alive>基本信息</keep-alive>
+      </el-tab-pane>
+      <el-tab-pane label="审批信息" name="approval">
+        <keep-alive>审批信息</keep-alive>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -156,12 +197,12 @@ export default {
       activeName: 'form',
       form: {
         bidName: '',
-        bidCode: '',
+        bidCode: ''
       },
       rules: {
         bidName: [{ required: true, message: '请输入标题', trigger: 'blur' }],
-        bidCode: [{ required: true, message: '请上传图片', trigger: 'blur' }],
-      },
+        bidCode: [{ required: true, message: '请上传图片', trigger: 'blur' }]
+      }
     }
   },
   methods: {
@@ -172,8 +213,8 @@ export default {
           console.log('form', this.form)
         }
       })
-    },
-  },
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -202,22 +243,13 @@ $border: #d3d3d3;
 tr {
   td:nth-child(2n-1) {
     width: 15%;
-    color: #909399;
-    font-weight: bold;
-    .is-required:before {
-      content: '*';
-      color: #f56c6c;
-      margin-right: 4px;
-    }
   }
   td:nth-child(2n) {
     width: 35%;
   }
 }
 td {
-  border-bottom: 1px solid $border;
-  border-right: 1px solid $border;
-  padding: 5px 0;
+  // padding: 5px 0;
   min-width: 0;
   box-sizing: border-box;
   text-overflow: ellipsis;
@@ -225,6 +257,20 @@ td {
   position: relative;
   text-align: left;
 }
+.required:before {
+  content: '*';
+  color: #f56c6c;
+  margin-right: 4px;
+}
+.border-cell {
+  border-bottom: 1px solid $border;
+  border-right: 1px solid $border;
+}
+.label {
+  color: #909399;
+  font-weight: bold;
+}
+.cell,
 .label {
   box-sizing: border-box;
   overflow: hidden;
@@ -232,18 +278,9 @@ td {
   white-space: normal;
   word-break: break-all;
   line-height: 23px;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-.cell {
-  box-sizing: border-box;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  word-break: break-all;
-  line-height: 23px;
-  padding-left: 10px;
-  padding-right: 10px;
+  // padding-left: 10px;
+  // padding-right: 10px;
+  margin: 5px 10px;
 }
 ::v-deep .el-form-item {
   margin-bottom: 0;
