@@ -1,16 +1,16 @@
 <template>
   <div class="navbar">
-    <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <hamburger
+      id="hamburger-container"
+      :is-active="sidebar.opened"
+      class="hamburger-container"
+      @toggleClick="toggleSideBar"
+    />
 
     <breadcrumb id="breadcrumb-container" class="breadcrumb-container" />
 
     <div class="right-menu">
       <template v-if="device!=='mobile'">
-
-        <el-tooltip content="大屏展示" effect="dark" placement="bottom">
-          <dashboardIcon id="dashboard" class="right-menu-item hover-effect"  />
-        </el-tooltip>
-
         <el-tooltip content="全屏缩放" effect="dark" placement="bottom">
           <screenfull id="screenfull" class="right-menu-item hover-effect" />
         </el-tooltip>
@@ -18,40 +18,38 @@
         <el-tooltip content="布局设置" effect="dark" placement="bottom">
           <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip>
-
       </template>
 
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="Avatar" class="user-avatar">
+          <img :src="Avatar" class="user-avatar" />
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown">
-          <span style="display:block;" >
-            <el-dropdown-item >
-              {{trueName}}
-            </el-dropdown-item>
+          <span style="display:block;">
+            <el-dropdown-item>{{trueName}}</el-dropdown-item>
           </span>
           <span style="display:block;" @click="show = true">
-            <el-dropdown-item divided>
-              布局设置
-            </el-dropdown-item>
+            <el-dropdown-item divided>布局设置</el-dropdown-item>
           </span>
           <span style="display:block;" @click="showPasswordDialog">
-            <el-dropdown-item>
-              修改密码
-            </el-dropdown-item>
+            <el-dropdown-item>修改密码</el-dropdown-item>
           </span>
           <span style="display:block;" @click="open">
-            <el-dropdown-item>
-              退出登录
-            </el-dropdown-item>
+            <el-dropdown-item>退出登录</el-dropdown-item>
           </span>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
     <el-dialog title="修改密码" :visible.sync="dialogPasswordVisible" :modal-append-to-body="false">
-      <el-form ref="updatePassForm" :rules="rules" :model="updatePassForm" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form
+        ref="updatePassForm"
+        :rules="rules"
+        :model="updatePassForm"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left:50px;"
+      >
         <el-form-item label="原密码" prop="oldPassword">
           <el-input v-model="updatePassForm.oldPassword" placeholder="请输入原密码" type="password" />
         </el-form-item>
@@ -83,7 +81,7 @@ export default {
     Hamburger,
     Screenfull,
     SizeSelect,
-    dashboardIcon
+    dashboardIcon,
   },
   data() {
     return {
@@ -92,19 +90,21 @@ export default {
       dialogPasswordVisible: false,
       updatePassForm: {},
       rules: {
-        oldPassword: [{ required: true, message: '请填写密码', trigger: 'blur' }, { min: 6, message: '长度至少6个字符', trigger: 'blur' }],
-        newPassword: [{ required: true, message: '请填写密码', trigger: 'blur' }, { min: 6, message: '长度至少6个字符', trigger: 'blur' }]
+        oldPassword: [
+          { required: true, message: '请填写密码', trigger: 'blur' },
+          { min: 6, message: '长度至少6个字符', trigger: 'blur' },
+        ],
+        newPassword: [
+          { required: true, message: '请填写密码', trigger: 'blur' },
+          { min: 6, message: '长度至少6个字符', trigger: 'blur' },
+        ],
       },
-      trueName:JSON.parse(sessionStorage.getItem('user')).trueName
+      // trueName:JSON.parse(sessionStorage.getItem('user')).trueName
+      trueName: '张三',
     }
   },
   computed: {
-    ...mapGetters([
-      'sidebar',
-      'device',
-      'user',
-      'baseApi'
-    ]),
+    ...mapGetters(['sidebar', 'device', 'user', 'baseApi']),
     show: {
       get() {
         return this.$store.state.settings.showSettings
@@ -112,10 +112,10 @@ export default {
       set(val) {
         this.$store.dispatch('settings/changeSetting', {
           key: 'showSettings',
-          value: val
+          value: val,
         })
-      }
-    }
+      },
+    },
   },
   methods: {
     toggleSideBar() {
@@ -132,7 +132,7 @@ export default {
         this.$notify({
           title: '密码修改成功，请重新登录',
           type: 'success',
-          duration: 1500
+          duration: 1500,
         })
         setTimeout(() => {
           this.logout()
@@ -143,7 +143,7 @@ export default {
       this.$confirm('确定注销并退出系统吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning'
+        type: 'warning',
       }).then(() => {
         this.logout()
       })
@@ -152,8 +152,8 @@ export default {
       this.$store.dispatch('LogOut').then(() => {
         location.reload()
       })
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -163,18 +163,18 @@ export default {
   overflow: hidden;
   position: relative;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
   .hamburger-container {
     line-height: 46px;
     height: 100%;
     float: left;
     cursor: pointer;
-    transition: background .3s;
-    -webkit-tap-highlight-color:transparent;
+    transition: background 0.3s;
+    -webkit-tap-highlight-color: transparent;
 
     &:hover {
-      background: rgba(0, 0, 0, .025)
+      background: rgba(0, 0, 0, 0.025);
     }
   }
 
@@ -206,10 +206,10 @@ export default {
 
       &.hover-effect {
         cursor: pointer;
-        transition: background .3s;
+        transition: background 0.3s;
 
         &:hover {
-          background: rgba(0, 0, 0, .025)
+          background: rgba(0, 0, 0, 0.025);
         }
       }
     }

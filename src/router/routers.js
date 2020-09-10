@@ -58,6 +58,20 @@ export const constantRouterMap = [
         meta: { title: '个人中心' }
       }
     ]
+  },
+  {
+    path: '/demo',
+    component: Layout,
+    hidden: true,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'form',
+        component: () => import('@/views/demo/form'),
+        name: 'demo表单',
+        meta: { title: 'demo表单' }
+      }
+    ]
   }
 ]
 
