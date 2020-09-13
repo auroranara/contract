@@ -21,10 +21,11 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-$border: #d3d3d3;
+@import '~@/assets/styles/variables.scss';
+
 .table-border {
   margin-bottom: 20px;
-  border: 1px solid $border;
+  border: 1px solid $gridBorder;
   border-right: none;
   border-bottom: none;
   position: relative;

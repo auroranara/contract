@@ -51,27 +51,8 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-$border: #d3d3d3;
-.container {
-  padding: 10px 20px;
-}
-.btn_container {
-  margin-bottom: 10px;
-}
-.table-border {
-  margin-bottom: 20px;
-  border: 1px solid $border;
-  border-right: none;
-  border-bottom: none;
-  position: relative;
-  overflow: hidden;
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 100%;
-  background-color: #fff;
-  font-size: 14px;
-  color: #606266;
-}
+@import '~@/assets/styles/variables.scss';
+
 .label-bg {
   background: #e2f5fd;
 }
@@ -95,8 +76,8 @@ td.is-right {
   margin-right: 4px;
 }
 .border-cell {
-  border-bottom: 1px solid $border;
-  border-right: 1px solid $border;
+  border-bottom: 1px solid $gridBorder;
+  border-right: 1px solid $gridBorder;
 }
 .label {
   color: #909399;
