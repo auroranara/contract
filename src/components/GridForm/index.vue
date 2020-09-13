@@ -1,19 +1,9 @@
 <template>
-  <el-form
-    ref="form"
-    :model="form"
-    :rules="rules"
-    :hide-required-asterisk="true"
-  >
+  <el-form ref="form" :model="model" :rules="rules" :hide-required-asterisk="true">
     <div class="table-border">
       <table cellspacing="0" cellpadding="0" border="0" width="100%">
         <tr v-for="(row, index) in settings" :key="index">
-          <cellItem
-            v-for="(col, i) in row"
-            :setting="col"
-            :data="form"
-            :key="i"
-          ></cellItem>
+          <cellItem v-for="(col, i) in row" :setting="col" :data="model" :key="i"></cellItem>
         </tr>
       </table>
     </div>
@@ -24,10 +14,10 @@ import cellItem from './cellItem'
 
 export default {
   name: 'gridForm',
-  props: ['rules', 'form', 'settings'],
+  props: ['rules', 'model', 'settings'],
   components: {
-    cellItem
-  }
+    cellItem,
+  },
 }
 </script>
 <style lang="scss" scoped>

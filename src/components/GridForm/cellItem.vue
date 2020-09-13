@@ -12,27 +12,42 @@ export default {
       tag,
       rowspan,
       colspan,
-      cellStyle
+      cellStyle,
+      align = 'left',
+      showBg,
+      tagProps = {},
     } = this.setting
+    const tdClass = {
+      'border-cell': true,
+      'is-center': align === 'center',
+      'is-right': align === 'right',
+      'label-bg': showBg,
+    }
     if (rowspan === '0' || colspan === '0') return null
     if (type === 'label') {
       return (
-        <td class="border-cell" rowspan={rowspan} colspan={colspan}>
+        <td class={tdClass} rowspan={rowspan} colspan={colspan}>
           <div class={{ label: true, required: required }}>{label}</div>
         </td>
       )
+    } else if (type === 'empty') {
+      return <td class={tdClass}></td>
     } else {
       return (
-        <td class="border-cell" rowspan={rowspan} colspan={colspan}>
+        <td class={tdClass} rowspan={rowspan} colspan={colspan}>
           <div class="cell" style={cellStyle}>
             <el-form-item prop={field}>
-              {render ? render(this.data) : <tag vModel={this.data[field]} />}
+              {render ? (
+                render(this.data)
+              ) : (
+                <tag attrs={tagProps} vModel={this.data[field]} />
+              )}
             </el-form-item>
           </div>
         </td>
       )
     }
-  }
+  },
 }
 </script>
 <style lang="scss" scoped>
@@ -57,6 +72,9 @@ $border: #d3d3d3;
   font-size: 14px;
   color: #606266;
 }
+.label-bg {
+  background: #e2f5fd;
+}
 td {
   min-width: 0;
   box-sizing: border-box;
@@ -64,6 +82,12 @@ td {
   vertical-align: middle;
   position: relative;
   text-align: left;
+}
+td.is-center {
+  text-align: center;
+}
+td.is-right {
+  text-align: right;
 }
 .required:before {
   content: '*';

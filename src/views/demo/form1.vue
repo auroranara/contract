@@ -11,12 +11,7 @@
     </div>
     <el-tabs v-model="activeName" type="card">
       <el-tab-pane label="单据信息" name="form">
-        <grid-form
-          ref="gridForm"
-          :rules="rules"
-          :settings="settings"
-          :form="form"
-        ></grid-form>
+        <grid-form ref="gridForm" :rules="rules" :settings="settings" :form="form"></grid-form>
       </el-tab-pane>
       <el-tab-pane label="基本信息" name="baseInfo">
         <keep-alive>基本信息</keep-alive>
@@ -28,12 +23,12 @@
   </div>
 </template>
 <script>
-import gridForm from '@/views/components/gridForm'
+import GridForm from '@/components/GridForm'
 
 export default {
   name: 'Test',
   components: {
-    gridForm
+    GridForm,
   },
   data() {
     return {
@@ -41,51 +36,51 @@ export default {
       form: {},
       rules: {
         bidName: [
-          { required: true, message: '请输入标段名称', trigger: 'blur' }
+          { required: true, message: '请输入标段名称', trigger: 'blur' },
         ],
         projectName: [
-          { required: true, message: '请选择项目名称', trigger: 'blur' }
+          { required: true, message: '请选择项目名称', trigger: 'blur' },
         ],
-        jsx: [{ required: true, message: '请评分实时性', trigger: 'blur' }]
+        jsx: [{ required: true, message: '请评分实时性', trigger: 'blur' }],
       },
       projects: [
         { value: '1', label: '无锡地铁1号线工程' },
-        { value: '2', label: '无锡地铁2号线工程' }
+        { value: '2', label: '无锡地铁2号线工程' },
       ],
       settings: [
         [
           {
             type: 'label',
             label: '标段名称',
-            required: true
+            required: true,
           },
           {
             type: 'handler',
             field: 'bidName',
             tag: 'el-input',
-            render: data => <el-input vModel={data['bidName']} />
+            render: (data) => <el-input vModel={data['bidName']} />,
           },
           {
             type: 'label',
-            label: '标段编号'
+            label: '标段编号',
           },
           {
             type: 'handler',
             field: 'bidCode',
-            tag: 'el-input'
-          }
+            tag: 'el-input',
+          },
         ],
         [
           {
             type: 'label',
             label: '项目名称名称',
-            required: true
+            required: true,
           },
           {
             type: 'handler',
             field: 'projectName',
             tag: 'el-input',
-            render: data => (
+            render: (data) => (
               <el-select
                 vModel={data['projectName']}
                 style="width:100%"
@@ -95,83 +90,83 @@ export default {
                   <el-option value={value} label={label} key={value} />
                 ))}
               </el-select>
-            )
+            ),
           },
           {
             type: 'label',
             label: '招标人',
-            required: true
+            required: true,
           },
           {
             type: 'handler',
             field: 'zbr',
-            tag: 'el-input'
-          }
+            tag: 'el-input',
+          },
         ],
         [
           {
             type: 'label',
             label: '估算金额（元）',
-            required: true
+            required: true,
           },
           {
             type: 'handler',
             field: 'gsje',
-            tag: 'el-input'
+            tag: 'el-input',
           },
           {
             type: 'label',
-            label: '合同产生方式'
+            label: '合同产生方式',
           },
           {
             type: 'handler',
             field: 'htscfs',
-            tag: 'el-input'
-          }
+            tag: 'el-input',
+          },
         ],
         [
           {
             type: 'label',
             label: '估算金额（大写）',
-            required: true
+            required: true,
           },
           {
             type: 'handler',
             field: 'gsjedx',
-            tag: 'el-input'
+            tag: 'el-input',
           },
           {
             type: 'label',
-            label: '建设地点'
+            label: '建设地点',
           },
           {
             type: 'handler',
             field: 'jsdd',
-            tag: 'el-input'
-          }
+            tag: 'el-input',
+          },
         ],
         [
           {
             type: 'label',
             label: '招标分类',
-            required: true
+            required: true,
           },
           {
             type: 'handler',
             field: 'zbfl',
-            tag: 'el-input'
+            tag: 'el-input',
           },
           {
             type: 'label',
-            label: '专业分类'
+            label: '专业分类',
           },
           {
             type: 'handler',
             field: 'zyfl',
-            tag: 'el-input'
-          }
-        ]
-      ]
+            tag: 'el-input',
+          },
+        ],
+      ],
     }
   },
   methods: {
@@ -183,8 +178,8 @@ export default {
           console.log('form', this.form)
         }
       })
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="scss" scoped>

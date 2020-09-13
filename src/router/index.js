@@ -10,6 +10,8 @@ import { userMenuVos } from './demoRouter'
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 const whiteList = [
+  '/401',
+  '/404',
   '/login',
   '/demo/form',
   '/demo/testForm',
@@ -56,25 +58,19 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     /* has no token*/
-    if (whiteList.indexOf(to.path) !== -1) {
-      if (store.getters.menus.length === 0) {
-        store.dispatch('setUserMenus', userMenuVos)
-        const asyncRouter = filterAsyncRouter(userMenuVos, false, true)
-        const showRouter = filterAsyncRouter(userMenuVos)
-        asyncRouter.push({ path: '*', redirect: '/404', hidden: true })
-        store.dispatch('GenerateRoutes', asyncRouter).then(() => {
-          // 存储路由
-          router.addRoutes(asyncRouter) // 动态添加可访问路由表
-          next({ ...to, replace: true })
-        })
-        store.dispatch('SetShowRoutes', showRouter)
-      }
-      // 在免登录白名单，直接进入
-      next()
-    } else {
-      next(`/login?redirect=${to.path}`) // 否则全部重定向到登录页
-      NProgress.done()
+    if (store.getters.menus.length === 0) {
+      store.dispatch('setUserMenus', userMenuVos)
+      const asyncRouter = filterAsyncRouter(userMenuVos, false, true)
+      const showRouter = filterAsyncRouter(userMenuVos)
+      asyncRouter.push({ path: '*', redirect: '/404', hidden: true })
+      store.dispatch('GenerateRoutes', asyncRouter).then(() => {
+        // 存储路由
+        router.addRoutes(asyncRouter) // 动态添加可访问路由表
+        next({ ...to, replace: true })
+      })
+      store.dispatch('SetShowRoutes', showRouter)
     }
+    next()
   }
 })
 
