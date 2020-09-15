@@ -80,7 +80,7 @@ td.is-right {
   border-right: 1px solid $gridBorder;
 }
 .label {
-  color: #909399;
+  color: #646464;
   font-weight: bold;
 }
 .cell,

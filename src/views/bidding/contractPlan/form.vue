@@ -9,43 +9,45 @@
       <el-button type="primary">调整</el-button>
       <el-button type="primary">下推招标计划</el-button>
     </div>
-    <el-tabs v-model="activeName" type="card">
+    <el-tabs v-model="activeName" type="border-card">
       <el-tab-pane label="单据信息" name="form">
-        <el-card header="信息" style="margin-bottom:20px">
-          <grid-form ref="gridForm" :rules="rules" :settings="settings" :model="form"></grid-form>
-        </el-card>
-        <el-card header="概算">
-          <el-button size="small" style="margin-right:10px" type="primary" @click="addEstimate">新增</el-button>
-          <el-button size="small" type="danger" @click="deleteEstimate">删除</el-button>
-          <div class="handle-table">
-            <el-table
-              style="margin-top:10px"
-              :data="estimateList"
-              border
-              @selection-change="handleEstimateChange"
-            >
-              <el-table-column type="selection" width="55" align="center"></el-table-column>
-              <el-table-column prop="gsbh" label="概算编号" width="200"></el-table-column>
-              <el-table-column prop="gsmc" label="概算名称">
-                <template slot-scope="scope">
-                  <el-input size="small" v-model="estimateList[scope.$index].gsmc" />
-                </template>
-              </el-table-column>
-              <el-table-column prop="gaisuanje" label="概算金额" width="250"></el-table-column>
-              <el-table-column prop="gusuanje" label="估算金额" width="250">
-                <template slot-scope="scope">
-                  <el-input-number
-                    :precision="2"
-                    size="small"
-                    v-model.number="estimateList[scope.$index].gusuanje"
-                    :controls="false"
-                  />
-                </template>
-              </el-table-column>
-              <el-table-column prop="proportion" label="占比" width="200"></el-table-column>
-            </el-table>
-          </div>
-        </el-card>
+        <div class="block-title">
+          <span>信息</span>
+        </div>
+        <grid-form ref="gridForm" :rules="rules" :settings="settings" :model="form"></grid-form>
+        <div class="block-title">
+          <span>概算</span>
+        </div>
+        <el-button size="small" style="margin-right:10px" type="primary" @click="addEstimate">新增</el-button>
+        <el-button size="small" type="danger" @click="deleteEstimate">删除</el-button>
+        <div class="handle-table">
+          <el-table
+            style="margin-top:10px"
+            :data="estimateList"
+            border
+            @selection-change="handleEstimateChange"
+          >
+            <el-table-column type="selection" width="55" align="center"></el-table-column>
+            <el-table-column prop="gsbh" label="概算编号" width="200"></el-table-column>
+            <el-table-column prop="gsmc" label="概算名称">
+              <template slot-scope="scope">
+                <el-input size="small" v-model="estimateList[scope.$index].gsmc" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="gaisuanje" label="概算金额" width="250"></el-table-column>
+            <el-table-column prop="gusuanje" label="估算金额" width="250">
+              <template slot-scope="scope">
+                <el-input-number
+                  :precision="2"
+                  size="small"
+                  v-model.number="estimateList[scope.$index].gusuanje"
+                  :controls="false"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="proportion" label="占比" width="200"></el-table-column>
+          </el-table>
+        </div>
       </el-tab-pane>
       <el-tab-pane label="基本信息" name="baseInfo">
         <el-table :data="baseInfoList" style="width: 550px" border>
@@ -557,6 +559,20 @@ export default {
 <style lang="scss">
 .container {
   padding: 10px 20px;
+  .block-title {
+    border-bottom: 2px solid #1890ff;
+    padding-left: 10px;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    & > span {
+      display: inline-block;
+      padding-left: 8px;
+      height: 26px;
+      line-height: 26px;
+      border-left: 4px solid #1890ff;
+      font-size: 18px;
+    }
+  }
   .timeline-container {
     margin-top: 10px;
   }

@@ -5,9 +5,9 @@
       :unique-opened="true"
       @select="handleSelect"
       :collapse-transition="false"
-      background-color="#BBBBBB"
-      text-color="#fff"
-      active-text-color="#ffd04b"
+      background-color="#F5F7FA"
+      text-color="#4F4F4F"
+      active-text-color="#5F9BFD"
     >
       <el-submenu index="grgzt" :popper-append-to-body="false">
         <template slot="title">个人工作台</template>
@@ -164,38 +164,205 @@
         </el-submenu>
       </el-submenu>
     </el-menu>
+
+    <div class="right-menu">
+      <template v-if="device!=='mobile'">
+        <el-tooltip content="全屏缩放" effect="dark" placement="bottom">
+          <screenfull id="screenfull" class="right-menu-item hover-effect" />
+        </el-tooltip>
+
+        <el-tooltip content="布局设置" effect="dark" placement="bottom">
+          <size-select id="size-select" class="right-menu-item hover-effect" />
+        </el-tooltip>
+      </template>
+
+      <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
+        <div class="avatar-wrapper">
+          <img :src="Avatar" class="user-avatar" />
+          <i class="el-icon-caret-bottom" />
+        </div>
+        <el-dropdown-menu slot="dropdown">
+          <span style="display:block;">
+            <el-dropdown-item>{{trueName}}</el-dropdown-item>
+          </span>
+          <span style="display:block;" @click="show = true">
+            <el-dropdown-item divided>布局设置</el-dropdown-item>
+          </span>
+          <span style="display:block;" @click="showPasswordDialog">
+            <el-dropdown-item>修改密码</el-dropdown-item>
+          </span>
+          <span style="display:block;" @click="open">
+            <el-dropdown-item>退出登录</el-dropdown-item>
+          </span>
+        </el-dropdown-menu>
+      </el-dropdown>
+    </div>
   </div>
 </template>
 <script>
 import variables from '@/assets/styles/variables.scss'
+import { mapGetters } from 'vuex'
+import Screenfull from '@/components/Screenfull'
+import SizeSelect from '@/components/SizeSelect'
+import Avatar from '@/assets/images/avatar.png'
+import { updatePassword } from '@/api/system/user'
 
 export default {
   name: 'TopSidbar',
+  components: {
+    Screenfull,
+    SizeSelect,
+  },
   data() {
-    return {}
+    return {
+      Avatar: Avatar,
+      dialogVisible: false,
+      dialogPasswordVisible: false,
+      updatePassForm: {},
+      rules: {
+        oldPassword: [
+          { required: true, message: '请填写密码', trigger: 'blur' },
+          { min: 6, message: '长度至少6个字符', trigger: 'blur' },
+        ],
+        newPassword: [
+          { required: true, message: '请填写密码', trigger: 'blur' },
+          { min: 6, message: '长度至少6个字符', trigger: 'blur' },
+        ],
+      },
+      // trueName:JSON.parse(sessionStorage.getItem('user')).trueName
+      trueName: '张三',
+    }
   },
   computed: {
+    ...mapGetters(['sidebar', 'device', 'user', 'baseApi']),
+    show: {
+      get() {
+        return this.$store.state.settings.showSettings
+      },
+      set(val) {
+        this.$store.dispatch('settings/changeSetting', {
+          key: 'showSettings',
+          value: val,
+        })
+      },
+    },
     variables() {
       return variables
     },
   },
   methods: {
     handleSelect() {},
+    toggleSideBar() {
+      this.$store.dispatch('app/toggleSideBar')
+    },
+    showPasswordDialog() {
+      this.$nextTick(() => {
+        this.dialogPasswordVisible = true
+      })
+    },
+    changePassword() {
+      updatePassword(this.updatePassForm).then((res) => {
+        this.dialogPasswordVisible = false
+        this.$notify({
+          title: '密码修改成功，请重新登录',
+          type: 'success',
+          duration: 1500,
+        })
+        setTimeout(() => {
+          this.logout()
+        }, 1500)
+      })
+    },
+    open() {
+      this.$confirm('确定注销并退出系统吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        this.logout()
+      })
+    },
+    logout() {
+      this.$store.dispatch('LogOut').then(() => {
+        location.reload()
+      })
+    },
   },
 }
 </script>
 <style lang="scss">
 .top-menu {
+  height: 50px;
+  overflow: hidden;
+  position: relative;
+
+  .right-menu {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    line-height: 50px;
+
+    &:focus {
+      outline: none;
+    }
+
+    .right-menu-item {
+      display: inline-block;
+      padding: 0 8px;
+      height: 100%;
+      font-size: 18px;
+      color: #5a5e66;
+      vertical-align: text-bottom;
+
+      &.hover-effect {
+        cursor: pointer;
+        transition: background 0.3s;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.025);
+        }
+      }
+    }
+
+    .avatar-container {
+      margin-right: 30px;
+
+      .avatar-wrapper {
+        margin-top: 5px;
+        position: relative;
+
+        .user-avatar {
+          cursor: pointer;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+        }
+
+        .el-icon-caret-bottom {
+          cursor: pointer;
+          position: absolute;
+          right: -20px;
+          top: 25px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
   .el-menu--horizontal > .el-submenu .el-submenu__title {
-    height: 40px;
-    line-height: 40px;
+    height: 50px;
+    line-height: 50px;
   }
   .el-submenu__title {
     padding: 0 10px;
     margin: 0 10px;
   }
   .el-submenu__title i {
-    color: white;
+    color: #4f4f4f;
+  }
+  .el-submenu__title:hover,
+  .el-menu-item:hover {
+    background: white !important;
   }
 }
 </style>
