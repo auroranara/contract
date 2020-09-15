@@ -50,7 +50,7 @@ export const userMenuVos = [
     children: [
       {
         path: 'supplier',
-        component: 'features/develop',
+        component: 'baseInfo/supplier',
         name: 'supplier',
         meta: { title: '供应商' }
       },

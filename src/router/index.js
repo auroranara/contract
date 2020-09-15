@@ -9,16 +9,7 @@ import { userMenuVos } from './demoRouter'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = [
-  '/401',
-  '/404',
-  '/login',
-  '/demo/form',
-  '/demo/testForm',
-  '/personnel/todo',
-  '/personnel/done',
-  '/personnel/task'
-] // no redirect whitelist
+const whiteList = ['/401', '/404', '/login'] // no redirect whitelist
 
 router.beforeEach((to, from, next) => {
   if (to.meta.title) {

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="btn_container">
+    <div class="head-container">
       <el-button type="primary">审核</el-button>
       <el-button type="primary">修改</el-button>
       <el-button type="primary" @click="onSave('form')">保存</el-button>
@@ -557,9 +557,6 @@ export default {
 <style lang="scss">
 .container {
   padding: 10px 20px;
-  .btn_container {
-    margin-bottom: 10px;
-  }
   .timeline-container {
     margin-top: 10px;
   }
