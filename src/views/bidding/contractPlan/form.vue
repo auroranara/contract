@@ -11,19 +11,69 @@
     </div>
     <el-tabs v-model="activeName" type="card">
       <el-tab-pane label="单据信息" name="form">
-        <grid-form ref="gridForm" :rules="rules" :settings="settings" :model="form"></grid-form>
+        <el-card header="信息" style="margin-bottom:20px">
+          <grid-form ref="gridForm" :rules="rules" :settings="settings" :model="form"></grid-form>
+        </el-card>
+        <el-card header="概算">
+          <el-button size="small" style="margin-right:10px" type="primary" @click="addEstimate">新增</el-button>
+          <el-button size="small" type="danger" @click="deleteEstimate">删除</el-button>
+          <div class="handle-table">
+            <el-table
+              style="margin-top:10px"
+              :data="estimateList"
+              border
+              @selection-change="handleEstimateChange"
+            >
+              <el-table-column type="selection" width="55" align="center"></el-table-column>
+              <el-table-column prop="gsbh" label="概算编号" width="200"></el-table-column>
+              <el-table-column prop="gsmc" label="概算名称">
+                <template slot-scope="scope">
+                  <el-input size="small" v-model="estimateList[scope.$index].gsmc" />
+                </template>
+              </el-table-column>
+              <el-table-column prop="gaisuanje" label="概算金额" width="250"></el-table-column>
+              <el-table-column prop="gusuanje" label="估算金额" width="250">
+                <template slot-scope="scope">
+                  <el-input-number
+                    :precision="2"
+                    size="small"
+                    v-model.number="estimateList[scope.$index].gusuanje"
+                    :controls="false"
+                  />
+                </template>
+              </el-table-column>
+              <el-table-column prop="proportion" label="占比" width="200"></el-table-column>
+            </el-table>
+          </div>
+        </el-card>
       </el-tab-pane>
       <el-tab-pane label="基本信息" name="baseInfo">
-        <keep-alive>基本信息</keep-alive>
+        <el-table :data="baseInfoList" style="width: 550px" border>
+          <el-table-column prop="title" label="标题" width="180"></el-table-column>
+          <el-table-column prop="content" label="内容"></el-table-column>
+        </el-table>
       </el-tab-pane>
       <el-tab-pane label="审批信息" name="approval">
-        <keep-alive>审批信息</keep-alive>
+        <div class="timeline-container">
+          <el-timeline>
+            <el-timeline-item
+              v-for="(activity, index) in timelineList"
+              :key="index"
+              :icon="activity.icon"
+              :type="activity.type"
+              :color="activity.color"
+              :size="activity.size"
+              :timestamp="activity.timestamp"
+            >{{activity.content}}</el-timeline-item>
+          </el-timeline>
+        </div>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 <script>
 import GridForm from '@/components/GridForm'
+import moment from 'moment'
 
 export default {
   name: 'Test',
@@ -121,7 +171,7 @@ export default {
           },
           {
             type: 'handler',
-            field: 'htscfs',
+            field: 'htcsfs',
             tag: 'el-input',
           },
         ],
@@ -233,11 +283,21 @@ export default {
             ),
           },
           {
-            type: 'empty',
+            type: 'label',
+            label: '计划竣工时间',
+            required: true,
             showBg: true,
           },
           {
-            type: 'empty',
+            type: 'handler',
+            field: 'jhjgsj',
+            render: (data) => (
+              <el-date-picker
+                vModel={data['jhjgsj']}
+                type="datetime"
+                style="width:100%"
+              ></el-date-picker>
+            ),
           },
         ],
         [
@@ -282,10 +342,10 @@ export default {
           },
           {
             type: 'handler',
-            field: 'zbbm',
+            field: 'jskssj',
             render: (data) => (
               <el-date-picker
-                vModel={data['zbbm']}
+                vModel={data['jskssj']}
                 type="datetime"
                 style="width:100%"
               ></el-date-picker>
@@ -347,9 +407,141 @@ export default {
           },
         ],
       ],
+      // 基础信息
+      baseInfoList: [
+        { title: '单据编号', content: '' },
+        { title: '状态', content: '初始状态' },
+        { title: '创建时间', content: '2019/7/5  9:10:10' },
+        { title: '创建人', content: '项目负责人' },
+        { title: '修改人', content: '' },
+        { title: '修改时间', content: '' },
+      ],
+      // 时间线列表（审批信息）
+      timelineList: [
+        {
+          content: '创建单据 由合同部——张三创建',
+          timestamp: '2020-04-12 20:46:23',
+          type: 'primary',
+          icon: 'el-icon-check',
+          color: '#0bbd87',
+        },
+        {
+          content: '由审核人李四审通过',
+          timestamp: '2020-04-15 20:46:12',
+          icon: 'el-icon-check',
+          color: '#0bbd87',
+        },
+        {
+          content: '审核人孙晓琳审通中',
+          timestamp: '2020-04-16 20:46:12',
+          icon: 'el-icon-more',
+          color: 'orange',
+        },
+        {
+          content: '待审核人王五审核',
+        },
+        {
+          content: '待审核人马六审核',
+        },
+      ],
+      // 概算列表
+      estimateList: [
+        {
+          key: '1',
+          gsbh: '--GS01',
+          gsmc: '地下车站',
+          gaisuanje: '50580000.74',
+          gusuanje: '40000000.74',
+          proportion: '79.08%',
+        },
+        {
+          key: '2',
+          gsbh: '--GS02',
+          gsmc: '高架车站',
+          gaisuanje: '50165465.00',
+          gusuanje: '49800000.00',
+          proportion: '99.27%',
+        },
+        {
+          key: '3',
+          gsbh: '--GS03',
+          gsmc: '地下区间',
+          gaisuanje: '30580000.74',
+          gusuanje: '30000000.74',
+          proportion: '98.10%',
+        },
+        {
+          key: '4',
+          gsbh: '--GS04',
+          gsmc: '高架区间',
+          gaisuanje: '50000000.00',
+          gusuanje: '49800000.00',
+          proportion: '99.60%',
+        },
+      ],
+      // 概算列表选中的对象
+      selectedEstimate: [],
+      // 状态字典
+      statusDict: [
+        { value: '1', label: '初始状态' },
+        { value: '2', label: '审批中' },
+        { value: '3', label: '审批完成' },
+        { value: '4', label: '已停用' },
+      ],
+    }
+  },
+  created() {
+    // 假数据
+    this.form = {
+      bidName: '无锡地铁4号线具区路车辆段基础工程',
+      bidCode: Date.now(),
+      projectName: '无锡地铁4号线工程',
+      zbr: '无锡地铁集团有限公司',
+      gsje: '169600001',
+      htcsfs: '招标',
+      gsjedx: '壹亿陆仟玖佰陆拾万',
+      jsdd: '无锡',
+      zbfl: '施工类',
+      zyfl: '施工-土建',
+      zbfs: '1',
+      zbzzxs: '1',
+      jhkgsj: moment('2020-10-09'),
+      jhjgsj: moment('2021-01-05'),
+      zbdw: '无锡地铁建设分公司',
+      zbbm: '工程部',
+      zbry: '项目负责人',
+      jhkssj: moment('2020-09-09'),
+      bdfw:
+        '具区路车辆段主体及附属结构；市政管线迁改；交通疏解；变电所及进出线管廊(若有)等的地铁附属设施施工范围内需迁移的绿化迁移',
+      bdnr:
+        '主体及附属结构；市政管线迁改；交通疏解；具区路车辆段及配套项目基础工程',
     }
   },
   methods: {
+    handleEstimateChange(val) {
+      this.selectedEstimate = val
+    },
+    // 新增概算
+    addEstimate() {
+      // 需要一个key来进行删除操作
+      this.estimateList = [...this.estimateList, { key: Date.now() }]
+    },
+    // 删除概算列表中选中的数据
+    deleteEstimate() {
+      if (
+        Array.isArray(this.selectedEstimate) &&
+        this.selectedEstimate.length
+      ) {
+        this.estimateList = this.estimateList.filter(
+          (item) => !this.selectedEstimate.some((val) => val.key === item.key)
+        )
+      } else {
+        this.$message({
+          message: '请先勾选想要删除的数据',
+          type: 'warning',
+        })
+      }
+    },
     onSave() {
       this.$refs['gridForm'].$refs['form'].validate((valid, obj) => {
         const msg = Object.entries(obj)
@@ -362,11 +554,22 @@ export default {
   },
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .container {
   padding: 10px 20px;
-}
-.btn_container {
-  margin-bottom: 10px;
+  .btn_container {
+    margin-bottom: 10px;
+  }
+  .timeline-container {
+    margin-top: 10px;
+  }
+  .el-input-number .el-input__inner {
+    text-align: left;
+  }
+  .handle-table {
+    .el-table td {
+      padding: 5px 0;
+    }
+  }
 }
 </style>

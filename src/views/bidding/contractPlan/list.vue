@@ -52,18 +52,11 @@
 
         <el-table-column align="center" label="计划开始时间" prop="jhkssj" :show-overflow-tooltip="true"></el-table-column>
 
-        <!-- <el-table-column align="center" label="操作">
-        <template slot-scope="scope">
-          <el-button
-            v-permission="['projectInfo:edit']"
-            size="mini"
-            icon="el-icon-edit"
-            type="primary"
-            @click="detail(scope.row.id)"
-            >编辑</el-button
-          >
-        </template>
-        </el-table-column>-->
+        <el-table-column align="center" label="操作" fixed="right">
+          <template slot-scope="scope">
+            <el-button type="text" @click="handleView(scope.row)">查看</el-button>
+          </template>
+        </el-table-column>
       </el-table>
 
       <!--分页组件-->
@@ -191,7 +184,24 @@ export default {
     }
   },
   methods: {
-    getList() {},
+    getList() {
+      this.list = [
+        {
+          bdmc: '无锡地铁4号线具区路车辆段基础工程',
+          bdbh: Date.now(),
+          htcsfs: '招标',
+          zbfl: '施工类',
+          zyfl: '施工-土建',
+          xmmc: '无锡地铁4号线工程',
+          zbdw: '无锡地铁建设分公司',
+          zbbm: '工程部',
+          zbry: '项目负责人',
+          zbfs: '公开招标',
+          zbzzxs: '自行招标',
+          jhkssj: '2020/10/1',
+        },
+      ]
+    },
     // 点击新增
     onSearch() {
       console.log('listQuery', this.listQuery)
@@ -207,6 +217,9 @@ export default {
       this.getList()
     },
     onClickAdd() {
+      this.$router.push('/bidding/contractPlan/form')
+    },
+    handleView() {
       this.$router.push('/bidding/contractPlan/form')
     },
   },
