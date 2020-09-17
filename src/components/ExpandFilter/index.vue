@@ -25,6 +25,10 @@ export default {
         sm: 24,
       }),
     },
+    showExpand: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -56,20 +60,22 @@ export default {
           </div>
           <div class="operations">
             {this.$slots.operations}
-            <el-link
-              type="primary"
-              underline={false}
-              onClick={this.onClickExpand}
-            >
-              <i
-                class={{
-                  'el-icon-arrow-down': true,
-                  'expand-icon': true,
-                  expand: this.expand,
-                }}
-              ></i>
-              {this.expand ? '收起' : '展开'}
-            </el-link>
+            {this.showExpand && this.fields.length > 2 && (
+              <el-link
+                type="primary"
+                underline={false}
+                onClick={this.onClickExpand}
+              >
+                <i
+                  class={{
+                    'el-icon-arrow-down': true,
+                    'expand-icon': true,
+                    expand: this.expand,
+                  }}
+                ></i>
+                {this.expand ? '收起' : '展开'}
+              </el-link>
+            )}
           </div>
         </div>
       )
@@ -92,20 +98,22 @@ export default {
         <el-row gutter={12}>
           <el-col class="is-right" span={24}>
             {this.$slots.operations}
-            <el-link
-              type="primary"
-              underline={false}
-              onClick={this.onClickExpand}
-            >
-              <i
-                class={{
-                  'el-icon-arrow-down': true,
-                  'expand-icon': true,
-                  expand: this.expand,
-                }}
-              ></i>
-              {this.expand ? '收起' : '展开'}
-            </el-link>
+            {this.showExpand && this.fields.length > 2 && (
+              <el-link
+                type="primary"
+                underline={false}
+                onClick={this.onClickExpand}
+              >
+                <i
+                  class={{
+                    'el-icon-arrow-down': true,
+                    'expand-icon': true,
+                    expand: this.expand,
+                  }}
+                ></i>
+                {this.expand ? '收起' : '展开'}
+              </el-link>
+            )}
           </el-col>
         </el-row>
       </div>

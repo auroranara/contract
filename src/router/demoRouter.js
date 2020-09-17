@@ -1,40 +1,40 @@
 // 模拟后端返回的路由
 export const userMenuVos = [
   {
-    path: '/personnel',
+    path: '/workbench',
     component: 'Layout',
-    name: 'personnel',
+    name: 'workbench',
     redirect: 'noredirect',
     alwaysShow: true,
     meta: { title: '个人工作台', icon: 'monitor' },
     children: [
       {
         path: 'backlog',
-        component: 'features/develop',
+        component: 'workbench/backlog',
         name: 'backlog',
         meta: { title: '待办事项' }
       },
       {
         path: 'done',
-        component: 'features/develop',
+        component: 'workbench/done',
         name: 'done',
         meta: { title: '已办事项' }
       },
       {
         path: 'toBeRead',
-        component: 'features/develop',
+        component: 'workbench/toBeRead',
         name: 'toBeRead',
         meta: { title: '待阅事项' }
       },
       {
         path: 'haveRead',
-        component: 'features/develop',
+        component: 'workbench/haveRead',
         name: 'haveRead',
         meta: { title: '已阅事项' }
       },
       {
         path: 'myContract',
-        component: 'features/develop',
+        component: 'workbench/myContract',
         name: 'myContract',
         meta: { title: '我的合同' }
       }
