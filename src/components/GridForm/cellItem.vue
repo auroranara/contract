@@ -15,19 +15,23 @@ export default {
       cellStyle,
       align = 'left',
       showBg,
+      disabled = false,
       tagProps = {},
     } = this.setting
     const tdClass = {
       'border-cell': true,
       'is-center': align === 'center',
       'is-right': align === 'right',
-      'label-bg': showBg,
+      'label-bg': showBg && !disabled,
+      disabled: disabled,
     }
     if (rowspan === '0' || colspan === '0') return null
     if (type === 'label') {
       return (
         <td class={tdClass} rowspan={rowspan} colspan={colspan}>
-          <div class={{ label: true, required: required }}>{label}</div>
+          <div class={{ label: true, required: required }}>
+            {render ? render() : label}
+          </div>
         </td>
       )
     } else if (type === 'empty') {
@@ -53,11 +57,8 @@ export default {
 <style lang="scss" scoped>
 @import '~@/assets/styles/variables.scss';
 
-.label-bg {
-  background: #e2f5fd;
-}
 td {
-  min-width: 0;
+  min-width: 100px;
   box-sizing: border-box;
   text-overflow: ellipsis;
   vertical-align: middle;
@@ -92,6 +93,12 @@ td.is-right {
   word-break: break-all;
   line-height: 23px;
   margin: 5px 10px;
+}
+.label-bg {
+  background: #f5fdff;
+}
+.disabled {
+  background: #f6f6f6;
 }
 ::v-deep .el-form-item {
   margin-bottom: 0;

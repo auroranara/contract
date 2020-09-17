@@ -1,6 +1,7 @@
 <template>
   <div class="top-menu">
     <el-menu
+      class="menu-container"
       mode="horizontal"
       :unique-opened="true"
       @select="handleSelect"
@@ -252,9 +253,6 @@ export default {
   },
   methods: {
     handleSelect() {},
-    toggleSideBar() {
-      this.$store.dispatch('app/toggleSideBar')
-    },
     showPasswordDialog() {
       this.$nextTick(() => {
         this.dialogPasswordVisible = true
@@ -292,10 +290,11 @@ export default {
 </script>
 <style lang="scss">
 .top-menu {
-  height: 50px;
   overflow: hidden;
   position: relative;
-
+  .menu-container {
+    padding-right: 170px;
+  }
   .right-menu {
     position: absolute;
     top: 0;

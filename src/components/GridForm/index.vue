@@ -20,7 +20,7 @@ export default {
   },
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 @import '~@/assets/styles/variables.scss';
 
 .table-border {
@@ -36,5 +36,11 @@ export default {
   background-color: #fff;
   font-size: 14px;
   color: #606266;
+  .el-textarea__inner,
+  .el-input__inner {
+    border: none;
+    background: transparent;
+    text-overflow: ellipsis;
+  }
 }
 </style>

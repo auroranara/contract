@@ -6,7 +6,7 @@ export const userMenuVos = [
     name: 'personnel',
     redirect: 'noredirect',
     alwaysShow: true,
-    meta: { title: '个人工作台', icon: 'dashboard' },
+    meta: { title: '个人工作台', icon: 'monitor' },
     children: [
       {
         path: 'backlog',
@@ -46,7 +46,7 @@ export const userMenuVos = [
     name: '基础数据',
     redirect: 'noredirect',
     alwaysShow: true,
-    meta: { title: '基础数据', icon: 'dashboard' },
+    meta: { title: '基础数据', icon: 'database' },
     children: [
       {
         path: 'supplier',
@@ -56,7 +56,7 @@ export const userMenuVos = [
       },
       {
         path: 'client',
-        component: 'features/develop',
+        component: 'baseInfo/client',
         name: 'client',
         meta: { title: '客户' }
       },
@@ -122,7 +122,7 @@ export const userMenuVos = [
     name: 'project',
     redirect: 'noredirect',
     alwaysShow: true,
-    meta: { title: '项目管理', icon: 'dashboard' },
+    meta: { title: '项目管理', icon: 'menu' },
     children: [
       {
         path: 'projectInfo',
@@ -138,7 +138,7 @@ export const userMenuVos = [
     name: 'cost',
     redirect: 'noredirect',
     alwaysShow: true,
-    meta: { title: '造价管理', icon: 'dashboard' },
+    meta: { title: '造价管理', icon: 'chart' },
     children: [
       {
         path: 'estimateFormulationStart',
@@ -196,7 +196,7 @@ export const userMenuVos = [
     name: 'bidding',
     redirect: 'noredirect',
     alwaysShow: true,
-    meta: { title: '招标管理', icon: 'dashboard' },
+    meta: { title: '招标管理', icon: 'date' },
     children: [
       {
         path: 'contractPlanStart',
@@ -290,7 +290,7 @@ export const userMenuVos = [
     name: 'contract',
     redirect: 'noredirect',
     alwaysShow: true,
-    meta: { title: '合同管理', icon: 'dashboard' },
+    meta: { title: '合同管理', icon: 'log' },
     children: [
       {
         path: 'contractFileFormulation',
@@ -360,7 +360,7 @@ export const userMenuVos = [
     name: 'template',
     redirect: 'noredirect',
     alwaysShow: true,
-    meta: { title: '模板管理', icon: 'dashboard' },
+    meta: { title: '模板管理', icon: 'dept' },
     children: [
       {
         path: 'biddingfileTemplate',
@@ -388,7 +388,7 @@ export const userMenuVos = [
     name: 'transfer',
     redirect: 'noredirect',
     alwaysShow: true,
-    meta: { title: '移交管理', icon: 'dashboard' },
+    meta: { title: '移交管理', icon: 'backup' },
     children: [
       {
         path: 'spareParts',
@@ -410,7 +410,7 @@ export const userMenuVos = [
     name: 'evaluation',
     redirect: 'noredirect',
     alwaysShow: true,
-    meta: { title: '评价管理', icon: 'dashboard' },
+    meta: { title: '评价管理', icon: 'edit' },
     children: [
       {
         path: 'internal',
@@ -429,6 +429,28 @@ export const userMenuVos = [
         component: 'features/develop',
         name: 'customer',
         meta: { title: '客户评价' }
+      }
+    ]
+  },
+  {
+    path: '/system',
+    component: 'Layout',
+    name: 'system',
+    redirect: 'noredirect',
+    alwaysShow: true,
+    meta: { title: '系统管理', icon: 'system' },
+    children: [
+      {
+        path: 'user',
+        component: 'features/develop',
+        name: 'user',
+        meta: { title: '用户管理' }
+      },
+      {
+        path: 'role',
+        component: 'features/develop',
+        name: 'role',
+        meta: { title: '角色管理' }
       }
     ]
   }

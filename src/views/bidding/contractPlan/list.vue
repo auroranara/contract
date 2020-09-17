@@ -1,19 +1,21 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <expand-Filter :fields="fields" :model="listQuery">
-        <template v-slot:operations>
-          <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
-          <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
-          <el-dropdown split-button type="primary" @click="onClickAdd">
-            新增
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>批量导出</el-dropdown-item>
-              <el-dropdown-item>批量导入</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </template>
-      </expand-Filter>
+      <el-card>
+        <expand-Filter :fields="fields" :model="listQuery">
+          <template v-slot:operations>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
+            <el-dropdown split-button type="primary" @click="onClickAdd">
+              新增
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item>批量导出</el-dropdown-item>
+                <el-dropdown-item>批量导入</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </template>
+        </expand-Filter>
+      </el-card>
     </div>
     <el-card>
       <!--表格渲染-->

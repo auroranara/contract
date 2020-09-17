@@ -1,12 +1,10 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <expand-Filter :fields="fields" :model="listQuery" type="inline" :showLabel="false">
-        <template v-slot:operations>
-          <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
-          <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
-        </template>
-      </expand-Filter>
+      <el-button type="primary">新增</el-button>
+      <el-button type="primary" @click="onSave">保存</el-button>
+      <el-button type="primary">删除</el-button>
+      <el-button type="primary" @click="onSearch">查询</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -26,9 +24,14 @@
       <!-- 右侧内容 -->
       <el-col :span="18">
         <el-tabs type="border-card" v-model="tabKey">
-          <el-tab-pane name="jcxx" label="供应商信息">
+          <el-tab-pane name="jcxx" label="客户信息">
             <block-title title="基础信息" />
-            <grid-form :settings="baseSettings(this.detail)"></grid-form>
+            <grid-form
+              ref="gridForm"
+              :settings="baseSettings(this.detail)"
+              :model="detail"
+              :rules="rules"
+            ></grid-form>
             <block-title title="银行信息" />
             <el-table :data="bankInfoList" border>
               <el-table-column prop="sdzzh" label="是否主账户" align="center">
@@ -46,7 +49,7 @@
           <el-tab-pane name="xtxx" label="系统信息">
             <el-row>
               <el-col :md="12" :sm="24">
-                <grid-form :settings="systemSettings(this.detail)"></grid-form>
+                <grid-form :settings="systemSettings(this.systemInfo)"></grid-form>
               </el-col>
             </el-row>
           </el-tab-pane>
@@ -73,65 +76,21 @@ export default {
       tabKey: 'jcxx',
       // 查询query信息
       listQuery: {},
-      fields: [
-        {
-          field: 'gysmc',
-          alwaysShow: true,
-          label: '供应商名称',
-          render: (data) => (
-            <el-input placeholder="供应商名称" vModel={data['gysmc']} />
-          ),
-        },
-        {
-          field: 'gyslx',
-          alwaysShow: true,
-          label: '供应商类型',
-          render: (data) => (
-            <el-input placeholder="供应商类型" vModel={data['gyslx']} />
-          ),
-        },
-        {
-          field: 'gyslb',
-          label: '供应商类别',
-          alwaysShow: true,
-          render: (data) => (
-            <el-input placeholder="供应商类别" vModel={data['gyslb']} />
-          ),
-        },
-        {
-          field: 'gj',
-          label: '国家',
-          render: (data) => <el-input placeholder="国家" vModel={data['gj']} />,
-        },
-        {
-          field: 'shen',
-          label: '省/自治区',
-          render: (data) => (
-            <el-input placeholder="省/自治区" vModel={data['shen']} />
-          ),
-        },
-        {
-          field: 'shi',
-          label: '市',
-          render: (data) => <el-input placeholder="市" vModel={data['shi']} />,
-        },
-      ],
       // 基础信息
       detail: {
-        gysmc: '无锡广大汽车租赁有限公司',
-        gysdm: 'GYS000000002',
-        gyszj: '0',
-        gysbs: '201901121012-F5D3-1C6',
-        gyslb: '监理',
-        gyslx: '工程类',
-        sfglf: '是',
-        tyshxydm: '9121123213213123123',
-        gj: 'CN',
+        khmc: '',
+        khbm: 'JS0099156',
+        sfglf: '否',
+        sfybnsr: '是',
+        kqtt: '江苏普信土地房地产资产评估测绘有限公司',
+        tyshxydm: '912000123213F',
+        gj: '中国',
         sheng: '江苏',
         shi: '无锡',
-        sfjy: '否',
-        qyrq: '2020-02-12',
-        sxrq: '2025-02-12',
+        dizhi: '无锡新区旺庄路52-2101232',
+      },
+      // 系统信息
+      systemInfo: {
         zt: '审批完成',
         cjsj: '2019/02/02 18:10',
         cjr: '张三',
@@ -146,19 +105,19 @@ export default {
       list: [
         {
           key: '1',
-          label: '供应商',
+          label: '客户',
           children: [
             {
               key: '1-1',
-              label: '供应商1',
+              label: '客户1',
             },
             {
               key: '1-2',
-              label: '供应商2',
+              label: '客户2',
             },
             {
               key: '1-3',
-              label: '供应商3',
+              label: '客户3',
             },
           ],
         },
@@ -175,6 +134,12 @@ export default {
           zhsfzy: '是',
         },
       ],
+      rules: {
+        khmc: [{ required: true, message: '请输入客户名称', trigger: 'blur' }],
+        sfglf: [
+          { required: true, message: '请输入是否关联方', trigger: 'blur' },
+        ],
+      },
     }
   },
   methods: {
@@ -183,67 +148,26 @@ export default {
         [
           {
             type: 'label',
-            label: '供应商名称',
+            label: '客户名称',
             showBg: true,
+            required: true,
           },
           {
             type: 'handler',
-            disabled: true,
-            render: () => data.gysmc,
+            field: 'khmc',
+            render: (data) => <el-input vModel={data['khmc']} />,
           },
           {
             type: 'label',
-            label: '供应商代码',
+            label: '客户编码',
             showBg: true,
+            required: true,
           },
           {
             type: 'handler',
+            field: 'khbm',
             disabled: true,
-            render: () => data.gysdm,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '供应商主键',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            disabled: true,
-            render: () => data.gyszj,
-          },
-          {
-            type: 'label',
-            label: '供应商标识',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            disabled: true,
-            render: () => data.gysbs,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '供应商类别',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            disabled: true,
-            render: () => data.gyslb,
-          },
-          {
-            type: 'label',
-            label: '供应商类型',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            disabled: true,
-            render: () => data.gyslx,
+            render: (data) => <el-input readonly vModel={data['khbm']} />,
           },
         ],
         [
@@ -251,21 +175,47 @@ export default {
             type: 'label',
             label: '是否关联方',
             showBg: true,
+            required: true,
           },
           {
             type: 'handler',
-            disabled: true,
-            render: () => data.sfglf,
+            field: 'sfglf',
+            render: (data) => <el-input vModel={data['sfglf']} />,
+          },
+          {
+            type: 'label',
+            label: '是否一般纳税人',
+            showBg: true,
+            required: true,
+          },
+          {
+            type: 'handler',
+            field: 'sfybnsr',
+            render: (data) => <el-input vModel={data['sfybnsr']} />,
+          },
+        ],
+        [
+          {
+            type: 'label',
+            label: '开票抬头',
+            showBg: true,
+            required: true,
+          },
+          {
+            type: 'handler',
+            field: 'kqtt',
+            render: (data) => <el-input vModel={data['kqtt']} />,
           },
           {
             type: 'label',
             label: '统一社会信用代码',
             showBg: true,
+            required: true,
           },
           {
             type: 'handler',
-            disabled: true,
-            render: () => data.tyshxydm,
+            field: 'tyshxydm',
+            render: (data) => <el-input vModel={data['tyshxydm']} />,
           },
         ],
         [
@@ -273,21 +223,23 @@ export default {
             type: 'label',
             label: '国家',
             showBg: true,
+            required: true,
           },
           {
             type: 'handler',
-            disabled: true,
-            render: () => data.gj,
+            field: 'gj',
+            render: (data) => <el-input vModel={data['gj']} />,
           },
           {
             type: 'label',
             label: '省/自治区',
             showBg: true,
+            required: true,
           },
           {
             type: 'handler',
-            disabled: true,
-            render: () => data.sheng,
+            field: 'sheng',
+            render: (data) => <el-input vModel={data['sheng']} />,
           },
         ],
         [
@@ -295,43 +247,23 @@ export default {
             type: 'label',
             label: '市',
             showBg: true,
+            required: true,
           },
           {
             type: 'handler',
-            disabled: true,
-            render: () => data.shi,
+            field: 'shi',
+            render: (data) => <el-input vModel={data['shi']} />,
           },
           {
             type: 'label',
-            label: '是否禁用',
+            label: '地址、电话',
             showBg: true,
+            required: true,
           },
           {
             type: 'handler',
-            disabled: true,
-            render: () => data.sfjy,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '启用日期',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            disabled: true,
-            render: () => data.qyrq,
-          },
-          {
-            type: 'label',
-            label: '失效日期',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            disabled: true,
-            render: () => data.sxrq,
+            field: 'dizhi',
+            render: (data) => <el-input vModel={data['dizhi']} />,
           },
         ],
       ]
@@ -403,6 +335,24 @@ export default {
     onTreeNodeClick(data) {
       this.currentKey = data.key
       // TODO 点击设置右侧显示参数
+    },
+    onSave() {
+      this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
+        if (err) {
+          const h = this.$createElement
+          const msg = Object.entries(err)
+            .map((item) => item[1].map((val) => val.message).join('，'))
+            .join('\n')
+          console.log('msg', msg)
+          this.$notify.error({
+            title: '校验错误信息',
+            message: h('div', { style: 'white-space:pre-wrap' }, msg),
+            duration: 20000,
+          })
+        } else {
+          console.log('form', this.detail)
+        }
+      })
     },
   },
 }

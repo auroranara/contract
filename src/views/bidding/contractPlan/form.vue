@@ -1,23 +1,19 @@
 <template>
   <div class="container">
     <div class="head-container">
-      <el-button type="primary">审核</el-button>
-      <el-button type="primary">修改</el-button>
-      <el-button type="primary" @click="onSave('form')">保存</el-button>
-      <el-button type="primary">提交</el-button>
-      <el-button type="primary">删除</el-button>
-      <el-button type="primary">调整</el-button>
-      <el-button type="primary">下推招标计划</el-button>
+      <el-button plain type="primary">审核</el-button>
+      <el-button plain type="primary">修改</el-button>
+      <el-button plain type="primary" @click="onSave('form')">保存</el-button>
+      <el-button plain type="primary">提交</el-button>
+      <el-button plain type="primary">删除</el-button>
+      <el-button plain type="primary">调整</el-button>
+      <el-button plain type="primary">下推招标计划</el-button>
     </div>
     <el-tabs v-model="activeName" type="border-card">
       <el-tab-pane label="单据信息" name="form">
-        <div class="block-title">
-          <span>信息</span>
-        </div>
+        <block-title title="信息"></block-title>
         <grid-form ref="gridForm" :rules="rules" :settings="settings" :model="form"></grid-form>
-        <div class="block-title">
-          <span>概算</span>
-        </div>
+        <block-title title="概算"></block-title>
         <el-button size="small" style="margin-right:10px" type="primary" @click="addEstimate">新增</el-button>
         <el-button size="small" type="danger" @click="deleteEstimate">删除</el-button>
         <div class="handle-table">
@@ -75,12 +71,14 @@
 </template>
 <script>
 import GridForm from '@/components/GridForm'
+import BlockTitle from '@/components/BlockTitle'
 import moment from 'moment'
 
 export default {
   name: 'Test',
   components: {
     GridForm,
+    BlockTitle,
   },
   data() {
     return {
@@ -545,10 +543,11 @@ export default {
       }
     },
     onSave() {
-      this.$refs['gridForm'].$refs['form'].validate((valid, obj) => {
-        const msg = Object.entries(obj)
-        console.log('msg', msg)
-        if (valid) {
+      this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
+        if (err) {
+          const msg = Object.entries(err)
+          console.log('msg', msg)
+        } else {
           console.log('form', this.form)
         }
       })
@@ -559,20 +558,6 @@ export default {
 <style lang="scss">
 .container {
   padding: 10px 20px;
-  .block-title {
-    border-bottom: 2px solid #1890ff;
-    padding-left: 10px;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-    & > span {
-      display: inline-block;
-      padding-left: 8px;
-      height: 26px;
-      line-height: 26px;
-      border-left: 4px solid #1890ff;
-      font-size: 18px;
-    }
-  }
   .timeline-container {
     margin-top: 10px;
   }
