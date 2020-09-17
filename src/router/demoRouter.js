@@ -62,7 +62,7 @@ export const userMenuVos = [
       },
       {
         path: 'organization',
-        component: 'features/develop',
+        component: 'baseInfo/organization',
         name: 'organization',
         meta: { title: '组织' }
       },
@@ -92,19 +92,19 @@ export const userMenuVos = [
       },
       {
         path: 'unit',
-        component: 'features/develop',
+        component: 'baseInfo/unit',
         name: 'unit',
         meta: { title: '单位' }
       },
       {
         path: 'taxRate',
-        component: 'features/develop',
+        component: 'baseInfo/taxRate',
         name: 'taxRate',
         meta: { title: '税率' }
       },
       {
         path: 'administrativeRegions',
-        component: 'features/develop',
+        component: 'baseInfo/administrativeRegions',
         name: 'administrativeRegions',
         meta: { title: '行政区域' }
       },

@@ -1,10 +1,15 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button type="primary">新增</el-button>
-      <el-button type="primary" @click="onSave">保存</el-button>
-      <el-button type="primary">删除</el-button>
-      <el-button type="primary" @click="onSearch">查询</el-button>
+      <expand-Filter :fields="fields" :model="listQuery" type="inline" :showLabel="false">
+        <template v-slot:operations>
+          <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+          <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
+          <el-button type="primary">新增</el-button>
+          <el-button type="primary" @click="onSave">保存</el-button>
+          <el-button type="primary">删除</el-button>
+        </template>
+      </expand-Filter>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -34,16 +39,25 @@
             ></grid-form>
             <block-title title="银行信息" />
             <el-table :data="bankInfoList" border>
-              <el-table-column prop="sdzzh" label="是否主账户" align="center">
+              <el-table-column width="100" prop="sdzzh" label="是否主账户" align="center">
                 <template slot-scope="scope">
                   <el-checkbox disabled :value="!!scope.row.sfzzh"></el-checkbox>
                 </template>
               </el-table-column>
-              <el-table-column prop="yh" label="银行"></el-table-column>
-              <el-table-column prop="fh" label="分行"></el-table-column>
-              <el-table-column prop="yhzh" label="银行账户"></el-table-column>
-              <el-table-column prop="lhh" label="联行号"></el-table-column>
-              <el-table-column prop="zhsfzy" label="账户是否主要"></el-table-column>
+              <el-table-column width="150" prop="zhxx" label="总行信息" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="150" prop="khh" label="开户行" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="100" prop="sheng" label="省" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="150" prop="fhmc" label="分行名称" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="150" prop="lhh" label="联行号" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="100" prop="khr" label="开户人" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="150" prop="dzqz" label="电子签章" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column
+                width="150"
+                prop="sfjsdzyp"
+                label="是否接受电子银票"
+                :show-overflow-tooltip="true"
+              ></el-table-column>
+              <el-table-column width="150" prop="bz" label="备注" :show-overflow-tooltip="true"></el-table-column>
             </el-table>
           </el-tab-pane>
           <el-tab-pane name="xtxx" label="系统信息">
@@ -62,6 +76,7 @@
 import ExpandFilter from '@/components/ExpandFilter'
 import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
+import { mapState } from 'vuex'
 
 export default {
   name: 'supplier',
@@ -77,18 +92,7 @@ export default {
       // 查询query信息
       listQuery: {},
       // 基础信息
-      detail: {
-        khmc: '',
-        khbm: 'JS0099156',
-        sfglf: '否',
-        sfybnsr: '是',
-        kqtt: '江苏普信土地房地产资产评估测绘有限公司',
-        tyshxydm: '912000123213F',
-        gj: '中国',
-        sheng: '江苏',
-        shi: '无锡',
-        dizhi: '无锡新区旺庄路52-2101232',
-      },
+      detail: {},
       // 系统信息
       systemInfo: {
         zt: '审批完成',
@@ -123,24 +127,58 @@ export default {
         },
       ],
       currentKey: null,
-      bankInfoList: [
-        {
-          id: '1',
-          sfzzh: 1,
-          yh: '交通银行',
-          fh: '交通银行青山支行',
-          yhzh: '6058182298765512',
-          lhh: '103120230',
-          zhsfzy: '是',
-        },
-      ],
+      bankInfoList: [],
       rules: {
         khmc: [{ required: true, message: '请输入客户名称', trigger: 'blur' }],
         sfglf: [
           { required: true, message: '请输入是否关联方', trigger: 'blur' },
         ],
       },
+      fields: [
+        {
+          field: 'khmc',
+          alwaysShow: true,
+          label: '客户名称',
+          render: (data) => (
+            <el-input placeholder="客户名称" vModel={data['khmc']} />
+          ),
+        },
+        {
+          field: 'zhuangtai',
+          label: '状态',
+          alwaysShow: true,
+          render: (data) => (
+            <el-select vModel={data['zhuangtai']}>
+              {this.statusDict.map(({ value, label }) => (
+                <el-option key={value} value={value} label={label}></el-option>
+              ))}
+            </el-select>
+          ),
+        },
+        {
+          field: 'gj',
+          label: '国家',
+          render: (data) => <el-input placeholder="国家" vModel={data['gj']} />,
+        },
+        {
+          field: 'sheng',
+          label: '省/自治区',
+          render: (data) => (
+            <el-input placeholder="省/自治区" vModel={data['sheng']} />
+          ),
+        },
+        {
+          field: 'shi',
+          label: '市',
+          render: (data) => <el-input placeholder="市" vModel={data['shi']} />,
+        },
+      ],
     }
+  },
+  computed: {
+    ...mapState({
+      statusDict: (state) => state.baseInfo.statusDict,
+    }),
   },
   methods: {
     baseSettings(data) {
@@ -331,10 +369,37 @@ export default {
     onReset() {
       this.currentKey = null
       const key = this.$refs.treeNode.setCurrentKey()
+      this.detail = {}
+      this.bankInfoList = []
     },
     onTreeNodeClick(data) {
       this.currentKey = data.key
       // TODO 点击设置右侧显示参数
+      this.detail = {
+        khmc: '',
+        khbm: 'JS0099156',
+        sfglf: '否',
+        sfybnsr: '是',
+        kqtt: '江苏普信土地房地产资产评估测绘有限公司',
+        tyshxydm: '912000123213F',
+        gj: '中国',
+        sheng: '江苏',
+        shi: '无锡',
+        dizhi: '无锡新区旺庄路52-2101232',
+      }
+      this.bankInfoList = [
+        {
+          id: '1',
+          sfzzh: 1,
+          zhxx: '交通银行',
+          khh: '交通银行青山支行',
+          sheng: '江苏省',
+          shi: '无锡市',
+          fhmc: '交通银行股份有限公司',
+          yhzh: '6058182298765512',
+          lhh: '103120230',
+        },
+      ]
     },
     onSave() {
       this.$refs['gridForm'].$refs['form'].validate((valid, err) => {

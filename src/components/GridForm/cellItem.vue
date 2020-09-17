@@ -80,10 +80,6 @@ td.is-right {
   border-bottom: 1px solid $gridBorder;
   border-right: 1px solid $gridBorder;
 }
-.label {
-  color: #646464;
-  font-weight: bold;
-}
 .cell,
 .label {
   box-sizing: border-box;
@@ -93,6 +89,11 @@ td.is-right {
   word-break: break-all;
   line-height: 23px;
   margin: 5px 10px;
+}
+.label {
+  color: #646464;
+  font-weight: bold;
+  margin: 10px;
 }
 .label-bg {
   background: #f5fdff;
