@@ -2,15 +2,23 @@ import request from '@/utils/request'
 
 export function userList(data) {
   return request({
-    url: '/end/users',
+    url: '/api/users',
     method: 'get',
-    params: { 'psnId': data.psnId, 'mobile': data.mobile,  'lineId': data.lineId, 'stationId': data.stationId,'type': data.type, 'page': data.page, 'limit': data.limit }
+    params: {
+      psnId: data.psnId,
+      mobile: data.mobile,
+      lineId: data.lineId,
+      stationId: data.stationId,
+      type: data.type,
+      page: data.page,
+      limit: data.limit
+    }
   })
 }
 
 export function saveUser(data) {
   return request({
-    url: '/end/users',
+    url: '/api/users',
     method: 'post',
     data
   })
@@ -18,7 +26,7 @@ export function saveUser(data) {
 
 export function updateUser(data) {
   return request({
-    url: '/end/users/user',
+    url: '/api/users/user',
     method: 'post',
     data
   })
@@ -26,7 +34,7 @@ export function updateUser(data) {
 
 export function updateSubject(data) {
   return request({
-    url: '/end/users/subject',
+    url: '/api/users/subject',
     method: 'post',
     data
   })
@@ -34,9 +42,8 @@ export function updateSubject(data) {
 
 export function updatePassword(data) {
   return request({
-    url: '/end/users/pwd',
+    url: '/api/users/pwd',
     method: 'post',
     data
   })
 }
-

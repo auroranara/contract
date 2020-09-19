@@ -4,7 +4,7 @@ import Layout from '@/layout/index'
 const permission = {
   state: {
     routers: constantRouterMap,
-    showRouters:[],
+    showRouters: [],
     addRouters: []
   },
   mutations: {
@@ -12,9 +12,9 @@ const permission = {
       state.addRouters = routers
       state.routers = constantRouterMap.concat(routers)
     },
-    SET_SHOW_ROUTERS:(state, routers) => {
+    SET_SHOW_ROUTERS: (state, routers) => {
       state.showRouters = routers
-    },
+    }
   },
   actions: {
     GenerateRoutes({ commit }, asyncRouter) {
@@ -22,7 +22,7 @@ const permission = {
     },
     SetShowRoutes({ commit }, asyncRouter) {
       commit('SET_SHOW_ROUTERS', asyncRouter)
-    },
+    }
   }
 }
 
@@ -52,7 +52,11 @@ const permission = {
 //     return true
 //   })
 // }
-export function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = false) {
+export function filterAsyncRouter(
+  asyncRouterMap,
+  lastRouter = false,
+  type = false
+) {
   return JSON.parse(JSON.stringify(asyncRouterMap)).filter(route => {
     // 处理 vue-router所需要路由 Empty（继承Empty模板的层）的children全部提到上一层
     if (type && route.children) {
@@ -61,6 +65,12 @@ export function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = fal
     // 拼装路由
     if (lastRouter && route.path.indexOf('http') === -1) {
       route.path = lastRouter.path + '/' + route.path
+      route.meta =
+        (route.children && route.children.length) ||
+        !lastRouter.redirect ||
+        lastRouter.redirect === 'noredirect'
+          ? route.meta
+          : { ...route.meta, activeMenu: lastRouter.path }
     }
 
     if (route.component) {
@@ -69,13 +79,15 @@ export function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = fal
         route.component = Layout
       } else if (route.component === 'Empty') {
         route.component = () => import(`@/router/empty`)
+      } else if (route.component === 'RouterView') {
+        route.component = () => import(`@/router/routerView`)
       } else {
         route.component = loadView(route.component) // route.component是一个字符串 这里是字符串转组件对象
       }
     }
-    if (route.children != null && route.children && route.children.length) {
+    if (route.children && route.children.length) {
       route.children = filterAsyncRouter(route.children, route, type)
-    }else{
+    } else {
       delete route['children']
       delete route['redirect']
     }
@@ -106,12 +118,9 @@ function filterChildren(childrenMap, lastRouter = false) {
     children = children.concat(el)
   })
   return children
-  console.log(children)
 }
 
-
-
-export const loadView = (view) => {
+export const loadView = view => {
   return () => import(`@/views/${view}`)
 }
 

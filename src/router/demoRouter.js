@@ -207,33 +207,40 @@ export const userMenuVos = [
       {
         path: 'contractPlan',
         name: 'contractPlan',
-        component: 'bidding/contractPlan/list',
+        component: 'RouterView',
         meta: { title: '合同策划' },
-        redirect: 'contractPlan/list'
-        // children: [
-        //   {
-        //     path: 'list',
-        //     component: 'features/develop',
-        //     name: 'list',
-        //     hidden: true,
-        //     meta: { title: '合同策划列表' }
-        //   },
-        //   {
-        //     path: 'form',
-        //     component: 'bidding/contractPlan/form',
-        //     name: 'form',
-        //     hidden: true,
-        //     meta: { title: '合同策划单' }
-        //   }
-        // ]
+        redirect: 'contractPlan/list',
+        children: [
+          {
+            path: 'list',
+            component: 'bidding/contractPlan/list',
+            name: 'contractPlanList',
+            hidden: true,
+            meta: { title: '合同策划列表' }
+          },
+          {
+            path: 'form',
+            component: 'bidding/contractPlan/form',
+            name: 'contractPlanForm',
+            hidden: true,
+            meta: { title: '合同策划单' }
+          },
+          {
+            path: 'adjustForm',
+            component: 'bidding/contractPlan/form',
+            name: 'contractPlanAdjustForm',
+            hidden: true,
+            meta: { title: '合同策划调整单' }
+          }
+        ]
       },
-      {
-        path: 'contractPlan/form',
-        component: 'bidding/contractPlan/form',
-        name: 'form',
-        hidden: true,
-        meta: { title: '合同策划单' }
-      },
+      // {
+      //   path: 'contractPlan/form',
+      //   component: 'bidding/contractPlan/form',
+      //   name: 'form',
+      //   hidden: true,
+      //   meta: { title: '合同策划单' }
+      // },
       {
         path: 'biddingPlanStart',
         component: 'features/develop',
@@ -451,6 +458,12 @@ export const userMenuVos = [
         component: 'features/develop',
         name: 'role',
         meta: { title: '角色管理' }
+      },
+      {
+        path: 'resource',
+        component: 'system/resource',
+        name: 'resource',
+        meta: { title: '资源管理' }
       }
     ]
   }

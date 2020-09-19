@@ -22,7 +22,7 @@
               @click="delResource"
             >删除</el-button>
           </div>
-          <div style="height:500px;    overflow-y: scroll">
+          <div style="height:500px;    overflow-y: auto">
             <el-tree
               ref="resourceTree"
               :expand-on-click-node="false"
@@ -80,8 +80,20 @@
                   @show="$refs['iconSelect'].reset()"
                 >
                   <IconSelect ref="iconSelect" @selected="selected" />
-                  <el-input slot="reference" v-model="temp.icon" style="width: 450px;" placeholder="点击选择图标" readonly>
-                    <svg-icon v-if="temp.icon" slot="prefix" :icon-class="temp.icon" class="el-input__icon" style="height: 32px;width: 16px;" />
+                  <el-input
+                    slot="reference"
+                    v-model="temp.icon"
+                    style="width: 450px;"
+                    placeholder="点击选择图标"
+                    clearable
+                  >
+                    <svg-icon
+                      v-if="temp.icon"
+                      slot="prefix"
+                      :icon-class="temp.icon"
+                      class="el-input__icon"
+                      style="height: 32px;width: 16px;"
+                    />
                     <i v-else slot="prefix" class="el-icon-search el-input__icon" />
                   </el-input>
                 </el-popover>
@@ -138,7 +150,13 @@
       </el-col>
     </el-row>
 
-    <el-dialog append-to-body :close-on-click-modal="false" :visible.sync="dialogFormVisible" title="新增资源">
+    <el-dialog
+      :close-on-click-modal="false"
+      :visible.sync="dialogFormVisible"
+      title="新增资源"
+      :destroy-on-close="true"
+      append-to-body
+    >
       <el-form
         ref="dataForm"
         :rules="rules"
@@ -151,7 +169,7 @@
           <el-input v-model="saveResourceData.parentName" :disabled="true" />
         </el-form-item>
         <el-form-item label="类型" prop="type">
-          <el-select v-model="saveResourceData.type" label="类型" prop="type">
+          <el-select v-model="saveResourceData.type">
             <el-option
               v-for="item in typeOptions"
               :key="item.value"
@@ -168,26 +186,38 @@
             @show="$refs['iconSelect'].reset()"
           >
             <IconSelect ref="iconSelect" @selected="selectedDialog" />
-            <el-input slot="reference" v-model="saveResourceData.icon" style="width: 450px;" placeholder="点击选择图标" readonly>
-              <svg-icon v-if="saveResourceData.icon" slot="prefix" :icon-class="saveResourceData.icon" class="el-input__icon" style="height: 32px;width: 16px;" />
+            <el-input
+              slot="reference"
+              v-model="saveResourceData.icon"
+              style="width: 450px;"
+              placeholder="点击选择图标"
+              clearable
+            >
+              <svg-icon
+                v-if="saveResourceData.icon"
+                slot="prefix"
+                :icon-class="saveResourceData.icon"
+                class="el-input__icon"
+                style="height: 32px;width: 16px;"
+              />
               <i v-else slot="prefix" class="el-icon-search el-input__icon" />
             </el-input>
           </el-popover>
         </el-form-item>
         <el-form-item v-if="saveResourceData.type===0" label="是否缓存" prop="cache">
-          <el-select v-model="saveResourceData.cache" label="类型">
+          <el-select v-model="saveResourceData.cache">
             <el-option :key="0" label="是" :value="0" />
             <el-option :key="1" label="否" :value="1" />
           </el-select>
         </el-form-item>
         <el-form-item v-if="saveResourceData.type===0" label="是否隐藏" prop="hidden">
-          <el-select v-model="saveResourceData.hidden" label="是否隐藏">
+          <el-select v-model="saveResourceData.hidden">
             <el-option :key="0" label="是" :value="0" />
             <el-option :key="1" label="否" :value="1" />
           </el-select>
         </el-form-item>
         <el-form-item v-if="saveResourceData.type===0" label="是否外链" prop="iframe">
-          <el-select v-model="saveResourceData.iframe" label="是否外链">
+          <el-select v-model="saveResourceData.iframe">
             <el-option :key="0" label="是" :value="0" />
             <el-option :key="1" label="否" :value="1" />
           </el-select>
@@ -208,7 +238,7 @@
           <el-input-number v-model="saveResourceData.sort" placeholder="请填写顺序" />
         </el-form-item>
         <el-form-item v-if="saveResourceData.type!==0" label="请求方式" prop="requestType">
-          <el-select v-model="saveResourceData.requestType" label="请求方式" prop="requestType">
+          <el-select v-model="saveResourceData.requestType">
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -232,7 +262,12 @@
 
 <script>
 import IconSelect from '@/components/IconSelect'
-import { queryResources, saveResource, delResource, updateResource } from '@/api/system/resource'
+import {
+  queryResources,
+  saveResource,
+  delResource,
+  updateResource,
+} from '@/api/system/resource'
 export default {
   components: { IconSelect },
   data() {
@@ -240,65 +275,78 @@ export default {
       typeOptions: [
         {
           value: 0,
-          label: '菜单'
+          label: '菜单',
         },
         {
           value: 2,
-          label: '按钮'
+          label: '按钮',
         },
         {
           value: 3,
-          label: 'url'
-        }
+          label: 'url',
+        },
       ],
       options: [
         {
           value: 'GET',
-          label: 'GET'
+          label: 'GET',
         },
         {
           value: 'POST',
-          label: 'POST'
+          label: 'POST',
         },
         {
           value: 'PUT',
-          label: 'PUT'
-        }, {
+          label: 'PUT',
+        },
+        {
           value: 'DELETE',
-          label: 'DELETE'
-        }
+          label: 'DELETE',
+        },
       ],
       resourceData: [],
       defaultResourceProps: {
         children: 'children',
         label: 'label',
         url: '',
-        parentId: ''
+        parentId: '',
       },
       rules: {
         name: [{ required: true, message: '请填写资源名称', trigger: 'blur' }],
         url: [{ required: true, message: '请填写资源路径', trigger: 'blur' }],
         type: [{ required: true, message: '请选择类型', trigger: 'change' }],
         sort: [{ required: true, message: '请填写排序', trigger: 'blur' }],
-        cache: [{ required: true, message: '请选择是否缓存', trigger: 'change' }],
-        hidden: [{ required: true, message: '请选择是否隐藏', trigger: 'change' }],
-        iframe: [{ required: true, message: '请选择是否外链', trigger: 'change' }],
+        cache: [
+          { required: true, message: '请选择是否缓存', trigger: 'change' },
+        ],
+        hidden: [
+          { required: true, message: '请选择是否隐藏', trigger: 'change' },
+        ],
+        iframe: [
+          { required: true, message: '请选择是否外链', trigger: 'change' },
+        ],
         code: [{ required: true, message: '请填写资源code', trigger: 'blur' }],
-        requestType: [{ required: true, message: '请选择请求方式', trigger: 'change' }],
-        component: [{ required: true, message: '请填写组件路径', trigger: 'blur' }],
-        componentName: [{ required: true, message: '请填写组件名称', trigger: 'blur' }]
+        requestType: [
+          { required: true, message: '请选择请求方式', trigger: 'change' },
+        ],
+        component: [
+          { required: true, message: '请填写组件路径', trigger: 'blur' },
+        ],
+        componentName: [
+          { required: true, message: '请填写组件名称', trigger: 'blur' },
+        ],
       },
       temp: {
         sort: 1,
-        icon: ''
+        icon: '',
       },
       saveResourceData: {
-        icon: ''
+        icon: '',
       },
-      dialogFormVisible: false
+      dialogFormVisible: false,
     }
   },
-  mounted: function() {
+  mounted: function () {
     this.loadResourceNode()
   },
   methods: {
@@ -317,7 +365,7 @@ export default {
           cache: data.cache,
           iframe: data.iframe,
           componentName: data.componentName,
-          component: data.component
+          component: data.component,
         }
         if (
           data.parentId !== null &&
@@ -334,19 +382,19 @@ export default {
       }
     },
     loadResourceNode() {
-      queryResources().then(res => {
+      queryResources().then((res) => {
         this.resourceData = res.data
       })
     },
     resetTemp() {
       this.temp = {
         sort: 1,
-        icon: ''
+        icon: '',
       }
     },
     resetSaveResourceData() {
       this.saveResourceData = {
-        icon: ''
+        icon: '',
       }
     },
     addResource() {
@@ -365,7 +413,7 @@ export default {
     },
     createData() {
       // 创建资源
-      this.$refs['dataForm'].validate(valid => {
+      this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           saveResource(this.saveResourceData).then(() => {
             this.dialogFormVisible = false
@@ -373,7 +421,7 @@ export default {
               title: '成功',
               message: '创建成功',
               type: 'success',
-              duration: 2000
+              duration: 2000,
             })
             this.loadResourceNode()
           })
@@ -391,7 +439,7 @@ export default {
           title: '成功',
           message: '删除成功',
           type: 'success',
-          duration: 2000
+          duration: 2000,
         })
         this.loadResourceNode()
       })
@@ -402,14 +450,14 @@ export default {
         this.$message.error('请选择一个资源')
         return
       }
-      this.$refs['dataFormEdit'].validate(valid => {
+      this.$refs['dataFormEdit'].validate((valid) => {
         if (valid) {
           updateResource(this.temp).then(() => {
             this.$notify({
               title: '成功',
               message: '编辑成功',
               type: 'success',
-              duration: 2000
+              duration: 2000,
             })
             this.loadResourceNode()
           })
@@ -422,8 +470,8 @@ export default {
     },
     selectedDialog(name) {
       this.saveResourceData.icon = name
-    }
-  }
+    },
+  },
 }
 </script>
 <style>

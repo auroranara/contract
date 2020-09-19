@@ -9,7 +9,7 @@ import { userMenuVos } from './demoRouter'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = ['/401', '/404', '/login'] // no redirect whitelist
+const whiteList = ['/login'] // no redirect whitelist
 
 router.beforeEach((to, from, next) => {
   if (to.meta.title) {
@@ -37,6 +37,7 @@ router.beforeEach((to, from, next) => {
             router.addRoutes(asyncRouter) // 动态添加可访问路由表
             next({ ...to, replace: true })
           })
+          console.log('showRouter', showRouter)
           store.dispatch('SetShowRoutes', showRouter)
         } else {
           store.dispatch('LogOut').then(() => {

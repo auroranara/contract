@@ -46,7 +46,7 @@ export default {
 .errPage-container {
   width: 800px;
   max-width: 100%;
-  margin: 100px auto;
+  margin: 50px auto;
   .pan-gif {
     margin: 0 auto;
     display: block;

@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function queryResources(data) {
   return request({
-    url: '/end/resources/tree',
+    url: '/api/resources/tree',
     method: 'get',
     data
   })
@@ -10,7 +10,7 @@ export function queryResources(data) {
 
 export function saveResource(data) {
   return request({
-    url: '/end/resources',
+    url: '/api/resources',
     method: 'post',
     data
   })
@@ -18,7 +18,7 @@ export function saveResource(data) {
 
 export function delResource(resourceId) {
   return request({
-    url: '/end/resources/' + resourceId,
+    url: '/api/resources/' + resourceId,
     method: 'get',
     params: { resourceId }
   })
@@ -26,9 +26,8 @@ export function delResource(resourceId) {
 
 export function updateResource(data) {
   return request({
-    url: '/end/resources/resource/' + data.id,
+    url: '/api/resources/resource/' + data.id,
     method: 'post',
     data
   })
 }
-
