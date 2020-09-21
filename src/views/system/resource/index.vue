@@ -105,16 +105,13 @@
                 </el-select>
               </el-form-item>
               <el-form-item v-if="temp.type===0" label="是否隐藏" prop="hidden">
-                <el-select v-model="temp.hidden" label="是否隐藏">
+                <el-select v-model="temp.hidden">
                   <el-option :key="0" label="是" :value="0" />
                   <el-option :key="1" label="否" :value="1" />
                 </el-select>
               </el-form-item>
-              <el-form-item v-if="temp.type===0" label="是否外链" prop="iframe">
-                <el-select v-model="temp.iframe" label="是否外链">
-                  <el-option :key="0" label="是" :value="0" />
-                  <el-option :key="1" label="否" :value="1" />
-                </el-select>
+              <el-form-item v-if="temp.type===0" label="重定向" prop="redirect">
+                <el-input v-model="temp.redirect"></el-input>
               </el-form-item>
               <el-form-item v-if="temp.type===0" label="组件名称" prop="componentName">
                 <el-input v-model="temp.componentName" placeholder="请输入组件名称" />
@@ -216,11 +213,8 @@
             <el-option :key="1" label="否" :value="1" />
           </el-select>
         </el-form-item>
-        <el-form-item v-if="saveResourceData.type===0" label="是否外链" prop="iframe">
-          <el-select v-model="saveResourceData.iframe">
-            <el-option :key="0" label="是" :value="0" />
-            <el-option :key="1" label="否" :value="1" />
-          </el-select>
+        <el-form-item v-if="saveResourceData.type===0" label="重定向" prop="redirect">
+          <el-input v-model="saveResourceData.redirect" />
         </el-form-item>
         <el-form-item v-if="saveResourceData.type===0" label="组件名称" prop="componentName">
           <el-input v-model="saveResourceData.componentName" placeholder="请输入组件名称" />
@@ -322,9 +316,6 @@ export default {
         hidden: [
           { required: true, message: '请选择是否隐藏', trigger: 'change' },
         ],
-        iframe: [
-          { required: true, message: '请选择是否外链', trigger: 'change' },
-        ],
         code: [{ required: true, message: '请填写资源code', trigger: 'blur' }],
         requestType: [
           { required: true, message: '请选择请求方式', trigger: 'change' },
@@ -363,7 +354,7 @@ export default {
           code: data.code,
           hidden: data.hidden,
           cache: data.cache,
-          iframe: data.iframe,
+          redirect: data.redirect,
           componentName: data.componentName,
           component: data.component,
         }

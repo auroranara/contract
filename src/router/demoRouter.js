@@ -209,6 +209,7 @@ export const userMenuVos = [
         name: 'contractPlan',
         component: 'RouterView',
         meta: { title: '合同策划' },
+        alwaysShow: true,
         redirect: 'contractPlan/list',
         children: [
           {

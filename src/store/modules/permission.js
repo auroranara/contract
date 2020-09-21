@@ -65,6 +65,7 @@ export function filterAsyncRouter(
     // 拼装路由
     if (lastRouter && route.path.indexOf('http') === -1) {
       route.path = lastRouter.path + '/' + route.path
+      // 设置activeMenu使叶子页面指定高亮侧边栏
       route.meta =
         (route.children && route.children.length) ||
         !lastRouter.redirect ||
