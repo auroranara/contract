@@ -99,7 +99,7 @@ td.is-right {
   background: #f5fdff;
 }
 .disabled {
-  background: #f6f6f6;
+  background: #f5f7fa;
 }
 ::v-deep .el-form-item {
   margin-bottom: 0;

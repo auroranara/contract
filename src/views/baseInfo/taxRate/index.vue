@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button type="primary" @click="onClickSearch">查询</el-button>
+      <el-button plain type="primary" icon="el-icon-search" @click="onClickSearch">查询</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -56,7 +56,7 @@
           border
           highlight-current-row
           style="width: 100%"
-          @row-click="onSelectSupplier"
+          @row-click="onSelect"
         >
           <el-table-column align="center" label="税率名称" prop="slmc" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column align="center" label="税率代码" prop="sldm" :show-overflow-tooltip="true"></el-table-column>
@@ -64,7 +64,7 @@
           <el-table-column align="center" label="失效时间" prop="sxsj" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelectSupplier(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -326,7 +326,7 @@ export default {
         xgr: '张三',
       }
     },
-    onSelectSupplier(row) {
+    onSelect(row) {
       this.currentKey = row.key
       const key = this.$refs.treeNode.setCurrentKey(row.key)
       this.detail = {

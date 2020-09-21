@@ -2,7 +2,7 @@
   <el-form ref="form" :model="model" :rules="rules" :hide-required-asterisk="true">
     <div class="table-border">
       <table cellspacing="0" cellpadding="0" border="0" width="100%">
-        <tr v-for="(row, index) in settings" :key="index">
+        <tr v-for="(row, index) in settings" :v-if="row&&row.length" :key="index">
           <cellItem v-for="(col, i) in row" :setting="col" :data="model" :key="i"></cellItem>
         </tr>
       </table>

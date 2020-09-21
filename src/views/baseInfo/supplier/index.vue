@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button type="primary" @click="onClickSearch">查询</el-button>
+      <el-button plain type="primary" icon="el-icon-search" @click="onClickSearch">查询</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -25,7 +25,7 @@
             <block-title title="基础信息" />
             <grid-form :settings="baseSettings(this.detail)"></grid-form>
             <block-title title="银行信息" />
-            <el-table :data="bankInfoList" border>
+            <el-table :data="customerBankList" border>
               <el-table-column prop="sdzzh" label="是否主账户" align="center">
                 <template slot-scope="scope">
                   <el-checkbox disabled :value="!!scope.row.sfzzh"></el-checkbox>
@@ -69,7 +69,7 @@
           border
           highlight-current-row
           style="width: 100%"
-          @row-click="onSelectSupplier"
+          @row-click="onSelect"
         >
           <el-table-column align="center" label="供应商名称" prop="gysmc" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column align="center" label="供应商类型" prop="gyslx" :show-overflow-tooltip="true"></el-table-column>
@@ -77,7 +77,7 @@
           <el-table-column align="center" label="供应商代码" prop="gysdm" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelectSupplier(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -158,7 +158,7 @@ export default {
       // 弹窗查询列表
       list: [],
       currentKey: null,
-      bankInfoList: [],
+      customerBankList: [],
     }
   },
   created() {
@@ -446,10 +446,6 @@ export default {
         limit: 10,
       }
       this.getList()
-      // this.currentKey = null
-      // const key = this.$refs.treeNode.setCurrentKey()
-      // this.detail = {}
-      // this.bankInfoList = []
     },
     // 点击打开查询弹窗
     onClickSearch() {
@@ -484,7 +480,7 @@ export default {
         xgsj: '2019/02/02 18:10',
         xgr: '张三',
       }
-      this.bankInfoList = [
+      this.customerBankList = [
         {
           id: '1',
           sfzzh: 1,
@@ -496,7 +492,7 @@ export default {
         },
       ]
     },
-    onSelectSupplier(row) {
+    onSelect(row) {
       this.currentKey = row.key
       const key = this.$refs.treeNode.setCurrentKey(row.key)
       this.detail = {
@@ -520,7 +516,7 @@ export default {
         xgsj: '2019/02/02 18:10',
         xgr: '张三',
       }
-      this.bankInfoList = [
+      this.customerBankList = [
         {
           id: '1',
           sfzzh: 1,

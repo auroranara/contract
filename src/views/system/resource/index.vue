@@ -1,6 +1,6 @@
 <template>
   <div class="app-container calendar-list-container">
-    <el-row :gutter="20" style="margin-top:50px;">
+    <el-row :gutter="20">
       <el-col :span="12">
         <el-card class="box-card">
           <div slot="header" class="clearfix">

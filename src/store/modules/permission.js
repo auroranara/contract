@@ -82,6 +82,8 @@ export function filterAsyncRouter(
         route.component = () => import(`@/router/empty`)
       } else if (route.component === 'RouterView') {
         route.component = () => import(`@/router/routerView`)
+      } else if (route.component === 'developing') {
+        route.component = () => import(`@/views/features/develop`)
       } else {
         route.component = loadView(route.component) // route.component是一个字符串 这里是字符串转组件对象
       }

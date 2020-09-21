@@ -2,12 +2,6 @@
   <div class="app-container">
     <div class="head-container">
       <el-button plain type="primary" icon="el-icon-search" @click="onClickSearch">查询</el-button>
-      <el-button plain type="primary" @click="onClickAdd">新增</el-button>
-      <el-button plain type="primary" @click="onSave">保存</el-button>
-      <el-button plain type="primary">提交</el-button>
-      <el-button plain type="primary" @click="onClickAdjust">调整</el-button>
-      <el-button plain type="primary">审核</el-button>
-      <el-button plain type="primary">删除</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -31,139 +25,31 @@
             <block-title title="基础信息" />
             <grid-form
               ref="gridForm"
-              :settings="baseSettings(this.detail,this.type)"
+              :settings="baseSettings(this.detail)"
               :model="detail"
               :rules="rules"
             ></grid-form>
             <block-title title="银行信息" />
-            <el-button v-if="!isDetail" size="small" type="primary" @click="addBank">新增</el-button>
-            <el-button
-              v-if="!isDetail"
-              size="small"
-              type="danger"
-              :disabled="!(selectedBank&&selectedBank.length)"
-              @click="deleteBank"
-            >删除</el-button>
-            <el-table
-              style="margin-top:10px"
-              :data="customerBankList"
-              border
-              @selection-change="handleBankChange"
-            >
-              <el-table-column type="selection" width="55" align="center"></el-table-column>
+            <el-table :data="customerBankList" border>
               <el-table-column width="100" prop="sdzzh" label="是否主账户" align="center">
                 <template slot-scope="scope">
-                  <el-checkbox :value="!!scope.row.sfzzh"></el-checkbox>
+                  <el-checkbox disabled :value="!!scope.row.sfzzh"></el-checkbox>
                 </template>
               </el-table-column>
-              <el-table-column
-                width="150"
-                prop="zhxx"
-                label="总行信息"
-                :show-overflow-tooltip="true"
-                align="center"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].zhxx"></el-input>
-                  <span v-else>{{scope.row.zhxx}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                width="150"
-                prop="khh"
-                label="开户行"
-                :show-overflow-tooltip="true"
-                align="center"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].khh"></el-input>
-                  <span v-else>{{scope.row.khh}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                width="100"
-                prop="sheng"
-                label="省"
-                :show-overflow-tooltip="true"
-                align="center"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].sheng"></el-input>
-                  <span v-else>{{scope.row.sheng}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                width="150"
-                prop="fhmc"
-                label="分行名称"
-                :show-overflow-tooltip="true"
-                align="center"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].fhmc"></el-input>
-                  <span v-else>{{scope.row.fhmc}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                width="150"
-                prop="lhh"
-                label="联行号"
-                :show-overflow-tooltip="true"
-                align="center"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].lhh"></el-input>
-                  <span v-else>{{scope.row.lhh}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                width="100"
-                prop="khr"
-                label="开户人"
-                :show-overflow-tooltip="true"
-                align="center"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].khr"></el-input>
-                  <span v-else>{{scope.row.khr}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                width="150"
-                prop="dzqz"
-                label="电子签章"
-                :show-overflow-tooltip="true"
-                align="center"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].dzqz"></el-input>
-                  <span v-else>{{scope.row.dzqz}}</span>
-                </template>
-              </el-table-column>
+              <el-table-column width="150" prop="zhxx" label="总行信息" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="150" prop="khh" label="开户行" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="100" prop="sheng" label="省" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="150" prop="fhmc" label="分行名称" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="150" prop="lhh" label="联行号" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="100" prop="khr" label="开户人" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column width="150" prop="dzqz" label="电子签章" :show-overflow-tooltip="true"></el-table-column>
               <el-table-column
                 width="150"
                 prop="sfjsdzyp"
                 label="是否接受电子银票"
-                align="center"
                 :show-overflow-tooltip="true"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].sfjsdzyp"></el-input>
-                  <span v-else>{{scope.row.sfjsdzyp}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                width="150"
-                prop="bz"
-                label="备注"
-                :show-overflow-tooltip="true"
-                align="center"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].bz"></el-input>
-                  <span v-else>{{scope.row.bz}}</span>
-                </template>
-              </el-table-column>
+              ></el-table-column>
+              <el-table-column width="150" prop="bz" label="备注" :show-overflow-tooltip="true"></el-table-column>
             </el-table>
           </el-tab-pane>
           <el-tab-pane name="xtxx" label="系统信息">
@@ -228,7 +114,7 @@ import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 
 export default {
-  name: 'client',
+  name: 'clientAdjust',
   components: {
     ExpandFilter,
     GridForm,
@@ -237,9 +123,8 @@ export default {
   },
   data() {
     return {
-      basePath: '/baseInfo/client',
-      // 列表数据的键值
-      rowKey: 'key',
+      // 列表的键值
+      key: 'key',
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
@@ -263,8 +148,6 @@ export default {
       list: [],
       currentKey: null,
       customerBankList: [],
-      // 银行信息中选中的对象
-      selectedBank: [],
       rules: {
         khmc: [{ required: true, message: '请输入客户名称', trigger: 'blur' }],
         sfglf: [
@@ -299,28 +182,12 @@ export default {
     ...mapState({
       statusDict: (state) => state.baseInfo.statusDict,
     }),
-    // 当前状态 可选值 add adjust detail
-    type() {
-      return this.$route.query.type || 'detail'
-    },
-    isAdd() {
-      return this.type === 'add'
-    },
-    isDetail() {
-      return this.type === 'detail'
-    },
-    isAdjust() {
-      return this.type === 'adjust'
-    },
   },
   created() {
     this.init()
   },
   methods: {
-    baseSettings(data, type) {
-      const isAdd = type === 'add'
-      const isAdjust = type === 'adjust'
-      const isDetail = type === 'detail'
+    baseSettings(data) {
       return [
         [
           {
@@ -347,32 +214,6 @@ export default {
             render: (data) => <el-input readonly vModel={data['khbm']} />,
           },
         ],
-        isAdjust
-          ? [
-              {
-                type: 'label',
-                label: '是否停用',
-                showBg: true,
-                required: true,
-              },
-              {
-                type: 'handler',
-                field: 'sfty',
-                render: (data) => (
-                  <el-radio-group vModel={data['sfty']}>
-                    <el-radio label={true}>是</el-radio>
-                    <el-radio label={false}>否</el-radio>
-                  </el-radio-group>
-                ),
-              },
-              {
-                type: 'empty',
-              },
-              {
-                type: 'empty',
-              },
-            ]
-          : [],
         [
           {
             type: 'label',
@@ -469,41 +310,6 @@ export default {
             render: (data) => <el-input vModel={data['dizhi']} />,
           },
         ],
-        ...(isAdjust
-          ? [
-              [
-                {
-                  type: 'label',
-                  label: '调整原因',
-                  showBg: true,
-                  required: true,
-                },
-                {
-                  type: 'handler',
-                  field: 'tzyy',
-                  colspan: '3',
-                  render: (data) => (
-                    <el-input type="textarea" vModel={data['tzyy']} />
-                  ),
-                },
-              ],
-              [
-                {
-                  type: 'label',
-                  label: '调整说明',
-                  showBg: true,
-                },
-                {
-                  type: 'handler',
-                  field: 'tzsm',
-                  colspan: '3',
-                  render: (data) => (
-                    <el-input type="textarea" vModel={data['tzsm']} />
-                  ),
-                },
-              ],
-            ]
-          : []),
       ]
     },
     systemSettings(data) {
@@ -612,12 +418,6 @@ export default {
       }
       this.getList()
     },
-    onResetInfo() {
-      this.detail = {}
-      this.customerBankList = []
-      this.$refs.treeNode.setCurrentKey()
-      this.currentKey = null
-    },
     onClickSearch() {
       this.queryDialogVisible = true
       this.listQuery = {
@@ -628,7 +428,6 @@ export default {
     },
     onTreeNodeClick(data) {
       this.currentKey = data.key
-      this.$router.replace(`${this.basePath}/list`)
       // TODO 点击设置右侧显示参数
       this.detail = {
         khmc: '',
@@ -668,56 +467,21 @@ export default {
       this.queryDialogVisible = false
     },
     onSave() {
-      console.log('customerBankList', this.customerBankList)
       this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
         if (err) {
+          const h = this.$createElement
           const msg = Object.entries(err)
             .map((item) => item[1].map((val) => val.message).join('，'))
             .join('\n')
           this.$notify.error({
             title: '校验错误信息',
-            message: this.$createElement(
-              'div',
-              { style: 'white-space:pre-wrap' },
-              msg
-            ),
+            message: h('div', { style: 'white-space:pre-wrap' }, msg),
             duration: 20000,
           })
         } else {
           console.log('form', this.detail)
         }
       })
-    },
-    // 点击新增
-    onClickAdd() {
-      this.onResetInfo()
-      this.$router.replace(`${this.basePath}/list?type=add`)
-    },
-    // 点击调整
-    onClickAdjust() {
-      // TODO：重修获取数据
-      this.$refs.treeNode.setCurrentKey()
-      this.currentKey = null
-      this.$router.replace(`${this.basePath}/list?type=adjust`)
-    },
-    handleBankChange(val) {
-      this.selectedBank = val
-    },
-    // 新增银行
-    addBank() {
-      this.customerBankList = [...this.customerBankList, { id: Date.now() }]
-    },
-    deleteBank() {
-      if (Array.isArray(this.selectedBank) && this.selectedBank.length) {
-        this.customerBankList = this.customerBankList.filter(
-          (item) => !this.selectedBank.some((val) => val.id === item.id)
-        )
-      } else {
-        this.$message({
-          message: '请先勾选想要删除的数据',
-          type: 'warning',
-        })
-      }
     },
   },
 }
