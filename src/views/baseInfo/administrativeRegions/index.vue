@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="onClickSearch">查询</el-button>
+      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -311,7 +311,7 @@ export default {
       this.getList()
     },
     // 点击打开查询弹窗
-    onClickSearch() {
+    handleViewSearch() {
       this.queryDialogVisible = true
       this.listQuery = {
         page: 1,

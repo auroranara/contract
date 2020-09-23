@@ -1,11 +1,11 @@
 <script>
 export default {
   name: 'cellItem',
-  props: ['setting', 'data'],
+  props: ['setting', 'data', 'rules'],
   render(h) {
     const {
       render,
-      type,
+      type = 'handler',
       required,
       label,
       field,
@@ -17,28 +17,52 @@ export default {
       showBg,
       disabled = false,
       tagProps = {},
+      colStyle,
     } = this.setting
     const tdClass = {
       'border-cell': true,
       'is-center': align === 'center',
       'is-right': align === 'right',
       'label-bg': showBg && !disabled,
-      disabled: disabled,
+      disabled,
     }
     if (rowspan === '0' || colspan === '0') return null
     if (type === 'label') {
+      const isRequired =
+        typeof required === 'boolean'
+          ? required
+          : this.rules && this.rules[field]
+          ? this.rules[field].some((item) => item.required)
+          : false
       return (
-        <td class={tdClass} rowspan={rowspan} colspan={colspan}>
-          <div class={{ label: true, required: required }}>
+        <td
+          style={colStyle}
+          class={tdClass}
+          rowspan={rowspan}
+          colspan={colspan}
+        >
+          <div class={{ label: true, required: isRequired }} style={cellStyle}>
             {render ? render() : label}
           </div>
         </td>
       )
     } else if (type === 'empty') {
-      return <td class={tdClass}></td>
+      return (
+        <td
+          style={colStyle}
+          class={tdClass}
+          rowspan={rowspan}
+          colspan={colspan}
+        ></td>
+      )
     } else {
       return (
-        <td class={tdClass} rowspan={rowspan} colspan={colspan}>
+        <td
+          style={colStyle}
+          class={tdClass}
+          rowspan={rowspan}
+          colspan={colspan}
+        >
           <div class="cell" style={cellStyle}>
             <el-form-item prop={field}>
               {render ? (

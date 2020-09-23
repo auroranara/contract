@@ -14,23 +14,19 @@
             :props="treeProps"
             :default-expand-all="true"
             @node-click="onTreeNodeClick"
-            node-key="key"
+            :node-key="rowKey"
           ></el-tree>
         </el-card>
       </el-col>
       <!-- 右侧内容 -->
       <el-col :span="18">
         <el-tabs type="border-card" v-model="tabKey">
-          <el-tab-pane name="jcxx" label="单位信息">
+          <el-tab-pane name="jcxx" label="人员信息">
             <block-title title="基础信息" />
             <grid-form :settings="baseSettings(this.detail)"></grid-form>
           </el-tab-pane>
           <el-tab-pane name="xtxx" label="系统信息">
-            <el-row>
-              <el-col :md="12" :sm="24">
-                <grid-form :settings="systemSettings(this.detail)"></grid-form>
-              </el-col>
-            </el-row>
+            <system-info :data="systemData" />
           </el-tab-pane>
         </el-tabs>
       </el-col>
@@ -38,13 +34,7 @@
 
     <el-dialog width="70%" title="查询" :visible.sync="queryDialogVisible">
       <div class="dialog-content">
-        <expand-Filter
-          :fields="fields"
-          :model="listQuery"
-          type="inline"
-          :showLabel="false"
-          :showExpand="false"
-        >
+        <expand-Filter :fields="fields" :model="listQuery" type="inline" :showLabel="false">
           <template v-slot:operations>
             <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
@@ -58,9 +48,12 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column align="center" label="单位名称" prop="dwmc" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="单位代码" prop="dwdm" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="转换比例" prop="zhbl" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column align="center" label="序号" width="80" type="index"></el-table-column>
+          <el-table-column align="center" label="人员名称" prop="rymc" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column align="center" label="人员代码" prop="rydm" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column align="center" label="职位" prop="zw" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column align="center" label="用户性质" prop="yhxz" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column align="center" label="角色" prop="js" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
               <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
@@ -85,17 +78,21 @@ import ExpandFilter from '@/components/ExpandFilter'
 import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
+import SystemInfo from '@/components/SystemInfo'
 
 export default {
-  name: 'organization',
+  name: 'person',
   components: {
     ExpandFilter,
     GridForm,
     BlockTitle,
     Pagination,
+    SystemInfo,
   },
   data() {
     return {
+      // 列表数据的键值
+      rowKey: 'id',
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
@@ -109,16 +106,43 @@ export default {
       queryDialogVisible: false,
       fields: [
         {
-          field: 'dwmc',
+          field: 'rymc',
           alwaysShow: true,
-          label: '单位名称',
+          label: '人员名称',
           render: (data) => (
-            <el-input placeholder="单位名称" vModel={data['dwmc']} />
+            <el-input placeholder="人员名称" vModel={data['rymc']} />
           ),
+        },
+        {
+          field: 'rydm',
+          alwaysShow: true,
+          label: '人员代码',
+          render: (data) => (
+            <el-input placeholder="人员代码" vModel={data['rydm']} />
+          ),
+        },
+        {
+          field: 'zw',
+          label: '职位',
+          render: (data) => <el-input placeholder="职位" vModel={data['zw']} />,
+        },
+        {
+          field: 'ssbm',
+          label: '所属部门',
+          render: (data) => (
+            <el-input placeholder="所属部门" vModel={data['ssbm']} />
+          ),
+        },
+        {
+          field: 'js',
+          label: '角色',
+          render: (data) => <el-input placeholder="角色" vModel={data['js']} />,
         },
       ],
       // 基础信息
       detail: {},
+      // 系统信息
+      systemData: {},
       treeProps: {
         children: 'children',
         label: 'label',
@@ -139,102 +163,139 @@ export default {
         [
           {
             type: 'label',
-            label: '单位名称',
+            label: '照片',
+            showBg: true,
+            colStyle: {
+              width: '230px',
+            },
+          },
+          {
+            type: 'handler',
+            disabled: true,
+            render: () => data.zp,
+          },
+          {
+            type: 'label',
+            label: '虚拟岗位',
+            showBg: true,
+            colStyle: {
+              width: '160px',
+            },
+          },
+          {
+            type: 'handler',
+            disabled: true,
+            render: () => data.xngw,
+          },
+        ],
+        [
+          {
+            type: 'label',
+            label: '人员名称',
             showBg: true,
           },
           {
             type: 'handler',
             disabled: true,
-            render: () => data.dwmc,
+            render: () => data.rymc,
           },
           {
             type: 'label',
-            label: '单位代码',
+            label: '人员代码',
             showBg: true,
           },
           {
             type: 'handler',
             disabled: true,
-            render: () => data.dwdm,
+            render: () => data.rydm,
           },
         ],
         [
           {
             type: 'label',
-            label: '转换比例',
+            label: '职位',
             showBg: true,
           },
           {
             type: 'handler',
             disabled: true,
-            render: () => data.zhbl,
+            render: () => data.zw,
           },
           {
-            type: 'empty',
+            type: 'label',
+            label: '用户性质',
             showBg: true,
           },
           {
-            type: 'empty',
+            type: 'handler',
             disabled: true,
-          },
-        ],
-      ]
-    },
-    systemSettings(data) {
-      return [
-        [
-          {
-            type: 'label',
-            label: '状态',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.zt,
+            render: () => data.yhxz,
           },
         ],
         [
           {
             type: 'label',
-            label: '创建时间',
+            label: '所属部门',
             showBg: true,
           },
           {
             type: 'handler',
-            render: () => data.cjsj,
+            disabled: true,
+            render: () => data.ssbm,
+          },
+          {
+            type: 'label',
+            label: '角色',
+            showBg: true,
+          },
+          {
+            type: 'handler',
+            disabled: true,
+            render: () => data.js,
           },
         ],
         [
           {
             type: 'label',
-            label: '创建人',
+            label: '是否可以看到所有合同信息',
             showBg: true,
           },
           {
             type: 'handler',
-            render: () => data.cjr,
+            disabled: true,
+            render: () => this.generateJudge(data.sfkykdsyhtxx),
+          },
+          {
+            type: 'label',
+            label: '所有标段审批可选',
+            showBg: true,
+          },
+          {
+            type: 'handler',
+            disabled: true,
+            render: () => this.generateJudge(data.syspbdkx),
           },
         ],
         [
           {
             type: 'label',
-            label: '修改时间',
+            label: '电话',
             showBg: true,
           },
           {
             type: 'handler',
-            render: () => data.xgsj,
+            disabled: true,
+            render: () => data.dh,
           },
-        ],
-        [
           {
             type: 'label',
-            label: '修改人',
+            label: '邮箱',
             showBg: true,
           },
           {
             type: 'handler',
-            render: () => data.xgr,
+            disabled: true,
+            render: () => data.yx,
           },
         ],
       ]
@@ -243,20 +304,20 @@ export default {
     getTreeList() {
       this.treeList = [
         {
-          key: '1',
-          label: '单位',
+          id: '1',
+          label: '人员',
           children: [
             {
-              key: '1-1',
-              label: '单位1',
+              id: '1-1',
+              label: '人员1',
             },
             {
-              key: '1-2',
-              label: '单位2',
+              id: '1-2',
+              label: '人员2',
             },
             {
-              key: '1-3',
-              label: '单位3',
+              id: '1-3',
+              label: '人员3',
             },
           ],
         },
@@ -269,11 +330,15 @@ export default {
     getList() {
       this.list = [
         {
-          key: '1-1',
-          label: '单位名称1',
-          dwmc: '单位名称1',
-          dwdm: '001',
-          zhbl: '50%',
+          id: '1-1',
+          rymc: '徐峥',
+          rydm: '0001',
+          zw: '董事局主席',
+          yhxz: '公司职员',
+          ssbm: '主任室',
+          js: 'ADMIN系统管理员',
+          dh: '13810504433',
+          yx: '123@163.com',
         },
       ]
     },
@@ -288,6 +353,13 @@ export default {
       }
       this.getList()
     },
+    generateJudge(value) {
+      return (
+        (['1', 1].includes(value) && '是') ||
+        (['0', 0].includes(value) && '否') ||
+        ''
+      )
+    },
     // 点击打开查询弹窗
     handleViewSearch() {
       this.queryDialogVisible = true
@@ -298,36 +370,32 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data.key
+      this.currentKey = data[this.rowKey]
+      this.$refs.treeNode.setCurrentKey(data[this.rowKey])
       // TODO 点击设置右侧显示参数
       this.detail = {
-        key: '1-1',
-        label: '单位名称1',
-        dwmc: '单位名称1',
-        dwdm: '001',
-        zhbl: '50%',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
+        id: '1-1',
+        rymc: '徐峥',
+        rydm: '0001',
+        zw: '董事局主席',
+        yhxz: '公司职员',
+        ssbm: '主任室',
+        js: 'ADMIN系统管理员',
+        sfkykdsyhtxx: 1,
+        syspbdkx: 1,
+        dh: '13810504433',
+        yx: '123@163.com',
+      }
+      this.systemData = {
+        status: '审批完成',
+        createTime: '2019/02/02 18:10',
+        createPerson: '张三',
+        modifyTime: '2019/02/02 18:10',
+        modifyPerson: '张三',
       }
     },
     onSelect(row) {
-      this.currentKey = row.key
-      const key = this.$refs.treeNode.setCurrentKey(row.key)
-      this.detail = {
-        key: '1-1',
-        label: '单位名称1',
-        dwmc: '单位名称1',
-        dwdm: '001',
-        zhbl: '50%',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
-      }
+      this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
   },

@@ -2,12 +2,7 @@
   <div class="app-container">
     <div class="head-container">
       <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
-      <el-button plain type="primary" @click="onClickAdd">新增</el-button>
-      <el-button plain type="primary" @click="onSave">保存</el-button>
-      <el-button plain type="primary">提交</el-button>
-      <el-button plain type="primary" @click="onClickAdjust">调整</el-button>
       <el-button plain type="primary">审核</el-button>
-      <el-button plain type="primary">删除</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -40,65 +35,33 @@
 
             <!-- 参数列表 -->
             <block-title title="参数列表" />
-            <el-button v-if="!isDetail" size="small" type="primary" @click="handleAddParams">新增</el-button>
-            <el-button
-              v-if="!isDetail"
-              size="small"
-              type="danger"
-              :disabled="!(selectedParams&&selectedParams.length)"
-              @click="handleDeleteParams"
-            >删除</el-button>
-            <el-table
-              style="margin-top:10px"
-              :data="paramsList"
-              border
-              @selection-change="handleParamsChange"
-            >
-              <el-table-column v-if="!isDetail" type="selection" width="55" align="center"></el-table-column>
+            <el-table style="margin-top:10px" :data="paramsList" border>
               <el-table-column align="center" label="序号" width="80" type="index"></el-table-column>
               <el-table-column
                 prop="listName"
                 label="名称"
-                :show-overflow-tooltip="isDetail"
+                :show-overflow-tooltip="true"
                 align="center"
                 label-class-name="required-header"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="paramsList[scope.$index].listName"></el-input>
-                  <span v-else>{{scope.row.listName}}</span>
-                </template>
-              </el-table-column>
+              ></el-table-column>
               <el-table-column
                 width="200"
                 prop="listCode"
                 label="编码"
-                :show-overflow-tooltip="isDetail"
+                :show-overflow-tooltip="true"
                 align="center"
                 label-class-name="required-header"
-              >
-                <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="paramsList[scope.$index].listCode"></el-input>
-                  <span v-else>{{scope.row.listCode}}</span>
-                </template>
-              </el-table-column>
+              ></el-table-column>
               <el-table-column
                 width="200"
                 prop="listStatus"
                 label="状态"
-                :show-overflow-tooltip="isDetail"
+                :show-overflow-tooltip="true"
                 align="center"
                 label-class-name="required-header"
               >
                 <template slot-scope="scope">
-                  <el-select v-if="!isDetail" v-model="paramsList[scope.$index].listStatus">
-                    <el-option
-                      v-for="({value,label}) in valueSetStatus"
-                      :key="value"
-                      :value="value"
-                      :label="label"
-                    ></el-option>
-                  </el-select>
-                  <span v-else>{{scope.row.listStatus}}</span>
+                  <span>{{scope.row.listStatus}}</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -248,19 +211,6 @@ export default {
     // ...mapState({
     //   statusDict: (state) => state.baseInfo.statusDict,
     // }),
-    // 当前状态 可选值 add adjust detail
-    type() {
-      return this.$route.query.type || 'detail'
-    },
-    isAdd() {
-      return this.type === 'add'
-    },
-    isDetail() {
-      return this.type === 'detail'
-    },
-    isAdjust() {
-      return this.type === 'adjust'
-    },
   },
   filters: {
     // 状态
@@ -285,10 +235,8 @@ export default {
           {
             type: 'handler',
             field: 'name',
-            disabled: this.isDetail,
-            render: () => (
-              <el-input readonly={this.isDetail} vModel={data['name']} />
-            ),
+            disabled: true,
+            render: () => <el-input readonly vModel={data['name']} />,
           },
           {
             type: 'label',
@@ -303,32 +251,33 @@ export default {
             render: () => <el-input readonly vModel={data['code']} />,
           },
         ],
-        this.isAdjust
-          ? [
-              {
-                type: 'label',
-                label: '是否停用',
-                showBg: true,
-                required: true,
-              },
-              {
-                type: 'handler',
-                field: 'enableStatus',
-                render: (data) => (
-                  <el-radio-group vModel={data['enableStatus']}>
-                    <el-radio label={0}>是</el-radio>
-                    <el-radio label={1}>否</el-radio>
-                  </el-radio-group>
-                ),
-              },
-              {
-                type: 'empty',
-              },
-              {
-                type: 'empty',
-              },
-            ]
-          : [],
+        [
+          {
+            type: 'label',
+            label: '是否停用',
+            showBg: true,
+            required: true,
+          },
+          {
+            type: 'handler',
+            field: 'enableStatus',
+            disabled: true,
+            render: (data) => (
+              <el-radio-group disabled vModel={data['enableStatus']}>
+                <el-radio label={0}>是</el-radio>
+                <el-radio label={1}>否</el-radio>
+              </el-radio-group>
+            ),
+          },
+          {
+            type: 'empty',
+            showBg: true,
+          },
+          {
+            type: 'empty',
+            disabled: true,
+          },
+        ],
         [
           {
             type: 'label',
@@ -339,10 +288,10 @@ export default {
           {
             type: 'handler',
             field: 'enableTime',
-            disabled: this.isDetail,
+            disabled: true,
             render: () => (
               <el-date-picker
-                readonly={this.isDetail}
+                readonly
                 vModel={data['enableTime']}
                 type="datetime"
                 style="width:100%"
@@ -358,47 +307,51 @@ export default {
           {
             type: 'handler',
             field: 'status',
-            disabled: this.isDetail,
-            render: () => (
-              <el-input readonly={this.isDetail} vModel={data['status']} />
+            disabled: true,
+            render: () => <el-input readonly vModel={data['status']} />,
+          },
+        ],
+        [
+          {
+            type: 'label',
+            label: '调整原因',
+            showBg: true,
+            required: true,
+          },
+          {
+            type: 'handler',
+            field: 'adjustReason',
+            colspan: '3',
+            disabled: true,
+            render: (data) => (
+              <el-input
+                readonly
+                type="textarea"
+                vModel={data['adjustReason']}
+              />
             ),
           },
         ],
-        ...(this.isAdjust
-          ? [
-              [
-                {
-                  type: 'label',
-                  label: '调整原因',
-                  showBg: true,
-                  required: true,
-                },
-                {
-                  type: 'handler',
-                  field: 'adjustReason',
-                  colspan: '3',
-                  render: (data) => (
-                    <el-input type="textarea" vModel={data['adjustReason']} />
-                  ),
-                },
-              ],
-              [
-                {
-                  type: 'label',
-                  label: '调整说明',
-                  showBg: true,
-                },
-                {
-                  type: 'handler',
-                  field: 'adjustExplain',
-                  colspan: '3',
-                  render: (data) => (
-                    <el-input type="textarea" vModel={data['adjustExplain']} />
-                  ),
-                },
-              ],
-            ]
-          : []),
+        [
+          {
+            type: 'label',
+            label: '调整说明',
+            showBg: true,
+          },
+          {
+            type: 'handler',
+            field: 'adjustExplain',
+            colspan: '3',
+            disabled: true,
+            render: (data) => (
+              <el-input
+                readonly
+                type="textarea"
+                vModel={data['adjustExplain']}
+              />
+            ),
+          },
+        ],
       ]
     },
     // 获取左侧树
@@ -462,7 +415,6 @@ export default {
     onTreeNodeClick(data) {
       this.currentKey = data.key
       this.$refs.treeNode.setCurrentKey(data.key)
-      this.$router.replace(`${this.basePath}/list`)
       // TODO 点击设置右侧显示参数
       this.detail = {
         key: '1-1',
@@ -478,68 +430,10 @@ export default {
         modifyTime: '2019/02/02 18:10',
         modifyPerson: '张三',
       }
-      this.selectedParams = []
     },
     onSelect(row) {
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
-    },
-    onResetInfo() {
-      this.detail = {}
-      this.systemData = {}
-      this.selectedParams = []
-      this.$refs.treeNode.setCurrentKey()
-      this.currentKey = null
-    },
-    // 点击新增
-    onClickAdd() {
-      this.onResetInfo()
-      this.$router.replace(`${this.basePath}/list?type=add`)
-    },
-    // 点击调整
-    onClickAdjust() {
-      // TODO：重修获取数据
-      this.$refs.treeNode.setCurrentKey()
-      this.currentKey = null
-      this.$router.replace(`${this.basePath}/list?type=adjust`)
-    },
-    onSave() {
-      this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
-        if (err) {
-          const msg = Object.entries(err)
-            .map((item) => item[1].map((val) => val.message).join('，'))
-            .join('\n')
-          this.$notify.error({
-            title: '校验错误信息',
-            message: this.$createElement(
-              'div',
-              { style: 'white-space:pre-wrap' },
-              msg
-            ),
-            duration: 20000,
-          })
-        } else {
-          console.log('form', this.detail)
-        }
-      })
-    },
-    handleAddParams() {
-      this.paramsList = [...this.paramsList, { id: Date.now() }]
-    },
-    handleDeleteParams() {
-      if (Array.isArray(this.selectedParams) && this.selectedParams.length) {
-        this.paramsList = this.paramsList.filter(
-          (item) => !this.selectedParams.some((val) => val.id === item.id)
-        )
-      } else {
-        this.$message({
-          message: '请先勾选想要删除的数据',
-          type: 'warning',
-        })
-      }
-    },
-    handleParamsChange(val) {
-      this.selectedParams = val
     },
   },
 }

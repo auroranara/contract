@@ -3,7 +3,7 @@
     <div class="table-border">
       <table cellspacing="0" cellpadding="0" border="0" width="100%">
         <tr v-for="(row, index) in settings" :v-if="row&&row.length" :key="index">
-          <cellItem v-for="(col, i) in row" :setting="col" :data="model" :key="i"></cellItem>
+          <cellItem v-for="(col, i) in row" :setting="col" :rules="rules" :data="model" :key="i"></cellItem>
         </tr>
       </table>
     </div>

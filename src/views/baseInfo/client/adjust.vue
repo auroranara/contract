@@ -1,7 +1,8 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="onClickSearch">查询</el-button>
+      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button plain type="primary">审核</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -30,34 +31,99 @@
               :rules="rules"
             ></grid-form>
             <block-title title="银行信息" />
-            <el-table :data="customerBankList" border>
-              <el-table-column width="100" prop="sdzzh" label="是否主账户" align="center">
+            <el-table style="margin-top:10px" :data="customerBankList" border>
+              <el-table-column type="selection" width="55" align="center"></el-table-column>
+              <el-table-column width="100" prop="isPrimaryAccount" label="是否主账户" align="center">
                 <template slot-scope="scope">
-                  <el-checkbox disabled :value="!!scope.row.sfzzh"></el-checkbox>
+                  <el-checkbox :value="!!scope.row.isPrimaryAccount"></el-checkbox>
                 </template>
               </el-table-column>
-              <el-table-column width="150" prop="zhxx" label="总行信息" :show-overflow-tooltip="true"></el-table-column>
-              <el-table-column width="150" prop="khh" label="开户行" :show-overflow-tooltip="true"></el-table-column>
-              <el-table-column width="100" prop="sheng" label="省" :show-overflow-tooltip="true"></el-table-column>
-              <el-table-column width="150" prop="fhmc" label="分行名称" :show-overflow-tooltip="true"></el-table-column>
-              <el-table-column width="150" prop="lhh" label="联行号" :show-overflow-tooltip="true"></el-table-column>
-              <el-table-column width="100" prop="khr" label="开户人" :show-overflow-tooltip="true"></el-table-column>
-              <el-table-column width="150" prop="dzqz" label="电子签章" :show-overflow-tooltip="true"></el-table-column>
               <el-table-column
                 width="150"
-                prop="sfjsdzyp"
-                label="是否接受电子银票"
+                prop="headOfficeName"
+                label="总行信息"
                 :show-overflow-tooltip="true"
+                align="center"
               ></el-table-column>
-              <el-table-column width="150" prop="bz" label="备注" :show-overflow-tooltip="true"></el-table-column>
+              <el-table-column
+                width="150"
+                prop="openBank"
+                label="开户行"
+                :show-overflow-tooltip="true"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                width="100"
+                prop="province"
+                label="省"
+                :show-overflow-tooltip="true"
+                align="center"
+              >
+                <template slot-scope="scope">
+                  <span>{{scope.row.province}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                width="100"
+                prop="city"
+                label="市"
+                :show-overflow-tooltip="true"
+                align="center"
+              >
+                <template slot-scope="scope">
+                  <span>{{scope.row.city}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                width="150"
+                prop="branchOfficeName"
+                label="分行名称"
+                :show-overflow-tooltip="true"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                width="150"
+                prop="correspondentNo"
+                label="联行号"
+                :show-overflow-tooltip="true"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                width="100"
+                prop="accountHolder"
+                label="开户人"
+                :show-overflow-tooltip="true"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                width="150"
+                prop="esignature"
+                label="电子签章"
+                :show-overflow-tooltip="true"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                width="150"
+                prop="isReceiveTicket"
+                label="是否接受电子银票"
+                align="center"
+                :show-overflow-tooltip="true"
+              >
+                <template slot-scope="scope">
+                  <span>{{scope.row.isReceiveTicket}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                width="150"
+                prop="remarks"
+                label="备注"
+                :show-overflow-tooltip="true"
+                align="center"
+              ></el-table-column>
             </el-table>
           </el-tab-pane>
           <el-tab-pane name="xtxx" label="系统信息">
-            <el-row>
-              <el-col :md="12" :sm="24">
-                <grid-form :settings="systemSettings(detail)"></grid-form>
-              </el-col>
-            </el-row>
+            <system-info :data="systemData" />
           </el-tab-pane>
         </el-tabs>
       </el-col>
@@ -85,8 +151,13 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column align="center" label="客户名称" prop="khmc" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="状态" prop="zt" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="客户名称"
+            prop="customerName"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column align="center" label="状态" prop="status" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
               <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
@@ -110,21 +181,24 @@
 import ExpandFilter from '@/components/ExpandFilter'
 import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
-import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
+import SystemInfo from '@/components/SystemInfo'
+import { mapState } from 'vuex'
 
 export default {
-  name: 'clientAdjust',
+  name: 'client',
   components: {
     ExpandFilter,
     GridForm,
     BlockTitle,
     Pagination,
+    SystemInfo,
   },
   data() {
     return {
-      // 列表的键值
-      key: 'key',
+      basePath: '/baseInfo/client',
+      // 列表数据的键值
+      rowKey: 'key',
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
@@ -136,6 +210,8 @@ export default {
       total: 0,
       // 基础信息
       detail: {},
+      // 系统信息
+      systemData: {},
       // 查询弹窗是否可见
       queryDialogVisible: false,
       treeProps: {
@@ -148,27 +224,31 @@ export default {
       list: [],
       currentKey: null,
       customerBankList: [],
+      // 银行信息中选中的对象
+      selectedBank: [],
       rules: {
-        khmc: [{ required: true, message: '请输入客户名称', trigger: 'blur' }],
-        sfglf: [
+        customerName: [
+          { required: true, message: '请输入客户名称', trigger: 'blur' },
+        ],
+        isRelationship: [
           { required: true, message: '请输入是否关联方', trigger: 'blur' },
         ],
       },
       fields: [
         {
-          field: 'khmc',
+          field: 'customerName',
           alwaysShow: true,
           label: '客户名称',
           render: (data) => (
-            <el-input placeholder="客户名称" vModel={data['khmc']} />
+            <el-input placeholder="客户名称" vModel={data['customerName']} />
           ),
         },
         {
-          field: 'zhuangtai',
+          field: 'status',
           label: '状态',
           alwaysShow: true,
           render: (data) => (
-            <el-select vModel={data['zhuangtai']}>
+            <el-select vModel={data['status']}>
               {this.statusDict.map(({ value, label }) => (
                 <el-option key={value} value={value} label={label}></el-option>
               ))}
@@ -182,6 +262,16 @@ export default {
     ...mapState({
       statusDict: (state) => state.baseInfo.statusDict,
     }),
+    // 当前状态 可选值 add adjust detail
+    type() {
+      return this.$route.query.type || 'detail'
+    },
+    isAdd() {
+      return this.type === 'add'
+    },
+    isAdjust() {
+      return this.type === 'adjust'
+    },
   },
   created() {
     this.init()
@@ -198,8 +288,11 @@ export default {
           },
           {
             type: 'handler',
-            field: 'khmc',
-            render: (data) => <el-input vModel={data['khmc']} />,
+            field: 'customerName',
+            disabled: true,
+            render: (data) => (
+              <el-input readonly vModel={data['customerName']} />
+            ),
           },
           {
             type: 'label',
@@ -209,9 +302,38 @@ export default {
           },
           {
             type: 'handler',
-            field: 'khbm',
+            field: 'customerCode',
             disabled: true,
-            render: (data) => <el-input readonly vModel={data['khbm']} />,
+            render: (data) => (
+              <el-input readonly vModel={data['customerCode']} />
+            ),
+          },
+        ],
+        [
+          {
+            type: 'label',
+            label: '是否停用',
+            showBg: true,
+            required: true,
+          },
+          {
+            type: 'handler',
+            field: 'isDisabled',
+            disabled: true,
+            render: (data) => (
+              <el-radio-group disabled vModel={data['isDisabled']}>
+                <el-radio label={1}>是</el-radio>
+                <el-radio label={0}>否</el-radio>
+              </el-radio-group>
+            ),
+          },
+          {
+            type: 'empty',
+            showBg: true,
+          },
+          {
+            type: 'empty',
+            disabled: true,
           },
         ],
         [
@@ -223,8 +345,14 @@ export default {
           },
           {
             type: 'handler',
-            field: 'sfglf',
-            render: (data) => <el-input vModel={data['sfglf']} />,
+            field: 'isRelationship',
+            disabled: true,
+            render: (data) => (
+              <el-radio-group disabled vModel={data['isRelationship']}>
+                <el-radio label={1}>是</el-radio>
+                <el-radio label={0}>否</el-radio>
+              </el-radio-group>
+            ),
           },
           {
             type: 'label',
@@ -234,8 +362,14 @@ export default {
           },
           {
             type: 'handler',
-            field: 'sfybnsr',
-            render: (data) => <el-input vModel={data['sfybnsr']} />,
+            field: 'isTaxpayer',
+            disabled: true,
+            render: (data) => (
+              <el-radio-group disabled vModel={data['isTaxpayer']}>
+                <el-radio label={1}>是</el-radio>
+                <el-radio label={0}>否</el-radio>
+              </el-radio-group>
+            ),
           },
         ],
         [
@@ -247,8 +381,11 @@ export default {
           },
           {
             type: 'handler',
-            field: 'kqtt',
-            render: (data) => <el-input vModel={data['kqtt']} />,
+            field: 'invoiceTitle',
+            disabled: true,
+            render: (data) => (
+              <el-input readonly vModel={data['invoiceTitle']} />
+            ),
           },
           {
             type: 'label',
@@ -258,8 +395,11 @@ export default {
           },
           {
             type: 'handler',
-            field: 'tyshxydm',
-            render: (data) => <el-input vModel={data['tyshxydm']} />,
+            field: 'socialCreditCode',
+            disabled: true,
+            render: (data) => (
+              <el-input readonly vModel={data['socialCreditCode']} />
+            ),
           },
         ],
         [
@@ -271,8 +411,16 @@ export default {
           },
           {
             type: 'handler',
-            field: 'gj',
-            render: (data) => <el-input vModel={data['gj']} />,
+            field: 'country',
+            disabled: true,
+            render: (data) => (
+              <el-select
+                disabled
+                placeholder=""
+                vModel={data['country']}
+                style="width:100%"
+              ></el-select>
+            ),
           },
           {
             type: 'label',
@@ -282,8 +430,16 @@ export default {
           },
           {
             type: 'handler',
-            field: 'sheng',
-            render: (data) => <el-input vModel={data['sheng']} />,
+            field: 'province',
+            disabled: true,
+            render: (data) => (
+              <el-select
+                disabled
+                placeholder=""
+                vModel={data['province']}
+                style="width:100%"
+              ></el-select>
+            ),
           },
         ],
         [
@@ -295,8 +451,16 @@ export default {
           },
           {
             type: 'handler',
-            field: 'shi',
-            render: (data) => <el-input vModel={data['shi']} />,
+            field: 'city',
+            disabled: true,
+            render: (data) => (
+              <el-select
+                disabled
+                placeholder=""
+                vModel={data['city']}
+                style="width:100%"
+              ></el-select>
+            ),
           },
           {
             type: 'label',
@@ -306,67 +470,52 @@ export default {
           },
           {
             type: 'handler',
-            field: 'dizhi',
-            render: (data) => <el-input vModel={data['dizhi']} />,
-          },
-        ],
-      ]
-    },
-    systemSettings(data) {
-      return [
-        [
-          {
-            type: 'label',
-            label: '状态',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.zt,
+            field: 'addressPhone',
+            disabled: true,
+            render: (data) => (
+              <el-input readonly vModel={data['addressPhone']} />
+            ),
           },
         ],
         [
           {
             type: 'label',
-            label: '创建时间',
+            label: '调整原因',
             showBg: true,
+            required: true,
           },
           {
             type: 'handler',
-            render: () => data.cjsj,
+            field: 'adjustReason',
+            colspan: '3',
+            disabled: true,
+            render: (data) => (
+              <el-input
+                readonly
+                type="textarea"
+                vModel={data['adjustReason']}
+              />
+            ),
           },
         ],
         [
           {
             type: 'label',
-            label: '创建人',
+            label: '调整说明',
             showBg: true,
           },
           {
             type: 'handler',
-            render: () => data.cjr,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '修改时间',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.xgsj,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '修改人',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.xgr,
+            field: 'adjustExplain',
+            colspan: '3',
+            disabled: true,
+            render: (data) => (
+              <el-input
+                readonly
+                type="textarea"
+                vModel={data['adjustExplain']}
+              />
+            ),
           },
         ],
       ]
@@ -402,8 +551,8 @@ export default {
       this.list = [
         {
           key: '1',
-          khmc: '江苏普信土地房地产资产评估测绘有限公司',
-          zt: '审批完成',
+          customerName: '江苏普信土地房地产资产评估测绘有限公司',
+          status: '审批完成',
         },
       ]
     },
@@ -418,7 +567,14 @@ export default {
       }
       this.getList()
     },
-    onClickSearch() {
+    onResetInfo() {
+      this.detail = {}
+      this.systemData = {}
+      this.customerBankList = []
+      this.$refs.treeNode.setCurrentKey()
+      this.currentKey = null
+    },
+    handleViewSearch() {
       this.queryDialogVisible = true
       this.listQuery = {
         page: 1,
@@ -430,33 +586,35 @@ export default {
       this.currentKey = data.key
       // TODO 点击设置右侧显示参数
       this.detail = {
-        khmc: '',
-        khbm: 'JS0099156',
-        sfglf: '否',
-        sfybnsr: '是',
-        kqtt: '江苏普信土地房地产资产评估测绘有限公司',
-        tyshxydm: '912000123213F',
-        gj: '中国',
-        sheng: '江苏',
-        shi: '无锡',
-        dizhi: '无锡新区旺庄路52-2101232',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
+        customerName: '无锡普信土地资产评估测绘有限公司',
+        customerCode: 'JS0099156',
+        isRelationship: 1,
+        isTaxpayer: 1,
+        invoiceTitle: '江苏普信土地房地产资产评估测绘有限公司',
+        socialCreditCode: '912000123213F',
+        country: '中国',
+        province: '江苏',
+        city: '无锡',
+        addressPhone: '无锡新区旺庄路52-2101232',
+      }
+      this.systemData = {
+        status: '审批完成',
+        createTime: '2019/02/02 18:10',
+        createPerson: '张三',
+        modifyTime: '2019/02/02 18:10',
+        modifyPerson: '张三',
       }
       this.customerBankList = [
         {
           id: '1',
-          sfzzh: 1,
-          zhxx: '交通银行',
-          khh: '交通银行青山支行',
-          sheng: '江苏省',
-          shi: '无锡市',
-          fhmc: '交通银行股份有限公司',
+          isPrimaryAccount: 1,
+          headOfficeName: '交通银行',
+          openBank: '交通银行青山支行',
+          province: '江苏省',
+          city: '无锡市',
+          branchOfficeName: '交通银行股份有限公司',
           yhzh: '6058182298765512',
-          lhh: '103120230',
+          correspondentNo: '103120230',
         },
       ]
     },
@@ -465,23 +623,6 @@ export default {
       this.$refs.treeNode.setCurrentKey(row.key)
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
-    },
-    onSave() {
-      this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
-        if (err) {
-          const h = this.$createElement
-          const msg = Object.entries(err)
-            .map((item) => item[1].map((val) => val.message).join('，'))
-            .join('\n')
-          this.$notify.error({
-            title: '校验错误信息',
-            message: h('div', { style: 'white-space:pre-wrap' }, msg),
-            duration: 20000,
-          })
-        } else {
-          console.log('form', this.detail)
-        }
-      })
     },
   },
 }
