@@ -45,7 +45,7 @@ export default {
       return (
         <div class="filter-container">
           <div class="filter">
-            <el-form inline={true}>
+            <el-form inline>
               {this.fields.map((item) =>
                 this.expand || (!this.expand && item.alwaysShow) ? (
                   <el-form-item

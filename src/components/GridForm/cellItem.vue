@@ -17,7 +17,7 @@ export default {
       showBg,
       disabled = false,
       tagProps = {},
-      colStyle,
+      tdStyle,
     } = this.setting
     const tdClass = {
       'border-cell': true,
@@ -35,12 +35,7 @@ export default {
           ? this.rules[field].some((item) => item.required)
           : false
       return (
-        <td
-          style={colStyle}
-          class={tdClass}
-          rowspan={rowspan}
-          colspan={colspan}
-        >
+        <td style={tdStyle} class={tdClass} rowspan={rowspan} colspan={colspan}>
           <div class={{ label: true, required: isRequired }} style={cellStyle}>
             {render ? render() : label}
           </div>
@@ -49,7 +44,7 @@ export default {
     } else if (type === 'empty') {
       return (
         <td
-          style={colStyle}
+          style={tdStyle}
           class={tdClass}
           rowspan={rowspan}
           colspan={colspan}
@@ -57,12 +52,7 @@ export default {
       )
     } else {
       return (
-        <td
-          style={colStyle}
-          class={tdClass}
-          rowspan={rowspan}
-          colspan={colspan}
-        >
+        <td style={tdStyle} class={tdClass} rowspan={rowspan} colspan={colspan}>
           <div class="cell" style={cellStyle}>
             <el-form-item prop={field}>
               {render ? (
@@ -128,4 +118,7 @@ td.is-right {
 ::v-deep .el-form-item {
   margin-bottom: 0;
 }
+// ::v-deep .el-form-item:not(.is-error) {
+//   margin-bottom: 0;
+// }
 </style>

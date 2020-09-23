@@ -49,9 +49,9 @@
           @row-click="onSelect"
         >
           <el-table-column align="center" label="序号" width="80" type="index"></el-table-column>
-          <el-table-column align="center" label="人员名称" prop="rymc" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="人员代码" prop="rydm" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="职位" prop="zw" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column align="center" label="人员名称" prop="name" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column align="center" label="人员代码" prop="id" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column align="center" label="职位" prop="jobName" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column align="center" label="用户性质" prop="yhxz" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column align="center" label="角色" prop="js" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column align="center" label="操作">
@@ -106,25 +106,27 @@ export default {
       queryDialogVisible: false,
       fields: [
         {
-          field: 'rymc',
+          field: 'name',
           alwaysShow: true,
           label: '人员名称',
           render: (data) => (
-            <el-input placeholder="人员名称" vModel={data['rymc']} />
+            <el-input placeholder="人员名称" vModel={data['name']} />
           ),
         },
         {
-          field: 'rydm',
+          field: 'id',
           alwaysShow: true,
           label: '人员代码',
           render: (data) => (
-            <el-input placeholder="人员代码" vModel={data['rydm']} />
+            <el-input placeholder="人员代码" vModel={data['id']} />
           ),
         },
         {
-          field: 'zw',
+          field: 'jobName',
           label: '职位',
-          render: (data) => <el-input placeholder="职位" vModel={data['zw']} />,
+          render: (data) => (
+            <el-input placeholder="职位" vModel={data['jobName']} />
+          ),
         },
         {
           field: 'ssbm',
@@ -165,20 +167,33 @@ export default {
             type: 'label',
             label: '照片',
             showBg: true,
-            colStyle: {
+            tdStyle: {
               width: '230px',
             },
           },
           {
             type: 'handler',
             disabled: true,
-            render: () => data.zp,
+            cellStyle: {
+              height: '130px',
+              display: 'flex',
+              'justify-content': 'center',
+              'align-items': 'center',
+            },
+            render: () =>
+              data.photo ? (
+                <el-image
+                  style="width: 100px; height: 100px"
+                  src={data.photo}
+                  preview-src-list={[data.photo]}
+                ></el-image>
+              ) : null,
           },
           {
             type: 'label',
             label: '虚拟岗位',
             showBg: true,
-            colStyle: {
+            tdStyle: {
               width: '160px',
             },
           },
@@ -197,7 +212,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.rymc,
+            render: () => data.name,
           },
           {
             type: 'label',
@@ -207,7 +222,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.rydm,
+            render: () => data.id,
           },
         ],
         [
@@ -219,7 +234,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.zw,
+            render: () => data.jobName,
           },
           {
             type: 'label',
@@ -331,9 +346,8 @@ export default {
       this.list = [
         {
           id: '1-1',
-          rymc: '徐峥',
-          rydm: '0001',
-          zw: '董事局主席',
+          name: '徐峥',
+          jobName: '董事局主席',
           yhxz: '公司职员',
           ssbm: '主任室',
           js: 'ADMIN系统管理员',
@@ -375,9 +389,10 @@ export default {
       // TODO 点击设置右侧显示参数
       this.detail = {
         id: '1-1',
-        rymc: '徐峥',
-        rydm: '0001',
-        zw: '董事局主席',
+        name: '徐峥',
+        jobName: '董事局主席',
+        photo:
+          'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
         yhxz: '公司职员',
         ssbm: '主任室',
         js: 'ADMIN系统管理员',

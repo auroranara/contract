@@ -111,13 +111,22 @@
                 </el-select>
               </el-form-item>
               <el-form-item v-if="temp.type===0" label="重定向" prop="redirect">
-                <el-input v-model="temp.redirect"></el-input>
+                <el-autocomplete
+                  v-model="temp.redirect"
+                  :fetch-suggestions="redirectQuery"
+                  style="width:100%"
+                />
               </el-form-item>
               <el-form-item v-if="temp.type===0" label="组件名称" prop="componentName">
                 <el-input v-model="temp.componentName" placeholder="请输入组件名称" />
               </el-form-item>
               <el-form-item v-if="temp.type===0" label="组件路径" prop="component">
-                <el-input v-model="temp.component" placeholder="请输入组件路径" />
+                <el-autocomplete
+                  v-model="temp.component"
+                  placeholder="请输入组件路径"
+                  :fetch-suggestions="componentQuery"
+                  style="width:100%"
+                />
               </el-form-item>
               <el-form-item label="资源名称" prop="name">
                 <el-input v-model="temp.name" placeholder="请输入资源名称" />
@@ -214,13 +223,22 @@
           </el-select>
         </el-form-item>
         <el-form-item v-if="saveResourceData.type===0" label="重定向" prop="redirect">
-          <el-input v-model="saveResourceData.redirect" />
+          <el-autocomplete
+            v-model="saveResourceData.redirect"
+            :fetch-suggestions="redirectQuery"
+            style="width:100%"
+          />
         </el-form-item>
         <el-form-item v-if="saveResourceData.type===0" label="组件名称" prop="componentName">
           <el-input v-model="saveResourceData.componentName" placeholder="请输入组件名称" />
         </el-form-item>
         <el-form-item v-if="saveResourceData.type===0" label="组件路径" prop="component">
-          <el-input v-model="saveResourceData.component" placeholder="请输入组件路径" />
+          <el-autocomplete
+            v-model="saveResourceData.component"
+            placeholder="请输入组件路径"
+            :fetch-suggestions="componentQuery"
+            style="width:100%"
+          />
         </el-form-item>
         <el-form-item label="资源名称" prop="name">
           <el-input v-model="saveResourceData.name" placeholder="请输入资源名称" />
@@ -321,7 +339,7 @@ export default {
           { required: true, message: '请选择请求方式', trigger: 'change' },
         ],
         component: [
-          { required: true, message: '请填写组件路径', trigger: 'blur' },
+          { required: true, message: '请填写组件路径', trigger: 'change' },
         ],
         componentName: [
           { required: true, message: '请填写组件名称', trigger: 'blur' },
@@ -461,6 +479,18 @@ export default {
     },
     selectedDialog(name) {
       this.saveResourceData.icon = name
+    },
+    // 重定向提示
+    redirectQuery(queryString, cb) {
+      cb([{ value: 'noredirect' }])
+    },
+    // 组件路径提示
+    componentQuery(queryString, cb) {
+      cb([
+        { value: 'Layout' },
+        { value: 'RouterView' },
+        { value: 'Developing' },
+      ])
     },
   },
 }
