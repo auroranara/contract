@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -14,7 +20,7 @@
             :props="treeProps"
             :default-expand-all="true"
             @node-click="onTreeNodeClick"
-            node-key="key"
+            :node-key="rowKey"
           ></el-tree>
         </el-card>
       </el-col>
@@ -26,11 +32,7 @@
             <grid-form :settings="baseSettings(this.detail)"></grid-form>
           </el-tab-pane>
           <el-tab-pane name="xtxx" label="系统信息">
-            <el-row>
-              <el-col :md="12" :sm="24">
-                <grid-form :settings="systemSettings(this.detail)"></grid-form>
-              </el-col>
-            </el-row>
+            <system-info :data="systemData" />
           </el-tab-pane>
         </el-tabs>
       </el-col>
@@ -46,7 +48,9 @@
           :showExpand="false"
         >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -58,13 +62,35 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column align="center" label="税率名称" prop="slmc" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="税率代码" prop="sldm" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="启用时间" prop="qysj" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="失效时间" prop="sxsj" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="税率名称"
+            prop="taxRateName"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="税率代码"
+            prop="taxRateCode"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="启用时间"
+            prop="effectiveTo"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="失效时间"
+            prop="effectiveFrom"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -86,6 +112,7 @@ import ExpandFilter from '@/components/ExpandFilter'
 import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
+import SystemInfo from '@/components/SystemInfo'
 
 export default {
   name: 'organization',
@@ -94,9 +121,11 @@ export default {
     GridForm,
     BlockTitle,
     Pagination,
+    SystemInfo,
   },
   data() {
     return {
+      rowKey: 'id',
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
@@ -110,24 +139,26 @@ export default {
       queryDialogVisible: false,
       fields: [
         {
-          field: 'slmc',
+          field: 'taxRateName',
           alwaysShow: true,
           label: '税率名称',
           render: (data) => (
-            <el-input placeholder="税率名称" vModel={data['slmc']} />
+            <el-input placeholder="税率名称" vModel={data['taxRateName']} />
           ),
         },
         {
-          field: 'sldm',
+          field: 'taxRateCode',
           alwaysShow: true,
           label: '税率代码',
           render: (data) => (
-            <el-input placeholder="税率代码" vModel={data['sldm']} />
+            <el-input placeholder="税率代码" vModel={data['taxRateCode']} />
           ),
         },
       ],
       // 基础信息
       detail: {},
+      // 系统信息
+      systemData: {},
       treeProps: {
         children: 'children',
         label: 'label',
@@ -154,7 +185,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.slmc,
+            render: () => data.taxRateName,
           },
           {
             type: 'label',
@@ -164,7 +195,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.sldm,
+            render: () => data.taxRateCode,
           },
         ],
         [
@@ -176,7 +207,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.qysj,
+            render: () => data.effectiveTo,
           },
           {
             type: 'label',
@@ -186,66 +217,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.sxsj,
-          },
-        ],
-      ]
-    },
-    systemSettings(data) {
-      return [
-        [
-          {
-            type: 'label',
-            label: '状态',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.zt,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '创建时间',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.cjsj,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '创建人',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.cjr,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '修改时间',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.xgsj,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '修改人',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.xgr,
+            render: () => data.effectiveFrom,
           },
         ],
       ]
@@ -254,19 +226,19 @@ export default {
     getTreeList() {
       this.treeList = [
         {
-          key: '1',
+          id: '1',
           label: '税率',
           children: [
             {
-              key: '1-1',
+              id: '1-1',
               label: '税率1',
             },
             {
-              key: '1-2',
+              id: '1-2',
               label: '税率2',
             },
             {
-              key: '1-3',
+              id: '1-3',
               label: '税率3',
             },
           ],
@@ -280,12 +252,12 @@ export default {
     getList() {
       this.list = [
         {
-          key: '1-1',
+          id: '1-1',
           label: '税率1',
-          slmc: '税率1',
-          sldm: 'SDSADSAFASF',
-          qysj: '2019/9/1',
-          sxsj: '2025/4/6',
+          taxRateName: '税率1',
+          taxRateCode: 'SDSADSAFASF',
+          effectiveTo: '2019/9/1',
+          effectiveFrom: '2025/4/6',
         },
       ]
     },
@@ -310,38 +282,27 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data.key
+      this.currentKey = data[this.rowKey]
       // TODO 点击设置右侧显示参数
       this.detail = {
-        key: '1-1',
+        id: '1-1',
         label: '税率1',
-        slmc: '税率1',
-        sldm: 'SDSADSAFASF',
-        qysj: '2019/9/1',
-        sxsj: '2025/4/6',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
+        taxRateName: '税率1',
+        taxRateCode: 'SDSADSAFASF',
+        effectiveTo: '2019/9/1',
+        effectiveFrom: '2025/4/6',
+      }
+      this.systemData = {
+        status: '审批完成',
+        createTime: '2019/02/02 18:10',
+        createPerson: '张三',
+        modifyTime: '2019/02/02 18:10',
+        modifyPerson: '张三',
       }
     },
     onSelect(row) {
-      this.currentKey = row.key
-      const key = this.$refs.treeNode.setCurrentKey(row.key)
-      this.detail = {
-        key: '1-1',
-        label: '税率1',
-        slmc: '税率1',
-        sldm: 'SDSADSAFASF',
-        qysj: '2019/9/1',
-        sxsj: '2025/4/6',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
-      }
+      this.$refs.treeNode.setCurrentKey(row[this.rowKey])
+      this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
   },

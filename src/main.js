@@ -21,12 +21,14 @@ import permission from './components/Permission'
 import './assets/styles/element-variables.scss'
 // global css
 import './assets/styles/index.scss'
+// 过滤
+import * as filters from './utils/filters'
 
 import echarts from 'echarts'
 Vue.prototype.$echarts = echarts
 
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 
 // 代码高亮
 import VueHighlightJS from 'vue-highlightjs'
@@ -47,6 +49,10 @@ Vue.use(permission)
 Vue.use(dict)
 Vue.use(Element, {
   size: Cookies.get('size') || 'small' // set element-ui default size
+})
+// 注册全局过滤
+Object.keys(filters).forEach(key => {
+  Vue.filter(key, filters[key])
 })
 
 Vue.config.productionTip = false

@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -14,7 +20,7 @@
             :props="treeProps"
             :default-expand-all="true"
             @node-click="onTreeNodeClick"
-            node-key="key"
+            :node-key="rowKey"
           ></el-tree>
         </el-card>
       </el-col>
@@ -26,24 +32,33 @@
             <grid-form :settings="baseSettings(this.detail)"></grid-form>
             <block-title title="银行信息" />
             <el-table :data="customerBankList" border>
-              <el-table-column prop="sdzzh" label="是否主账户" align="center">
+              <!-- <el-table-column prop="isPrimaryAccount" label="是否主账户" align="center">
                 <template slot-scope="scope">
-                  <el-checkbox disabled :value="!!scope.row.sfzzh"></el-checkbox>
+                  <el-checkbox disabled :value="!!scope.row.isPrimaryAccount"></el-checkbox>
+                </template>
+              </el-table-column> -->
+              <el-table-column prop="name" label="银行"></el-table-column>
+              <el-table-column
+                prop="branchBankName"
+                label="分行"
+              ></el-table-column>
+              <el-table-column
+                prop="bankAccount"
+                label="银行账户"
+              ></el-table-column>
+              <el-table-column
+                prop="relevanceBankNumber"
+                label="联行号"
+              ></el-table-column>
+              <el-table-column prop="isPrimaryAccount" label="账户是否主要">
+                <template slot-scope="scope">
+                  {{ scope.row.isPrimaryAccount | judgeFilter }}
                 </template>
               </el-table-column>
-              <el-table-column prop="yh" label="银行"></el-table-column>
-              <el-table-column prop="fh" label="分行"></el-table-column>
-              <el-table-column prop="yhzh" label="银行账户"></el-table-column>
-              <el-table-column prop="lhh" label="联行号"></el-table-column>
-              <el-table-column prop="zhsfzy" label="账户是否主要"></el-table-column>
             </el-table>
           </el-tab-pane>
           <el-tab-pane name="xtxx" label="系统信息">
-            <el-row>
-              <el-col :md="12" :sm="24">
-                <grid-form :settings="systemSettings(this.detail)"></grid-form>
-              </el-col>
-            </el-row>
+            <system-info :data="systemData" />
           </el-tab-pane>
         </el-tabs>
       </el-col>
@@ -59,7 +74,9 @@
           :showExpand="false"
         >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -71,13 +88,35 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column align="center" label="供应商名称" prop="gysmc" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="供应商类型" prop="gyslx" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="供应商类别" prop="gyslb" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="供应商代码" prop="gysdm" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="供应商名称"
+            prop="name"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="供应商类型"
+            prop="type"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="供应商类别"
+            prop="category"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="供应商代码"
+            prop="code"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -99,6 +138,8 @@ import ExpandFilter from '@/components/ExpandFilter'
 import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
+import SystemInfo from '@/components/SystemInfo'
+import { judgeFilter } from '@/utils/filters'
 
 export default {
   name: 'supplier',
@@ -107,9 +148,11 @@ export default {
     GridForm,
     BlockTitle,
     Pagination,
+    SystemInfo,
   },
   data() {
     return {
+      rowKey: 'id',
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
@@ -123,32 +166,34 @@ export default {
       queryDialogVisible: false,
       fields: [
         {
-          field: 'gysmc',
+          field: 'name',
           alwaysShow: true,
           label: '供应商名称',
           render: (data) => (
-            <el-input placeholder="供应商名称" vModel={data['gysmc']} />
+            <el-input placeholder="供应商名称" vModel={data['name']} />
           ),
         },
         {
-          field: 'gyslx',
+          field: 'type',
           alwaysShow: true,
           label: '供应商类型',
           render: (data) => (
-            <el-input placeholder="供应商类型" vModel={data['gyslx']} />
+            <el-input placeholder="供应商类型" vModel={data['type']} />
           ),
         },
         {
-          field: 'gyslb',
+          field: 'category',
           label: '供应商类别',
           alwaysShow: true,
           render: (data) => (
-            <el-input placeholder="供应商类别" vModel={data['gyslb']} />
+            <el-input placeholder="供应商类别" vModel={data['category']} />
           ),
         },
       ],
       // 基础信息
       detail: {},
+      // 系统信息
+      systemData: {},
       treeProps: {
         children: 'children',
         label: 'label',
@@ -176,7 +221,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.gysmc,
+            render: () => data.name,
           },
           {
             type: 'label',
@@ -186,7 +231,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.gysdm,
+            render: () => data.code,
           },
         ],
         [
@@ -198,7 +243,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.gyszj,
+            render: () => data.id,
           },
           {
             type: 'label',
@@ -208,7 +253,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.gysbs,
+            render: () => data.logo,
           },
         ],
         [
@@ -220,7 +265,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.gyslb,
+            render: () => data.category,
           },
           {
             type: 'label',
@@ -230,7 +275,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.gyslx,
+            render: () => data.type,
           },
         ],
         [
@@ -242,7 +287,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.sfglf,
+            render: () => judgeFilter(data.isRelevance),
           },
           {
             type: 'label',
@@ -252,7 +297,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.tyshxydm,
+            render: () => data.socialCreditCode,
           },
         ],
         [
@@ -264,7 +309,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.gj,
+            render: () => data.country,
           },
           {
             type: 'label',
@@ -274,7 +319,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.sheng,
+            render: () => data.province,
           },
         ],
         [
@@ -286,7 +331,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.shi,
+            render: () => data.city,
           },
           {
             type: 'label',
@@ -296,7 +341,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.sfjy,
+            render: () => judgeFilter(data.isDisabled),
           },
         ],
         [
@@ -308,7 +353,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.qyrq,
+            render: () => data.enableTime,
           },
           {
             type: 'label',
@@ -318,66 +363,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.sxrq,
-          },
-        ],
-      ]
-    },
-    systemSettings(data) {
-      return [
-        [
-          {
-            type: 'label',
-            label: '状态',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.zt,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '创建时间',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.cjsj,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '创建人',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.cjr,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '修改时间',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.xgsj,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '修改人',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.xgr,
+            render: () => data.disableTime,
           },
         ],
       ]
@@ -386,19 +372,19 @@ export default {
     getTreeList() {
       this.treeList = [
         {
-          key: '1',
+          id: '1',
           label: '供应商',
           children: [
             {
-              key: '1-1',
+              id: '1-1',
               label: '供应商1',
             },
             {
-              key: '1-2',
+              id: '1-2',
               label: '供应商2',
             },
             {
-              key: '1-3',
+              id: '1-3',
               label: '供应商3',
             },
           ],
@@ -412,22 +398,21 @@ export default {
     getList() {
       this.list = [
         {
-          key: '1-1',
+          id: '1-1',
           label: '供应商1',
-          gysmc: '无锡广大汽车租赁有限公司',
-          gysdm: 'GYS000000002',
-          gyszj: '0',
-          gysbs: '201901121012-F5D3-1C6',
-          gyslb: '监理',
-          gyslx: '工程类',
-          sfglf: '是',
-          tyshxydm: '9121123213213123123',
-          gj: 'CN',
-          sheng: '江苏',
-          shi: '无锡',
-          sfjy: '否',
-          qyrq: '2020-02-12',
-          sxrq: '2025-02-12',
+          name: '无锡广大汽车租赁有限公司',
+          code: 'GYS000000002',
+          logo: '201901121012-F5D3-1C6',
+          category: '监理',
+          type: '工程类',
+          isRelevance: 1,
+          socialCreditCode: '9121123213213123123',
+          country: 'CN',
+          province: '江苏',
+          city: '无锡',
+          isDisabled: 0,
+          enableTime: '2020-02-12',
+          disableTime: '2025-02-12',
           zt: '审批完成',
           cjsj: '2019/02/02 18:10',
           cjr: '张三',
@@ -457,76 +442,45 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data.key
+      this.currentKey = data[this.rowKey]
+      this.$refs.treeNode.setCurrentKey(data[this.rowKey])
       // TODO 点击设置右侧显示参数
       this.detail = {
-        gysmc: '无锡广大汽车租赁有限公司',
-        gysdm: 'GYS000000002',
-        gyszj: '0',
-        gysbs: '201901121012-F5D3-1C6',
-        gyslb: '监理',
-        gyslx: '工程类',
-        sfglf: '是',
-        tyshxydm: '9121123213213123123',
-        gj: 'CN',
-        sheng: '江苏',
-        shi: '无锡',
-        sfjy: '否',
-        qyrq: '2020-02-12',
-        sxrq: '2025-02-12',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
+        id: '1-1',
+        name: '无锡广大汽车租赁有限公司',
+        code: 'GYS000000002',
+        logo: '201901121012-F5D3-1C6',
+        category: '监理',
+        type: '工程类',
+        isRelevance: 1,
+        socialCreditCode: '9121123213213123123',
+        country: 'CN',
+        province: '江苏',
+        city: '无锡',
+        isDisabled: 0,
+        enableTime: '2020-02-12',
+        disableTime: '2025-02-12',
+      }
+      this.systemData = {
+        status: '审批完成',
+        createTime: '2019/02/02 18:10',
+        createPerson: '张三',
+        modifyTime: '2019/02/02 18:10',
+        modifyPerson: '张三',
       }
       this.customerBankList = [
         {
           id: '1',
-          sfzzh: 1,
-          yh: '交通银行',
-          fh: '交通银行青山支行',
-          yhzh: '6058182298765512',
-          lhh: '103120230',
-          zhsfzy: '是',
+          isPrimaryAccount: 1,
+          name: '交通银行',
+          branchBankName: '交通银行青山支行',
+          bankAccount: '6058182298765512',
+          relevanceBankNumber: '103120230',
         },
       ]
     },
     onSelect(row) {
-      this.currentKey = row.key
-      const key = this.$refs.treeNode.setCurrentKey(row.key)
-      this.detail = {
-        gysmc: '无锡广大汽车租赁有限公司',
-        gysdm: 'GYS000000002',
-        gyszj: '0',
-        gysbs: '201901121012-F5D3-1C6',
-        gyslb: '监理',
-        gyslx: '工程类',
-        sfglf: '是',
-        tyshxydm: '9121123213213123123',
-        gj: 'CN',
-        sheng: '江苏',
-        shi: '无锡',
-        sfjy: '否',
-        qyrq: '2020-02-12',
-        sxrq: '2025-02-12',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
-      }
-      this.customerBankList = [
-        {
-          id: '1',
-          sfzzh: 1,
-          yh: '交通银行',
-          fh: '交通银行青山支行',
-          yhzh: '6058182298765512',
-          lhh: '103120230',
-          zhsfzy: '是',
-        },
-      ]
+      this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
   },

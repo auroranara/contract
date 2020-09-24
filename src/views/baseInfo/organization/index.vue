@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -14,7 +20,7 @@
             :props="treeProps"
             :default-expand-all="true"
             @node-click="onTreeNodeClick"
-            node-key="key"
+            :node-key="rowKey"
           ></el-tree>
         </el-card>
       </el-col>
@@ -46,7 +52,9 @@
           :showExpand="false"
         >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -58,11 +66,36 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column align="center" label="组织名称" prop="zzmc" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="组织代码" prop="zzdm" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="公司或组织" prop="gshzz" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="旧机构编码" prop="jjgbm" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="机构级别" prop="jgjb" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="组织名称"
+            prop="zzmc"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="组织代码"
+            prop="zzdm"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="公司或组织"
+            prop="gshzz"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="旧机构编码"
+            prop="jjgbm"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="机构级别"
+            prop="jgjb"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column
             align="center"
             label="上级机构编码"
@@ -71,7 +104,9 @@
           ></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -104,6 +139,7 @@ export default {
   },
   data() {
     return {
+      rowKey: 'id',
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
@@ -275,19 +311,19 @@ export default {
     getTreeList() {
       this.treeList = [
         {
-          key: '1',
+          id: '1',
           label: '组织',
           children: [
             {
-              key: '1-1',
+              id: '1-1',
               label: '组织1',
             },
             {
-              key: '1-2',
+              id: '1-2',
               label: '组织2',
             },
             {
-              key: '1-3',
+              id: '1-3',
               label: '组织3',
             },
           ],
@@ -301,7 +337,7 @@ export default {
     getList() {
       this.list = [
         {
-          key: '1-1',
+          id: '1-1',
           label: '组织1',
           zzmc: '无锡轨道交通服务部',
           zzdm: '1',
@@ -333,11 +369,10 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data.key
+      this.currentKey = data[this.rowKey]
       // TODO 点击设置右侧显示参数
       this.detail = {
-        key: '1-1',
-        label: '组织1',
+        id: '1-1',
         zzmc: '无锡轨道交通服务部',
         zzdm: '1',
         gshzz: '公司',
@@ -352,23 +387,8 @@ export default {
       }
     },
     onSelect(row) {
-      this.currentKey = row.key
-      const key = this.$refs.treeNode.setCurrentKey(row.key)
-      this.detail = {
-        key: '1-1',
-        label: '组织1',
-        zzmc: '无锡轨道交通服务部',
-        zzdm: '1',
-        gshzz: '公司',
-        jjgbm: '1005',
-        jgjb: '2',
-        sjjgbm: '01',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
-      }
+      const key = this.$refs.treeNode.setCurrentKey(row[this.rowKey])
+      this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
   },

@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
       <el-button plain type="primary" @click="onClickAdd">新增</el-button>
       <el-button plain type="primary" @click="onSave">保存</el-button>
       <el-button plain type="primary">提交</el-button>
@@ -20,7 +26,7 @@
             :props="treeProps"
             :default-expand-all="true"
             @node-click="onTreeNodeClick"
-            node-key="key"
+            :node-key="rowKey"
           ></el-tree>
         </el-card>
       </el-col>
@@ -40,22 +46,39 @@
 
             <!-- 参数列表 -->
             <block-title title="参数列表" />
-            <el-button v-if="!isDetail" size="small" type="primary" @click="handleAddParams">新增</el-button>
+            <el-button
+              v-if="!isDetail"
+              size="small"
+              type="primary"
+              @click="handleAddParams"
+              >新增</el-button
+            >
             <el-button
               v-if="!isDetail"
               size="small"
               type="danger"
-              :disabled="!(selectedParams&&selectedParams.length)"
+              :disabled="!(selectedParams && selectedParams.length)"
               @click="handleDeleteParams"
-            >删除</el-button>
+              >删除</el-button
+            >
             <el-table
-              style="margin-top:10px"
+              style="margin-top: 10px"
               :data="paramsList"
               border
               @selection-change="handleParamsChange"
             >
-              <el-table-column v-if="!isDetail" type="selection" width="55" align="center"></el-table-column>
-              <el-table-column align="center" label="序号" width="80" type="index"></el-table-column>
+              <el-table-column
+                v-if="!isDetail"
+                type="selection"
+                width="55"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                align="center"
+                label="序号"
+                width="80"
+                type="index"
+              ></el-table-column>
               <el-table-column
                 prop="listName"
                 label="名称"
@@ -64,8 +87,11 @@
                 label-class-name="required-header"
               >
                 <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="paramsList[scope.$index].listName"></el-input>
-                  <span v-else>{{scope.row.listName}}</span>
+                  <el-input
+                    v-if="!isDetail"
+                    v-model="paramsList[scope.$index].listName"
+                  ></el-input>
+                  <span v-else>{{ scope.row.listName }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -77,8 +103,11 @@
                 label-class-name="required-header"
               >
                 <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="paramsList[scope.$index].listCode"></el-input>
-                  <span v-else>{{scope.row.listCode}}</span>
+                  <el-input
+                    v-if="!isDetail"
+                    v-model="paramsList[scope.$index].listCode"
+                  ></el-input>
+                  <span v-else>{{ scope.row.listCode }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -90,15 +119,18 @@
                 label-class-name="required-header"
               >
                 <template slot-scope="scope">
-                  <el-select v-if="!isDetail" v-model="paramsList[scope.$index].listStatus">
+                  <el-select
+                    v-if="!isDetail"
+                    v-model="paramsList[scope.$index].listStatus"
+                  >
                     <el-option
-                      v-for="({value,label}) in valueSetStatus"
+                      v-for="{ value, label } in valueSetStatus"
                       :key="value"
                       :value="value"
                       :label="label"
                     ></el-option>
                   </el-select>
-                  <span v-else>{{scope.row.listStatus}}</span>
+                  <span v-else>{{ scope.row.listStatus }}</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -121,7 +153,9 @@
           :showExpand="false"
         >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -133,12 +167,29 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column align="center" label="值集名称" prop="name" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="值集编码" prop="code" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="状态" prop="status" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="值集名称"
+            prop="name"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="值集编码"
+            prop="code"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="状态"
+            prop="status"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -162,6 +213,7 @@ import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import { mapState } from 'vuex'
+import { fetchList } from '@/api/baseInfo/valueSet'
 
 export default {
   name: 'valueSet',
@@ -174,6 +226,7 @@ export default {
   },
   data() {
     return {
+      rowKey: 'id',
       basePath: '/baseInfo/valueSet',
       // 当前tab的key
       tabKey: 'jcxx',
@@ -242,6 +295,8 @@ export default {
         { value: 1, label: '已启用' },
         { value: 0, label: '已停用' },
       ],
+      // 校验提示实例
+      notify: null,
     }
   },
   computed: {
@@ -402,22 +457,24 @@ export default {
       ]
     },
     // 获取左侧树
-    getTreeList() {
+    async getTreeList() {
+      const res = await fetchList()
+      console.log('res', res)
       this.treeList = [
         {
-          key: '1',
+          id: '1',
           label: '值集',
           children: [
             {
-              key: '1-1',
+              id: '1-1',
               label: '值集1',
             },
             {
-              key: '1-2',
+              id: '1-2',
               label: '值集2',
             },
             {
-              key: '1-3',
+              id: '1-3',
               label: '值集3',
             },
           ],
@@ -460,12 +517,12 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data.key
-      this.$refs.treeNode.setCurrentKey(data.key)
+      this.currentKey = data[this.rowKey]
+      this.$refs.treeNode.setCurrentKey(data[this.rowKey])
       this.$router.replace(`${this.basePath}/list`)
       // TODO 点击设置右侧显示参数
       this.detail = {
-        key: '1-1',
+        id: '1-1',
         name: '招标方式招标方式招标方式招标方式招标方式招标方式',
         code: '0202',
         enableTime: new Date(),
@@ -505,11 +562,14 @@ export default {
     },
     onSave() {
       this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
-        if (err) {
+        this.notify && this.notify.close()
+        if (valid) {
+          console.log('form', this.detail)
+        } else {
           const msg = Object.entries(err)
             .map((item) => item[1].map((val) => val.message).join('，'))
             .join('\n')
-          this.$notify.error({
+          this.notify = this.$notify.error({
             title: '校验错误信息',
             message: this.$createElement(
               'div',
@@ -518,8 +578,6 @@ export default {
             ),
             duration: 20000,
           })
-        } else {
-          console.log('form', this.detail)
         }
       })
     },

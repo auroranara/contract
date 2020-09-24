@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -14,7 +20,7 @@
             :props="treeProps"
             :default-expand-all="true"
             @node-click="onTreeNodeClick"
-            node-key="key"
+            :node-key="rowKey"
           ></el-tree>
         </el-card>
       </el-col>
@@ -26,11 +32,7 @@
             <grid-form :settings="baseSettings(this.detail)"></grid-form>
           </el-tab-pane>
           <el-tab-pane name="xtxx" label="系统信息">
-            <el-row>
-              <el-col :md="12" :sm="24">
-                <grid-form :settings="systemSettings(this.detail)"></grid-form>
-              </el-col>
-            </el-row>
+            <system-info :data="systemData" />
           </el-tab-pane>
         </el-tabs>
       </el-col>
@@ -46,7 +48,9 @@
           :showExpand="false"
         >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -58,12 +62,29 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column align="center" label="单位名称" prop="dwmc" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="单位代码" prop="dwdm" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="转换比例" prop="zhbl" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="单位名称"
+            prop="dwmc"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="单位代码"
+            prop="unitCode"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="转换比例"
+            prop="convertRelationship"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -85,6 +106,7 @@ import ExpandFilter from '@/components/ExpandFilter'
 import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
+import SystemInfo from '@/components/SystemInfo'
 
 export default {
   name: 'organization',
@@ -93,9 +115,11 @@ export default {
     GridForm,
     BlockTitle,
     Pagination,
+    SystemInfo,
   },
   data() {
     return {
+      rowKey: 'id',
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
@@ -119,6 +143,8 @@ export default {
       ],
       // 基础信息
       detail: {},
+      // 系统信息
+      systemData: {},
       treeProps: {
         children: 'children',
         label: 'label',
@@ -155,7 +181,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.dwdm,
+            render: () => data.unitCode,
           },
         ],
         [
@@ -167,7 +193,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.zhbl,
+            render: () => data.convertRelationship,
           },
           {
             type: 'empty',
@@ -180,82 +206,23 @@ export default {
         ],
       ]
     },
-    systemSettings(data) {
-      return [
-        [
-          {
-            type: 'label',
-            label: '状态',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.zt,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '创建时间',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.cjsj,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '创建人',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.cjr,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '修改时间',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.xgsj,
-          },
-        ],
-        [
-          {
-            type: 'label',
-            label: '修改人',
-            showBg: true,
-          },
-          {
-            type: 'handler',
-            render: () => data.xgr,
-          },
-        ],
-      ]
-    },
     // 获取左侧树
     getTreeList() {
       this.treeList = [
         {
-          key: '1',
+          id: '1',
           label: '单位',
           children: [
             {
-              key: '1-1',
+              id: '1-1',
               label: '单位1',
             },
             {
-              key: '1-2',
+              id: '1-2',
               label: '单位2',
             },
             {
-              key: '1-3',
+              id: '1-3',
               label: '单位3',
             },
           ],
@@ -269,11 +236,11 @@ export default {
     getList() {
       this.list = [
         {
-          key: '1-1',
+          id: '1-1',
           label: '单位名称1',
           dwmc: '单位名称1',
-          dwdm: '001',
-          zhbl: '50%',
+          unitCode: '001',
+          convertRelationship: '50%',
         },
       ]
     },
@@ -298,36 +265,25 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data.key
+      this.currentKey = data[this.rowKey]
       // TODO 点击设置右侧显示参数
       this.detail = {
-        key: '1-1',
-        label: '单位名称1',
+        id: '1-1',
         dwmc: '单位名称1',
-        dwdm: '001',
-        zhbl: '50%',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
+        unitCode: '001',
+        convertRelationship: '50%',
+      }
+      this.systemData = {
+        status: '审批完成',
+        createTime: '2019/02/02 18:10',
+        createPerson: '张三',
+        modifyTime: '2019/02/02 18:10',
+        modifyPerson: '张三',
       }
     },
     onSelect(row) {
-      this.currentKey = row.key
-      const key = this.$refs.treeNode.setCurrentKey(row.key)
-      this.detail = {
-        key: '1-1',
-        label: '单位名称1',
-        dwmc: '单位名称1',
-        dwdm: '001',
-        zhbl: '50%',
-        zt: '审批完成',
-        cjsj: '2019/02/02 18:10',
-        cjr: '张三',
-        xgsj: '2019/02/02 18:10',
-        xgr: '张三',
-      }
+      this.$refs.treeNode.setCurrentKey(row[this.rowKey])
+      this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
   },

@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
       <el-button plain type="primary" @click="onClickAdd">新增</el-button>
       <el-button plain type="primary" @click="onSave">保存</el-button>
       <el-button plain type="primary">提交</el-button>
@@ -20,7 +26,7 @@
             :props="treeProps"
             :default-expand-all="true"
             @node-click="onTreeNodeClick"
-            node-key="key"
+            :node-key="rowKey"
           ></el-tree>
         </el-card>
       </el-col>
@@ -36,24 +42,42 @@
               :rules="rules"
             ></grid-form>
             <block-title title="银行信息" />
-            <el-button v-if="!isDetail" size="small" type="primary" @click="addBank">新增</el-button>
+            <el-button
+              v-if="!isDetail"
+              size="small"
+              type="primary"
+              @click="addBank"
+              >新增</el-button
+            >
             <el-button
               v-if="!isDetail"
               size="small"
               type="danger"
-              :disabled="!(selectedBank&&selectedBank.length)"
+              :disabled="!(selectedBank && selectedBank.length)"
               @click="deleteBank"
-            >删除</el-button>
+              >删除</el-button
+            >
             <el-table
-              style="margin-top:10px"
+              style="margin-top: 10px"
               :data="customerBankList"
               border
               @selection-change="handleBankChange"
             >
-              <el-table-column type="selection" width="55" align="center"></el-table-column>
-              <el-table-column width="100" prop="isPrimaryAccount" label="是否主账户" align="center">
+              <el-table-column
+                type="selection"
+                width="55"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                width="100"
+                prop="isPrimaryAccount"
+                label="是否主账户"
+                align="center"
+              >
                 <template slot-scope="scope">
-                  <el-checkbox :value="!!scope.row.isPrimaryAccount"></el-checkbox>
+                  <el-checkbox
+                    :value="!!scope.row.isPrimaryAccount"
+                  ></el-checkbox>
                 </template>
               </el-table-column>
               <el-table-column
@@ -68,7 +92,7 @@
                     v-if="!isDetail"
                     v-model="customerBankList[scope.$index].headOfficeName"
                   ></el-input>
-                  <span v-else>{{scope.row.headOfficeName}}</span>
+                  <span v-else>{{ scope.row.headOfficeName }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -79,8 +103,11 @@
                 align="center"
               >
                 <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].openBank"></el-input>
-                  <span v-else>{{scope.row.openBank}}</span>
+                  <el-input
+                    v-if="!isDetail"
+                    v-model="customerBankList[scope.$index].openBank"
+                  ></el-input>
+                  <span v-else>{{ scope.row.openBank }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -91,8 +118,11 @@
                 align="center"
               >
                 <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].province"></el-input>
-                  <span v-else>{{scope.row.province}}</span>
+                  <el-input
+                    v-if="!isDetail"
+                    v-model="customerBankList[scope.$index].province"
+                  ></el-input>
+                  <span v-else>{{ scope.row.province }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -103,8 +133,11 @@
                 align="center"
               >
                 <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].city"></el-input>
-                  <span v-else>{{scope.row.city}}</span>
+                  <el-input
+                    v-if="!isDetail"
+                    v-model="customerBankList[scope.$index].city"
+                  ></el-input>
+                  <span v-else>{{ scope.row.city }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -119,7 +152,7 @@
                     v-if="!isDetail"
                     v-model="customerBankList[scope.$index].branchOfficeName"
                   ></el-input>
-                  <span v-else>{{scope.row.branchOfficeName}}</span>
+                  <span v-else>{{ scope.row.branchOfficeName }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -134,7 +167,7 @@
                     v-if="!isDetail"
                     v-model="customerBankList[scope.$index].correspondentNo"
                   ></el-input>
-                  <span v-else>{{scope.row.correspondentNo}}</span>
+                  <span v-else>{{ scope.row.correspondentNo }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -145,8 +178,11 @@
                 align="center"
               >
                 <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].accountHolder"></el-input>
-                  <span v-else>{{scope.row.accountHolder}}</span>
+                  <el-input
+                    v-if="!isDetail"
+                    v-model="customerBankList[scope.$index].accountHolder"
+                  ></el-input>
+                  <span v-else>{{ scope.row.accountHolder }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -157,8 +193,11 @@
                 align="center"
               >
                 <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].esignature"></el-input>
-                  <span v-else>{{scope.row.esignature}}</span>
+                  <el-input
+                    v-if="!isDetail"
+                    v-model="customerBankList[scope.$index].esignature"
+                  ></el-input>
+                  <span v-else>{{ scope.row.esignature }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -173,7 +212,7 @@
                     v-if="!isDetail"
                     v-model="customerBankList[scope.$index].isReceiveTicket"
                   ></el-input>
-                  <span v-else>{{scope.row.isReceiveTicket}}</span>
+                  <span v-else>{{ scope.row.isReceiveTicket }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -184,8 +223,11 @@
                 align="center"
               >
                 <template slot-scope="scope">
-                  <el-input v-if="!isDetail" v-model="customerBankList[scope.$index].remarks"></el-input>
-                  <span v-else>{{scope.row.remarks}}</span>
+                  <el-input
+                    v-if="!isDetail"
+                    v-model="customerBankList[scope.$index].remarks"
+                  ></el-input>
+                  <span v-else>{{ scope.row.remarks }}</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -207,7 +249,9 @@
           :showExpand="false"
         >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -225,10 +269,17 @@
             prop="customerName"
             :show-overflow-tooltip="true"
           ></el-table-column>
-          <el-table-column align="center" label="状态" prop="status" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="状态"
+            prop="status"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -266,7 +317,7 @@ export default {
     return {
       basePath: '/baseInfo/client',
       // 列表数据的键值
-      rowKey: 'key',
+      rowKey: 'id',
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
@@ -324,6 +375,8 @@ export default {
           ),
         },
       ],
+      // 校验提示实例
+      notify: null,
     }
   },
   computed: {
@@ -606,19 +659,19 @@ export default {
     getTreeList() {
       this.treeList = [
         {
-          key: '1',
+          id: '1',
           label: '客户',
           children: [
             {
-              key: '1-1',
+              id: '1-1',
               label: '客户1',
             },
             {
-              key: '1-2',
+              id: '1-2',
               label: '客户2',
             },
             {
-              key: '1-3',
+              id: '1-3',
               label: '客户3',
             },
           ],
@@ -665,7 +718,7 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data.key
+      this.currentKey = data[this.rowKey]
       this.$router.replace(`${this.basePath}/list`)
       // TODO 点击设置右侧显示参数
       this.detail = {
@@ -703,14 +756,17 @@ export default {
     },
     // 查询中选中信息
     onSelect(row) {
-      this.$refs.treeNode.setCurrentKey(row.key)
+      this.$refs.treeNode.setCurrentKey(row[this.rowKey])
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
     onSave() {
       console.log('customerBankList', this.customerBankList)
       this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
-        if (err) {
+        this.notify && this.notify.close()
+        if (valid) {
+          console.log('form', this.detail)
+        } else {
           const msg = Object.entries(err)
             .map((item) => item[1].map((val) => val.message).join('，'))
             .join('\n')
@@ -723,8 +779,6 @@ export default {
             ),
             duration: 20000,
           })
-        } else {
-          console.log('form', this.detail)
         }
       })
     },
@@ -762,3 +816,8 @@ export default {
   },
 }
 </script>
+<style lang="scss" scoped>
+.dialog-content {
+  min-height: 350px;
+}
+</style>

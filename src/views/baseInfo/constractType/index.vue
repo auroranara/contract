@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
       <el-button plain type="primary" @click="onClickAdd">新增</el-button>
       <el-button plain type="primary" @click="onSave">保存</el-button>
       <el-button plain type="primary">提交</el-button>
@@ -18,7 +24,6 @@
             :highlight-current="true"
             :data="treeList"
             :props="treeProps"
-            :default-expand-all="true"
             @node-click="onTreeNodeClick"
             :node-key="rowKey"
           ></el-tree>
@@ -48,9 +53,16 @@
     <!-- 查询弹窗 -->
     <el-dialog width="70%" title="查询" :visible.sync="queryDialogVisible">
       <div class="dialog-content">
-        <expand-Filter :fields="fields" :model="listQuery" type="inline" :showLabel="false">
+        <expand-Filter
+          :fields="fields"
+          :model="listQuery"
+          type="inline"
+          :showLabel="false"
+        >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -62,22 +74,59 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column width="80" align="center" label="序号" type="index"></el-table-column>
-          <el-table-column align="center" label="分类名称" prop="flmc" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="上级节点" prop="sjjd" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="收支类型" prop="szlx" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="清单类型" prop="qdlx" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="会计属性" prop="kjsx" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            width="80"
+            align="center"
+            label="序号"
+            type="index"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="分类名称"
+            prop="flmc"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="上级节点"
+            prop="sjjd"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="收支类型"
+            prop="szlx"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="清单类型"
+            prop="qdlx"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="会计属性"
+            prop="kjsx"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column
             align="center"
             label="期中支付类型"
             prop="qzzflx"
             :show-overflow-tooltip="true"
           ></el-table-column>
-          <el-table-column align="center" label="合同编码" prop="htbm" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="合同编码"
+            prop="htbm"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -100,6 +149,7 @@ import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
+import TreeSelect from '@/components/TreeSelect'
 import { mapState } from 'vuex'
 
 export default {
@@ -110,6 +160,7 @@ export default {
     BlockTitle,
     Pagination,
     SystemInfo,
+    TreeSelect,
   },
   data() {
     return {
@@ -141,7 +192,13 @@ export default {
           alwaysShow: true,
           label: '上级节点',
           render: (data) => (
-            <el-input placeholder="上级节点" vModel={data['sjjd']} />
+            <tree-select
+              style="width:100%"
+              vModel={data['sjjd']}
+              props={this.treeProps}
+              options={this.treeList}
+              placeholder=""
+            />
           ),
         },
         {
@@ -266,6 +323,8 @@ export default {
         { value: '2', label: '建设' },
         { value: '3', label: '其他' },
       ],
+      // 校验提示实例
+      notify: null,
     }
   },
   computed: {
@@ -365,7 +424,15 @@ export default {
             field: 'sjjd',
             disabled: this.isDetail,
             render: () => (
-              <el-input readonly={this.isDetail} vModel={data['sjjd']} />
+              <tree-select
+                style="width:100%"
+                disabled={this.isDetail}
+                vModel={data['sjjd']}
+                props={this.treeProps}
+                options={this.treeList}
+                placeholder=""
+                showFilter
+              />
             ),
           },
           {
@@ -573,18 +640,36 @@ export default {
       this.treeList = [
         {
           id: '1',
-          label: '分类',
+          label: '分类1',
           children: [
             {
               id: '1-1',
-              label: '分类1',
+              label: '分类1-1',
             },
             {
               id: '1-2',
-              label: '分类2',
+              label: '分类1-2',
             },
             {
               id: '1-3',
+              label: '分类1-3',
+            },
+          ],
+        },
+        {
+          id: '2',
+          label: '分类2',
+          children: [
+            {
+              id: '2-1',
+              label: '分类1',
+            },
+            {
+              id: '2-2',
+              label: '分类2',
+            },
+            {
+              id: '2-3',
               label: '分类3',
             },
           ],
@@ -593,7 +678,7 @@ export default {
     },
     // 初始化
     init() {
-      this.getTreeList()
+      setTimeout(this.getTreeList, 2000)
     },
     getList() {
       this.list = [
@@ -609,6 +694,7 @@ export default {
           kjsx: '1',
           qzzflx: '1',
           bz: '',
+          sjjd: '1-1',
         },
       ]
     },
@@ -649,6 +735,7 @@ export default {
         kjsx: '1',
         qzzflx: '1',
         bz: '',
+        sjjd: '1-1',
       }
       this.systemData = {
         status: '审批完成',
@@ -682,11 +769,14 @@ export default {
     },
     onSave() {
       this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
-        if (err) {
+        this.notify && this.notify.close()
+        if (valid) {
+          console.log('form', this.detail)
+        } else {
           const msg = Object.entries(err)
             .map((item) => item[1].map((val) => val.message).join('，'))
             .join('\n')
-          this.$notify.error({
+          this.notify = this.$notify.error({
             title: '校验错误信息',
             message: this.$createElement(
               'div',
@@ -695,8 +785,6 @@ export default {
             ),
             duration: 20000,
           })
-        } else {
-          console.log('form', this.detail)
         }
       })
     },

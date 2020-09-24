@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
       <el-button plain type="primary">审核</el-button>
     </div>
     <el-row :gutter="10">
@@ -15,7 +21,7 @@
             :props="treeProps"
             :default-expand-all="true"
             @node-click="onTreeNodeClick"
-            node-key="key"
+            :node-key="rowKey"
           ></el-tree>
         </el-card>
       </el-col>
@@ -31,11 +37,22 @@
               :rules="rules"
             ></grid-form>
             <block-title title="银行信息" />
-            <el-table style="margin-top:10px" :data="customerBankList" border>
-              <el-table-column type="selection" width="55" align="center"></el-table-column>
-              <el-table-column width="100" prop="isPrimaryAccount" label="是否主账户" align="center">
+            <el-table style="margin-top: 10px" :data="customerBankList" border>
+              <el-table-column
+                type="selection"
+                width="55"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                width="100"
+                prop="isPrimaryAccount"
+                label="是否主账户"
+                align="center"
+              >
                 <template slot-scope="scope">
-                  <el-checkbox :value="!!scope.row.isPrimaryAccount"></el-checkbox>
+                  <el-checkbox
+                    :value="!!scope.row.isPrimaryAccount"
+                  ></el-checkbox>
                 </template>
               </el-table-column>
               <el-table-column
@@ -60,7 +77,7 @@
                 align="center"
               >
                 <template slot-scope="scope">
-                  <span>{{scope.row.province}}</span>
+                  <span>{{ scope.row.province }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -71,7 +88,7 @@
                 align="center"
               >
                 <template slot-scope="scope">
-                  <span>{{scope.row.city}}</span>
+                  <span>{{ scope.row.city }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -110,7 +127,7 @@
                 :show-overflow-tooltip="true"
               >
                 <template slot-scope="scope">
-                  <span>{{scope.row.isReceiveTicket}}</span>
+                  <span>{{ scope.row.isReceiveTicket }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -139,7 +156,9 @@
           :showExpand="false"
         >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -157,10 +176,17 @@
             prop="customerName"
             :show-overflow-tooltip="true"
           ></el-table-column>
-          <el-table-column align="center" label="状态" prop="status" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="状态"
+            prop="status"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -198,7 +224,7 @@ export default {
     return {
       basePath: '/baseInfo/client',
       // 列表数据的键值
-      rowKey: 'key',
+      rowKey: 'id',
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
@@ -524,19 +550,19 @@ export default {
     getTreeList() {
       this.treeList = [
         {
-          key: '1',
+          id: '1',
           label: '客户',
           children: [
             {
-              key: '1-1',
+              id: '1-1',
               label: '客户1',
             },
             {
-              key: '1-2',
+              id: '1-2',
               label: '客户2',
             },
             {
-              key: '1-3',
+              id: '1-3',
               label: '客户3',
             },
           ],
@@ -583,7 +609,7 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data.key
+      this.currentKey = data[this.rowKey]
       // TODO 点击设置右侧显示参数
       this.detail = {
         customerName: '无锡普信土地资产评估测绘有限公司',
@@ -620,10 +646,15 @@ export default {
     },
     // 查询中选中信息
     onSelect(row) {
-      this.$refs.treeNode.setCurrentKey(row.key)
+      this.$refs.treeNode.setCurrentKey(row[this.rowKey])
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
   },
 }
 </script>
+<style lang="scss" scoped>
+.dialog-content {
+  min-height: 350px;
+}
+</style>

@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -34,9 +40,16 @@
 
     <el-dialog width="70%" title="查询" :visible.sync="queryDialogVisible">
       <div class="dialog-content">
-        <expand-Filter :fields="fields" :model="listQuery" type="inline" :showLabel="false">
+        <expand-Filter
+          :fields="fields"
+          :model="listQuery"
+          type="inline"
+          :showLabel="false"
+        >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -48,15 +61,47 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column align="center" label="序号" width="80" type="index"></el-table-column>
-          <el-table-column align="center" label="人员名称" prop="name" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="人员代码" prop="id" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="职位" prop="jobName" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="用户性质" prop="yhxz" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="角色" prop="js" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="序号"
+            width="80"
+            type="index"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="人员名称"
+            prop="name"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="人员代码"
+            prop="id"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="职位"
+            prop="jobName"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="用户性质"
+            prop="yhxz"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="角色"
+            prop="js"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -300,7 +345,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.dh,
+            render: () => data.phone,
           },
           {
             type: 'label',
@@ -351,7 +396,7 @@ export default {
           yhxz: '公司职员',
           ssbm: '主任室',
           js: 'ADMIN系统管理员',
-          dh: '13810504433',
+          phone: '13810504433',
           yx: '123@163.com',
         },
       ]
@@ -398,7 +443,7 @@ export default {
         js: 'ADMIN系统管理员',
         sfkykdsyhtxx: 1,
         syspbdkx: 1,
-        dh: '13810504433',
+        phone: '13810504433',
         yx: '123@163.com',
       }
       this.systemData = {
