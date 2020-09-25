@@ -161,7 +161,7 @@ export default {
     },
     // select下拉框显示，清空筛选，收起树
     onVisibleChange(visible) {
-      if (!visible) return
+      if (visible) return
       this.treeOptions = [...this.options]
       this.$nextTick(this.initHandle)
     },

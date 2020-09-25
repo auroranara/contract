@@ -20,6 +20,7 @@
       <el-col :span="6">
         <el-card>
           <el-tree
+            v-loading="treeLoading"
             ref="treeNode"
             :highlight-current="true"
             :data="treeList"
@@ -303,6 +304,7 @@ import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import { mapState } from 'vuex'
+import { fetchList } from '@/api/baseInfo/client'
 
 export default {
   name: 'client',
@@ -321,6 +323,7 @@ export default {
       // 当前tab的key
       tabKey: 'jcxx',
       listLoading: false,
+      treeLoading: false,
       // 查询query信息
       listQuery: {
         page: 1,
@@ -656,7 +659,11 @@ export default {
       ]
     },
     // 获取左侧树
-    getTreeList() {
+    async getTreeList() {
+      this.treeLoading = true
+      const res = await fetchList()
+      console.log('res', res)
+      this.treeLoading = false
       this.treeList = [
         {
           id: '1',
