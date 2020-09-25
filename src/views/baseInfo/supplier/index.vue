@@ -413,11 +413,6 @@ export default {
           isDisabled: 0,
           enableTime: '2020-02-12',
           disableTime: '2025-02-12',
-          zt: '审批完成',
-          cjsj: '2019/02/02 18:10',
-          cjr: '张三',
-          xgsj: '2019/02/02 18:10',
-          xgr: '张三',
         },
       ]
     },

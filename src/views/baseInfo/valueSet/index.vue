@@ -9,11 +9,19 @@
         >查询</el-button
       >
       <el-button plain type="primary" @click="onClickAdd">新增</el-button>
-      <el-button plain type="primary" @click="onSave">保存</el-button>
-      <el-button plain type="primary">提交</el-button>
-      <el-button plain type="primary" @click="onClickAdjust">调整</el-button>
-      <el-button plain type="primary">审核</el-button>
-      <el-button plain type="primary">删除</el-button>
+      <!-- <el-button plain type="primary" @click="onSave">保存</el-button> -->
+      <el-button :disabled="isDetail" plain type="primary" @click="onSubmit"
+        >提交</el-button
+      >
+      <el-button
+        :disabled="!isDetail"
+        plain
+        type="primary"
+        @click="onClickAdjust"
+        >调整</el-button
+      >
+      <!-- <el-button :disabled="!isDetail" plain type="primary">审核</el-button> -->
+      <el-button :disabled="!isDetail" plain type="primary">删除</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -124,7 +132,7 @@
                     v-model="paramsList[scope.$index].listStatus"
                   >
                     <el-option
-                      v-for="{ value, label } in valueSetStatus"
+                      v-for="{ value, label } in statusOptions"
                       :key="value"
                       :value="value"
                       :label="label"
@@ -182,7 +190,7 @@
           <el-table-column
             align="center"
             label="状态"
-            prop="status"
+            prop="enableStatus"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column align="center" label="操作">
@@ -213,7 +221,12 @@ import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import { mapState } from 'vuex'
-import { fetchList } from '@/api/baseInfo/valueSet'
+import {
+  fetchList,
+  addValueSet,
+  fetchListByPage,
+  fetchDetail,
+} from '@/api/baseInfo/valueSet'
 
 export default {
   name: 'valueSet',
@@ -258,11 +271,15 @@ export default {
           ),
         },
         {
-          field: 'status',
+          field: 'enableStatus',
           label: '状态',
           alwaysShow: true,
           render: (data) => (
-            <el-input placeholder="状态" vModel={data['status']} />
+            <el-select placeholder="状态" vModel={data['enableStatus']}>
+              {this.statusOptions.map(({ value, label }) => (
+                <el-option key={value} value={value} label={label}></el-option>
+              ))}
+            </el-select>
           ),
         },
       ],
@@ -272,7 +289,7 @@ export default {
       systemData: {},
       treeProps: {
         children: 'children',
-        label: 'label',
+        label: 'name',
       },
       // 左侧树
       treeList: [],
@@ -288,10 +305,12 @@ export default {
         enableTime: [
           { required: true, message: '请选择启用时间', trigger: 'blur' },
         ],
-        status: [{ required: true, message: '请选择状态', trigger: 'blur' }],
+        enableStatus: [
+          { required: true, message: '请选择状态', trigger: 'blur' },
+        ],
       },
       // 值集状态
-      valueSetStatus: [
+      statusOptions: [
         { value: 1, label: '已启用' },
         { value: 0, label: '已停用' },
       ],
@@ -319,8 +338,8 @@ export default {
   },
   filters: {
     // 状态
-    valueSetStatusFilter(value) {
-      const target = this.valueSetStatus.find((item) => item.value === value)
+    statusFilter(value) {
+      const target = this.statusOptions.find((item) => item.value === value)
       return target ? target.label : ''
     },
   },
@@ -407,15 +426,28 @@ export default {
           {
             type: 'label',
             label: '状态',
-            field: 'status',
+            field: 'enableStatus',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'status',
+            field: 'enableStatus',
             disabled: this.isDetail,
             render: () => (
-              <el-input readonly={this.isDetail} vModel={data['status']} />
+              <el-select
+                style="width:100%"
+                placeholder=""
+                vModel={data['enableStatus']}
+                disabled={this.isDetail}
+              >
+                {this.statusOptions.map(({ value, label }) => (
+                  <el-option
+                    key={value}
+                    value={value}
+                    label={label}
+                  ></el-option>
+                ))}
+              </el-select>
             ),
           },
         ],
@@ -459,33 +491,15 @@ export default {
     // 获取左侧树
     async getTreeList() {
       const res = await fetchList()
-      console.log('res', res)
-      this.treeList = [
-        {
-          id: '1',
-          label: '值集',
-          children: [
-            {
-              id: '1-1',
-              label: '值集1',
-            },
-            {
-              id: '1-2',
-              label: '值集2',
-            },
-            {
-              id: '1-3',
-              label: '值集3',
-            },
-          ],
-        },
-      ]
+      this.treeList = res.data || []
     },
     // 初始化
     init() {
       this.getTreeList()
     },
-    getList() {
+    async getList() {
+      const res = await fetchListByPage(this.listQuery)
+      console.log('res', res)
       this.list = [
         {
           key: '1-1',
@@ -516,25 +530,17 @@ export default {
       }
       this.list = []
     },
-    onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
-      this.$refs.treeNode.setCurrentKey(data[this.rowKey])
+    // 点击左侧树
+    async onTreeNodeClick(data) {
+      const id = data[this.rowKey]
+      this.currentKey = id
+      this.$refs.treeNode.setCurrentKey(id)
       this.$router.replace(`${this.basePath}/list`)
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        id: '1-1',
-        name: '招标方式招标方式招标方式招标方式招标方式招标方式',
-        code: '0202',
-        enableTime: new Date(),
-        status: 1,
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
+      // 获取详情
+      const res = await fetchDetail({ id })
+      this.detail = res.data || {}
+      this.systemData = res.data || {}
+      this.paramsList = res.data && res.data.unitLists ? res.data.unitLists : []
       this.selectedParams = []
     },
     onSelect(row) {
@@ -544,6 +550,7 @@ export default {
     onResetInfo() {
       this.detail = {}
       this.systemData = {}
+      this.paramsList = []
       this.selectedParams = []
       this.$refs.treeNode.setCurrentKey()
       this.currentKey = null
@@ -560,17 +567,19 @@ export default {
       this.currentKey = null
       this.$router.replace(`${this.basePath}/list?type=adjust`)
     },
-    onSave() {
-      this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
+    onSubmit() {
+      this.$refs['gridForm'].$refs['form'].validate(async (valid, err) => {
         this.notify && this.notify.close()
         if (valid) {
-          console.log('form', this.detail)
+          if (this.isAdd) {
+            this.handleAdd()
+          }
         } else {
           const msg = Object.entries(err)
             .map((item) => item[1].map((val) => val.message).join('，'))
             .join('\n')
           this.notify = this.$notify.error({
-            title: '校验错误信息',
+            title: '基础信息校验错误',
             message: this.$createElement(
               'div',
               { style: 'white-space:pre-wrap' },
@@ -581,13 +590,65 @@ export default {
         }
       })
     },
-    handleAddParams() {
-      this.paramsList = [...this.paramsList, { id: Date.now() }]
+    // 新增
+    async handleAdd() {
+      const payload = {
+        ...this.detail,
+        unitLists: this.paramsList.map(({ tempId, ...resValues }) => resValues),
+      }
+      const res = await addValueSet(payload)
+      if (res && res.status === 200) {
+        this.$notify({
+          title: '成功',
+          message: '操作成功',
+          type: 'success',
+          duration: 2000,
+        })
+        this.onResetInfo()
+        this.$router.replace(`${this.basePath}/list`)
+        this.getTreeList()
+      }
     },
+    // validateParam() {
+    //   const valid =
+    //     this.paramsList &&
+    //     this.paramsList.length > 0 &&
+    //     this.paramsList.every((item) => item.listName && item.listCode)
+    //   if (valid) {
+    //     return true
+    //   } else {
+    //     this.$notify.error({
+    //       title: '参数列表校验错误',
+    //       message: '请完善必填项',
+    //     })
+    //   }
+    // },
+    // 点击新增参数列表
+    handleAddParams() {
+      if (
+        this.paramsList &&
+        this.paramsList.length &&
+        !this.paramsList.every((item) => item.listName && item.listCode)
+      ) {
+        this.$message({
+          message: '请完善参数列表必填项',
+          type: 'warning',
+        })
+        return
+      }
+      this.paramsList = [
+        ...this.paramsList,
+        { tempId: Date.now(), listStatus: 1 },
+      ]
+    },
+    // 点击删除勾选的参数列表
     handleDeleteParams() {
       if (Array.isArray(this.selectedParams) && this.selectedParams.length) {
         this.paramsList = this.paramsList.filter(
-          (item) => !this.selectedParams.some((val) => val.id === item.id)
+          (item) =>
+            !this.selectedParams.some(
+              (val) => (val.id || val.tempId) === (item.id || item.tempId)
+            )
         )
       } else {
         this.$message({

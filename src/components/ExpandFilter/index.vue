@@ -93,29 +93,27 @@ export default {
                 ) : null}
               </el-col>
             ))}
+            <el-col class="is-right" span={24}>
+              {this.$slots.operations}
+              {this.showExpand && this.fields.length > 2 && (
+                <el-link
+                  type="primary"
+                  underline={false}
+                  onClick={this.onClickExpand}
+                >
+                  <i
+                    class={{
+                      'el-icon-arrow-down': true,
+                      'expand-icon': true,
+                      expand: this.expand,
+                    }}
+                  ></i>
+                  {this.expand ? '收起' : '展开'}
+                </el-link>
+              )}
+            </el-col>
           </el-row>
         </el-form>
-        <el-row gutter={12}>
-          <el-col class="is-right" span={24}>
-            {this.$slots.operations}
-            {this.showExpand && this.fields.length > 2 && (
-              <el-link
-                type="primary"
-                underline={false}
-                onClick={this.onClickExpand}
-              >
-                <i
-                  class={{
-                    'el-icon-arrow-down': true,
-                    'expand-icon': true,
-                    expand: this.expand,
-                  }}
-                ></i>
-                {this.expand ? '收起' : '展开'}
-              </el-link>
-            )}
-          </el-col>
-        </el-row>
       </div>
     )
   },

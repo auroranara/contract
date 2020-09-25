@@ -7,6 +7,8 @@
 </template>
 <script>
 import GridForm from '@/components/GridForm'
+import { systemStatusFilter } from '@/utils/filters'
+import moment from 'moment'
 
 export default {
   components: { GridForm },
@@ -20,9 +22,9 @@ export default {
       default: () => ({
         status: 'status',
         createTime: 'createTime',
-        createPerson: 'createPerson',
-        modifyTime: 'modifyTime',
-        modifyPerson: 'modifyPerson',
+        createPerson: 'createUserId',
+        modifyTime: 'updateTime',
+        modifyPerson: 'updateUserId',
       }),
     },
   },
@@ -38,7 +40,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data[this.model['status']],
+            render: () => systemStatusFilter(data[this.model['status']]),
           },
         ],
         [
@@ -50,7 +52,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data[this.model['createTime']],
+            render: () => this.formateTime(data[this.model['createTime']]),
           },
         ],
         [
@@ -74,7 +76,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data[this.model['modifyTime']],
+            render: () => this.formateTime(data[this.model['modifyTime']]),
           },
         ],
         [
@@ -90,6 +92,9 @@ export default {
           },
         ],
       ]
+    },
+    formateTime(value) {
+      return value ? moment(value).format('YYYY/MM/DD HH:mm') : ''
     },
   },
 }

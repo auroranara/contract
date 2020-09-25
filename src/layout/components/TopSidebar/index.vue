@@ -167,32 +167,45 @@
     </el-menu>
 
     <div class="right-menu">
-      <template v-if="device!=='mobile'">
-        <el-tooltip content="全屏缩放" effect="dark" placement="bottom">
+      <template v-if="device !== 'mobile'">
+        <!-- <el-tooltip content="全屏缩放" effect="dark" placement="bottom">
           <screenfull id="screenfull" class="right-menu-item hover-effect" />
-        </el-tooltip>
+        </el-tooltip> -->
 
         <el-tooltip content="布局设置" effect="dark" placement="bottom">
           <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip>
       </template>
 
-      <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
-        <div class="avatar-wrapper">
+      <el-dropdown
+        class="avatar-container right-menu-item hover-effect"
+        trigger="click"
+      >
+        <!-- <div class="avatar-wrapper">
           <img :src="Avatar" class="user-avatar" />
           <i class="el-icon-caret-bottom" />
+        </div> -->
+        <div class="avatar-wrapper">
+          <el-avatar v-if="trueName" class="user-avatar" :style="avatarStyle">
+            {{ trueName | shortName }}
+          </el-avatar>
+          <el-avatar
+            v-else
+            icon="el-icon-user-solid"
+            class="user-avatar"
+          ></el-avatar>
         </div>
         <el-dropdown-menu slot="dropdown">
-          <span style="display:block;">
-            <el-dropdown-item>{{trueName}}</el-dropdown-item>
+          <span style="display: block">
+            <el-dropdown-item>{{ trueName }}</el-dropdown-item>
           </span>
-          <span style="display:block;" @click="show = true">
+          <span style="display: block" @click="show = true">
             <el-dropdown-item divided>布局设置</el-dropdown-item>
           </span>
-          <span style="display:block;" @click="showPasswordDialog">
+          <span style="display: block" @click="showPasswordDialog">
             <el-dropdown-item>修改密码</el-dropdown-item>
           </span>
-          <span style="display:block;" @click="open">
+          <span style="display: block" @click="open">
             <el-dropdown-item>退出登录</el-dropdown-item>
           </span>
         </el-dropdown-menu>
@@ -203,7 +216,7 @@
 <script>
 import variables from '@/assets/styles/variables.scss'
 import { mapGetters } from 'vuex'
-import Screenfull from '@/components/Screenfull'
+// import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
 import Avatar from '@/assets/images/avatar.png'
 import { updatePassword } from '@/api/system/user'
@@ -211,7 +224,6 @@ import { updatePassword } from '@/api/system/user'
 export default {
   name: 'TopSidbar',
   components: {
-    Screenfull,
     SizeSelect,
   },
   data() {
@@ -230,8 +242,9 @@ export default {
           { min: 6, message: '长度至少6个字符', trigger: 'blur' },
         ],
       },
-      // trueName:JSON.parse(sessionStorage.getItem('user')).trueName
-      trueName: '张三',
+      trueName: JSON.parse(sessionStorage.getItem('user')).trueName,
+      // 头像预设背景色
+      colors: ['#5c5cff', '#66CCFF', '#9966FF', '#FFCC66', '#00CC33'],
     }
   },
   computed: {
@@ -249,6 +262,18 @@ export default {
     },
     variables() {
       return variables
+    },
+    avatarStyle() {
+      return {
+        'background-color': this.colors[this.trueName.charCodeAt(0) % 5],
+      }
+    },
+  },
+  filters: {
+    shortName(value) {
+      if (/管理/.test(value)) {
+        return '管理'
+      } else return value.slice(0, 1).toLocaleUpperCase()
     },
   },
   methods: {
@@ -325,17 +350,16 @@ export default {
     }
 
     .avatar-container {
-      margin-right: 30px;
+      margin-right: 10px;
 
       .avatar-wrapper {
-        margin-top: 5px;
         position: relative;
 
         .user-avatar {
           cursor: pointer;
           width: 40px;
           height: 40px;
-          border-radius: 10px;
+          border-radius: 100%;
         }
 
         .el-icon-caret-bottom {
@@ -344,6 +368,9 @@ export default {
           right: -20px;
           top: 25px;
           font-size: 12px;
+        }
+        .el-avatar {
+          line-height: 40px;
         }
       }
     }

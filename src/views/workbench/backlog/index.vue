@@ -1,14 +1,14 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-card>
-        <expand-Filter :fields="fields" :model="listQuery" :layout="{md:8,sm:24}">
-          <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">筛选</el-button>
-            <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
-          </template>
-        </expand-Filter>
-      </el-card>
+      <expand-Filter :fields="fields" :model="listQuery" type="inline">
+        <template v-slot:operations>
+          <el-button type="primary" icon="el-icon-search" @click="onSearch"
+            >筛选</el-button
+          >
+          <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
+        </template>
+      </expand-Filter>
     </div>
     <el-card>
       <el-table
@@ -16,21 +16,53 @@
         :data="list"
         border
         highlight-current-row
-        style="width: 100%;"
+        style="width: 100%"
       >
         <el-table-column align="center" label="序号" width="80">
-          <template slot-scope="scope">{{scope.$index+1}}</template>
+          <template slot-scope="scope">{{ scope.$index + 1 }}</template>
         </el-table-column>
-        <el-table-column align="center" label="工作阶段" prop="gzjd" :show-overflow-tooltip="true"></el-table-column>
-        <el-table-column align="center" label="待办任务" prop="dbrw" :show-overflow-tooltip="true">
+        <el-table-column
+          align="center"
+          label="工作阶段"
+          prop="gzjd"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="待办任务"
+          prop="dbrw"
+          :show-overflow-tooltip="true"
+        >
           <template slot-scope="scope">
-            <el-link type="primary" :underline="false">{{scope.row.dbrw}}</el-link>
+            <el-link type="primary" :underline="false">{{
+              scope.row.dbrw
+            }}</el-link>
           </template>
         </el-table-column>
-        <el-table-column align="center" label="单据类型" prop="djlx" :show-overflow-tooltip="true"></el-table-column>
-        <el-table-column align="center" label="单据名称" prop="djmc" :show-overflow-tooltip="true"></el-table-column>
-        <el-table-column align="center" label="创建时间" prop="cjsj" :show-overflow-tooltip="true"></el-table-column>
-        <el-table-column align="center" label="备注" prop="bz" :show-overflow-tooltip="true"></el-table-column>
+        <el-table-column
+          align="center"
+          label="单据类型"
+          prop="djlx"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="单据名称"
+          prop="djmc"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="创建时间"
+          prop="cjsj"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="备注"
+          prop="bz"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
       </el-table>
 
       <!--分页组件-->
