@@ -25,7 +25,7 @@ export function fetchDetail(params) {
   })
 }
 
-// 新增值集
+// 新增值集（saveType 1 保存 2调整提交 新增不传）
 export function addValueSet(data) {
   return request({
     url: '/api/unit/save',

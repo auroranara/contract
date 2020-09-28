@@ -26,7 +26,7 @@ export function fetchDetail(params) {
 }
 
 // 新增概算类型
-export function addValueSet(data) {
+export function addEstimateType(data) {
   return request({
     url: '/api/estimateType/save',
     method: 'post',
@@ -35,7 +35,7 @@ export function addValueSet(data) {
 }
 
 // 删除概算类型
-export function deleteValueSet(params) {
+export function deleteEstimateType(params) {
   return request({
     url: `/api/estimateType/${params.id}`,
     method: 'post'

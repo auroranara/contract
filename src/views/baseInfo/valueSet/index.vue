@@ -9,33 +9,39 @@
         >查询</el-button
       >
       <el-button plain type="primary" @click="onClickAdd">新增</el-button>
-      <!-- <el-button plain type="primary" @click="onSave">保存</el-button> -->
-      <el-button :disabled="isDetail" plain type="primary" @click="onSubmit"
-        >提交</el-button
-      >
       <el-button
         :disabled="!(isDetail && currentKey)"
         plain
         type="primary"
         @click="onClickAdjust"
-        >调整</el-button
+        >修改</el-button
       >
-      <!-- <el-button :disabled="!isDetail" plain type="primary">审核</el-button> -->
-      <el-button :disabled="!isDetail" plain type="primary">删除</el-button>
+      <el-button :disabled="isDetail" plain type="primary" @click="onSubmit"
+        >提交</el-button
+      >
+      <el-button
+        :disabled="!isDetail || !currentKey"
+        @click="handleDelete"
+        plain
+        type="primary"
+        >删除</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
       <el-col :span="6">
-        <el-card>
-          <el-tree
-            ref="treeNode"
-            :highlight-current="true"
-            :data="treeList"
-            :props="treeProps"
-            :default-expand-all="true"
-            @node-click="onTreeNodeClick"
-            :node-key="rowKey"
-          ></el-tree>
+        <el-card class="tree-select-wrapper">
+          <el-scrollbar wrap-class="scrollbar-wrapper">
+            <el-tree
+              ref="treeNode"
+              :highlight-current="true"
+              :data="treeList"
+              :props="treeProps"
+              :default-expand-all="true"
+              @node-click="onTreeNodeClick"
+              :node-key="rowKey"
+            ></el-tree>
+          </el-scrollbar>
         </el-card>
       </el-col>
 
@@ -230,6 +236,7 @@ import {
   addValueSet,
   fetchListByPage,
   fetchDetail,
+  deleteValueSet,
 } from '@/api/baseInfo/valueSet'
 
 export default {
@@ -312,12 +319,6 @@ export default {
         enableStatus: [
           { required: true, message: '请选择状态', trigger: 'blur' },
         ],
-        isDisabled: [
-          { required: true, message: '请选择是否停用', trigger: 'blur' },
-        ],
-        adjustReason: [
-          { required: true, message: '请输入调整原因', trigger: 'blur' },
-        ],
       },
       // 值集状态
       statusOptions: [
@@ -329,9 +330,6 @@ export default {
     }
   },
   computed: {
-    // ...mapState({
-    //   statusDict: (state) => state.baseInfo.statusDict,
-    // }),
     // 当前状态 可选值 add adjust detail
     type() {
       return this.$route.query.type || 'detail'
@@ -386,32 +384,6 @@ export default {
             render: () => <el-input readonly vModel={data['code']} />,
           },
         ],
-        this.isAdjust
-          ? [
-              {
-                type: 'label',
-                label: '是否停用',
-                showBg: true,
-                required: true,
-              },
-              {
-                type: 'handler',
-                field: 'isDisabled',
-                render: (data) => (
-                  <el-radio-group vModel={data['isDisabled']}>
-                    <el-radio label={1}>是</el-radio>
-                    <el-radio label={0}>否</el-radio>
-                  </el-radio-group>
-                ),
-              },
-              {
-                type: 'empty',
-              },
-              {
-                type: 'empty',
-              },
-            ]
-          : [],
         [
           {
             type: 'label',
@@ -460,41 +432,6 @@ export default {
             ),
           },
         ],
-        ...(this.isAdjust
-          ? [
-              [
-                {
-                  type: 'label',
-                  label: '调整原因',
-                  showBg: true,
-                  required: true,
-                },
-                {
-                  type: 'handler',
-                  field: 'adjustReason',
-                  colspan: '3',
-                  render: (data) => (
-                    <el-input type="textarea" vModel={data['adjustReason']} />
-                  ),
-                },
-              ],
-              [
-                {
-                  type: 'label',
-                  label: '调整说明',
-                  showBg: true,
-                },
-                {
-                  type: 'handler',
-                  field: 'adjustExplain',
-                  colspan: '3',
-                  render: (data) => (
-                    <el-input type="textarea" vModel={data['adjustExplain']} />
-                  ),
-                },
-              ],
-            ]
-          : []),
       ]
     },
     // 获取左侧树
@@ -593,51 +530,28 @@ export default {
             ),
             duration: 20000,
           })
-        } else if (this.isAdd) {
-          this.handleAdd()
-        } else if (this.isAdjust) {
-          this.handleAdjust()
+        } else {
+          let payload = {
+            ...this.detail,
+            saveType: 2,
+            unitLists: this.paramsList.map(
+              ({ tempId, ...resValues }) => resValues
+            ),
+          }
+          const res = await addValueSet(payload)
+          if (res && res.status === 200) {
+            this.$notify({
+              title: '成功',
+              message: '操作成功',
+              type: 'success',
+              duration: 2000,
+            })
+            this.onResetInfo()
+            this.$router.replace(`${this.basePath}/list`)
+            this.getTreeList()
+          }
         }
       })
-    },
-    // 新增调用
-    async handleAdd() {
-      const payload = {
-        ...this.detail,
-        unitLists: this.paramsList.map(({ tempId, ...resValues }) => resValues),
-      }
-      const res = await addValueSet(payload)
-      if (res && res.status === 200) {
-        this.$notify({
-          title: '成功',
-          message: '操作成功',
-          type: 'success',
-          duration: 2000,
-        })
-        this.onResetInfo()
-        this.$router.replace(`${this.basePath}/list`)
-        this.getTreeList()
-      }
-    },
-    // 调整调用
-    async handleAdjust() {
-      const payload = {
-        ...this.detail,
-        saveType: 2,
-        unitLists: this.paramsList.map(({ tempId, ...resValues }) => resValues),
-      }
-      const res = await addValueSet(payload)
-      if (res && res.status === 200) {
-        this.$notify({
-          title: '成功',
-          message: '操作成功',
-          type: 'success',
-          duration: 2000,
-        })
-        this.onResetInfo()
-        this.$router.replace(`${this.basePath}/list`)
-        this.getTreeList()
-      }
     },
     // 点击新增参数列表
     handleAddParams() {
@@ -676,6 +590,31 @@ export default {
     handleParamsChange(val) {
       this.selectedParams = val
     },
+    // 点击删除值集
+    handleDelete() {
+      if (this.currentKey) {
+        this.$confirm('是否确定删除该数据？', '提示', { type: 'warning' }).then(
+          async () => {
+            const res = await deleteValueSet({ id: this.currentKey })
+            if (res && res.status === 200) {
+              this.$notify({
+                title: '成功',
+                message: '操作成功',
+                type: 'success',
+                duration: 2000,
+              })
+              this.onResetInfo()
+              this.getTreeList()
+            }
+          }
+        )
+      } else {
+        this.$message({
+          message: '请选中想要删除的数据',
+          type: 'warning',
+        })
+      }
+    },
   },
 }
 </script>
@@ -687,5 +626,13 @@ export default {
   content: '*';
   color: #f56c6c;
   margin-right: 4px;
+}
+.tree-select-wrapper {
+  .scrollbar-wrapper {
+    max-height: 475px;
+  }
+  .el-card__body {
+    padding: 20px 10px;
+  }
 }
 </style>

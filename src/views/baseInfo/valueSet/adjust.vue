@@ -1,8 +1,14 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
-      <el-button plain type="primary">审核</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
+      <!-- <el-button plain type="primary">审核</el-button> -->
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -30,19 +36,22 @@
               ref="gridForm"
               :settings="baseSettings(this.detail)"
               :model="detail"
-              :rules="rules"
             ></grid-form>
 
             <!-- 参数列表 -->
             <block-title title="参数列表" />
-            <el-table style="margin-top:10px" :data="paramsList" border>
-              <el-table-column align="center" label="序号" width="80" type="index"></el-table-column>
+            <el-table style="margin-top: 10px" :data="paramsList" border>
+              <el-table-column
+                align="center"
+                label="序号"
+                width="80"
+                type="index"
+              ></el-table-column>
               <el-table-column
                 prop="listName"
                 label="名称"
                 :show-overflow-tooltip="true"
                 align="center"
-                label-class-name="required-header"
               ></el-table-column>
               <el-table-column
                 width="200"
@@ -50,7 +59,6 @@
                 label="编码"
                 :show-overflow-tooltip="true"
                 align="center"
-                label-class-name="required-header"
               ></el-table-column>
               <el-table-column
                 width="200"
@@ -58,10 +66,9 @@
                 label="状态"
                 :show-overflow-tooltip="true"
                 align="center"
-                label-class-name="required-header"
               >
                 <template slot-scope="scope">
-                  <span>{{scope.row.listStatus}}</span>
+                  <span>{{ scope.row.listStatus | statusFilter }}</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -84,7 +91,9 @@
           :showExpand="false"
         >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -96,12 +105,33 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column align="center" label="值集名称" prop="name" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="值集编码" prop="code" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column align="center" label="状态" prop="status" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column
+            align="center"
+            label="值集名称"
+            prop="name"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="值集编码"
+            prop="code"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            align="center"
+            label="状态"
+            prop="enableStatus"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="scope">
+              {{ scope.row.enableStatus | statusFilter }}
+            </template>
+          </el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -125,6 +155,10 @@ import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import { mapState } from 'vuex'
+import { judgeFilter } from '@/utils/filters'
+// import {
+
+// } from '@/api/baseInfo/valueSet'
 
 export default {
   name: 'valueSet',
@@ -168,11 +202,11 @@ export default {
           ),
         },
         {
-          field: 'status',
+          field: 'enableStatus',
           label: '状态',
           alwaysShow: true,
           render: (data) => (
-            <el-input placeholder="状态" vModel={data['status']} />
+            <el-input placeholder="状态" vModel={data['enableStatus']} />
           ),
         },
       ],
@@ -193,13 +227,6 @@ export default {
       selectedParams: [],
       // 参数列表
       paramsList: [],
-      rules: {
-        name: [{ required: true, message: '请输入值集名称', trigger: 'blur' }],
-        enableTime: [
-          { required: true, message: '请选择启用时间', trigger: 'blur' },
-        ],
-        status: [{ required: true, message: '请选择状态', trigger: 'blur' }],
-      },
       // 值集状态
       valueSetStatus: [
         { value: 1, label: '已启用' },
@@ -214,9 +241,8 @@ export default {
   },
   filters: {
     // 状态
-    valueSetStatusFilter(value) {
-      const target = this.valueSetStatus.find((item) => item.value === value)
-      return target ? target.label : ''
+    statusFilter(value) {
+      return (value === 1 && '已启用') || (value === 0 && '已停用') || ''
     },
   },
   created() {
@@ -256,18 +282,12 @@ export default {
             type: 'label',
             label: '是否停用',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
-            field: 'enableStatus',
+            field: 'isDisabled',
             disabled: true,
-            render: (data) => (
-              <el-radio-group disabled vModel={data['enableStatus']}>
-                <el-radio label={0}>是</el-radio>
-                <el-radio label={1}>否</el-radio>
-              </el-radio-group>
-            ),
+            render: (data) => judgeFilter(data.isDisabled),
           },
           {
             type: 'empty',
@@ -301,14 +321,14 @@ export default {
           {
             type: 'label',
             label: '状态',
-            field: 'status',
+            field: 'enableStatus',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'status',
+            field: 'enableStatus',
             disabled: true,
-            render: () => <el-input readonly vModel={data['status']} />,
+            render: () => <el-input readonly vModel={data['enableStatus']} />,
           },
         ],
         [
@@ -316,7 +336,6 @@ export default {
             type: 'label',
             label: '调整原因',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',

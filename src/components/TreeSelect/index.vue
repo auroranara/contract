@@ -21,8 +21,8 @@
         ref="selectTree"
         :accordion="accordion"
         :data="treeOptions"
-        :props="props"
-        :node-key="props.value"
+        :props="treeProps"
+        :node-key="treeProps.value"
         :default-expanded-keys="defaultExpandedKey"
         @node-click="handleNodeClick"
         :expand-on-click-node="false"
@@ -41,15 +41,13 @@ export default {
   },
   props: {
     /* 配置项 */
-    props: {
+    treeProps: {
       type: Object,
-      default: () => {
-        return {
-          value: 'id', // ID字段名
-          label: 'label', // 显示名称
-          children: 'children', // 子级字段名
-        }
-      },
+      default: () => ({
+        value: 'id', // ID字段名
+        label: 'label', // 显示名称
+        children: 'children', // 子级字段名
+      }),
     },
     /* 选项列表数据(树形结构的对象数组) */
     options: {
@@ -117,7 +115,7 @@ export default {
     initHandle() {
       this.filterText = ''
       this.valueTitle = this.valueId
-        ? this.$refs.selectTree.getNode(this.valueId).data[this.props.label]
+        ? this.$refs.selectTree.getNode(this.valueId).data[this.treeProps.label]
         : '' // 初始化显示
       this.$refs.selectTree.setCurrentKey(this.valueId) // 设置默认选中
       this.defaultExpandedKey = this.valueId ? [this.valueId] : [] // 设置默认展开
@@ -135,9 +133,9 @@ export default {
     },
     // 切换选项
     handleNodeClick(node) {
-      this.valueTitle = node[this.props.label]
-      this.valueId = node[this.props.value]
-      this.$emit('change', this.valueId)
+      this.valueTitle = node[this.treeProps.label]
+      this.valueId = node[this.treeProps.value]
+      this.$emit('change', this.valueId, node)
       this.defaultExpandedKey = [this.valueId]
       this.$refs.selectMain.blur()
     },
@@ -157,7 +155,7 @@ export default {
     // 树筛选函数 默认对label筛选
     filterTree(value, data) {
       if (!value) return true
-      return data[this.props.label].indexOf(value) !== -1
+      return data[this.treeProps.label].indexOf(value) !== -1
     },
     // select下拉框显示，清空筛选，收起树
     onVisibleChange(visible) {

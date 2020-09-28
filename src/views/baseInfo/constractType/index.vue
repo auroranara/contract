@@ -9,11 +9,23 @@
         >查询</el-button
       >
       <el-button plain type="primary" @click="onClickAdd">新增</el-button>
-      <el-button plain type="primary" @click="onSave">保存</el-button>
-      <el-button plain type="primary">提交</el-button>
-      <el-button plain type="primary" @click="onClickAdjust">调整</el-button>
-      <el-button plain type="primary">审核</el-button>
-      <el-button plain type="primary">删除</el-button>
+      <el-button
+        :disabled="!(isDetail && currentKey)"
+        plain
+        type="primary"
+        @click="onClickAdjust"
+        >修改</el-button
+      >
+      <el-button :disabled="isDetail" plain type="primary" @click="onSubmit"
+        >提交</el-button
+      >
+      <el-button
+        :disabled="!isDetail || !currentKey"
+        @click="handleDelete"
+        plain
+        type="primary"
+        >删除</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -26,6 +38,7 @@
             :props="treeProps"
             @node-click="onTreeNodeClick"
             :node-key="rowKey"
+            :expand-on-click-node="false"
           ></el-tree>
         </el-card>
       </el-col>
@@ -83,43 +96,43 @@
           <el-table-column
             align="center"
             label="分类名称"
-            prop="flmc"
+            prop="classifyName"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             align="center"
             label="上级节点"
-            prop="sjjd"
+            prop="parentNodeName"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             align="center"
             label="收支类型"
-            prop="szlx"
+            prop="inOutStatus"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             align="center"
             label="清单类型"
-            prop="qdlx"
+            prop="listStatus"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             align="center"
             label="会计属性"
-            prop="kjsx"
+            prop="accountAttributes"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             align="center"
             label="期中支付类型"
-            prop="qzzflx"
+            prop="paymentType"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             align="center"
             label="合同编码"
-            prop="htbm"
+            prop="contractCode"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column align="center" label="操作">
@@ -151,6 +164,13 @@ import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import TreeSelect from '@/components/TreeSelect'
 import { mapState } from 'vuex'
+import {
+  fetchListByPage,
+  fetchList,
+  fetchDetail,
+  addConstractType,
+  deleteConstractType,
+} from '@/api/baseInfo/constractType'
 
 export default {
   name: 'constractType',
@@ -180,33 +200,33 @@ export default {
       // 查询弹窗筛选配置
       fields: [
         {
-          field: 'flmc',
+          field: 'classifyName',
           alwaysShow: true,
           label: '分类名称',
           render: (data) => (
-            <el-input placeholder="分类名称" vModel={data['flmc']} />
+            <el-input placeholder="分类名称" vModel={data['classifyName']} />
           ),
         },
         {
-          field: 'sjjd',
+          field: 'parentNode',
           alwaysShow: true,
           label: '上级节点',
           render: (data) => (
             <tree-select
               style="width:100%"
-              vModel={data['sjjd']}
-              props={this.treeProps}
+              vModel={data['parentNode']}
+              treeProps={this.treeProps}
               options={this.treeList}
-              placeholder=""
+              placeholder="上级节点"
             />
           ),
         },
         {
-          field: 'szlx',
+          field: 'inOutStatus',
           label: '收支类型',
           alwaysShow: true,
           render: (data) => (
-            <el-select placeholder="收支类型" vModel={data['szlx']}>
+            <el-select placeholder="收支类型" vModel={data['inOutStatus']}>
               {this.paymentsTypes.map((item) => (
                 <el-option
                   key={item.value}
@@ -218,10 +238,10 @@ export default {
           ),
         },
         {
-          field: 'qdlx',
+          field: 'listStatus',
           label: '清单类型',
           render: (data) => (
-            <el-select placeholder="清单类型" vModel={data['qdlx']}>
+            <el-select placeholder="清单类型" vModel={data['listStatus']}>
               {this.listTypes.map((item) => (
                 <el-option
                   key={item.value}
@@ -233,10 +253,13 @@ export default {
           ),
         },
         {
-          field: 'kjsx',
+          field: 'accountAttributes',
           label: '会计属性',
           render: (data) => (
-            <el-select placeholder="会计属性" vModel={data['kjsx']}>
+            <el-select
+              placeholder="会计属性"
+              vModel={data['accountAttributes']}
+            >
               {this.accountingAttributes.map((item) => (
                 <el-option
                   key={item.value}
@@ -248,10 +271,10 @@ export default {
           ),
         },
         {
-          field: 'qzzflx',
+          field: 'paymentType',
           label: '期中支付类型',
           render: (data) => (
-            <el-select placeholder="期中支付类型" vModel={data['qzzflx']}>
+            <el-select placeholder="期中支付类型" vModel={data['paymentType']}>
               {this.interimPayment.map((item) => (
                 <el-option
                   key={item.value}
@@ -263,10 +286,10 @@ export default {
           ),
         },
         {
-          field: 'htbm',
+          field: 'contractCode',
           label: '合同编码',
           render: (data) => (
-            <el-input placeholder="合同编码" vModel={data['htbm']} />
+            <el-input placeholder="合同编码" vModel={data['contractCode']} />
           ),
         },
       ],
@@ -275,8 +298,9 @@ export default {
       // 系统信息数据
       systemData: {},
       treeProps: {
-        children: 'children',
-        label: 'label',
+        children: 'childrenCategoryList',
+        label: 'classifyName',
+        value: 'id',
       },
       // 左侧树
       treeList: [],
@@ -286,13 +310,25 @@ export default {
       // 参数列表
       paramsList: [],
       rules: {
-        flmc: [{ required: true, message: '请输入分类名称', trigger: 'blur' }],
-        sjjd: [{ required: true, message: '请输入上级节点', trigger: 'blur' }],
-        szlx: [{ required: true, message: '请选择收支类型', trigger: 'blur' }],
-        qdlx: [{ required: true, message: '请选择清单类型', trigger: 'blur' }],
-        htbm: [{ required: true, message: '请输入合同编码', trigger: 'blur' }],
-        kjsx: [{ required: true, message: '请选择会计属性', trigger: 'blur' }],
-        qzzflx: [
+        classifyName: [
+          { required: true, message: '请输入分类名称', trigger: 'blur' },
+        ],
+        parentNode: [
+          { required: true, message: '请输入上级节点', trigger: 'blur' },
+        ],
+        inOutStatus: [
+          { required: true, message: '请选择收支类型', trigger: 'blur' },
+        ],
+        listStatus: [
+          { required: true, message: '请选择清单类型', trigger: 'blur' },
+        ],
+        contractCode: [
+          { required: true, message: '请输入合同编码', trigger: 'blur' },
+        ],
+        accountAttributes: [
+          { required: true, message: '请选择会计属性', trigger: 'blur' },
+        ],
+        paymentType: [
           { required: true, message: '请选择期中支付类型', trigger: 'blur' },
         ],
       },
@@ -303,34 +339,31 @@ export default {
       ],
       // 收支类型选项
       paymentsTypes: [
-        { value: '1', label: '收款类型' },
-        { value: '2', label: '付款类型' },
+        { value: 1, label: '收款类型' },
+        { value: 2, label: '付款类型' },
       ],
       // 清单类型选项
       listTypes: [
-        { value: '1', label: '概算' },
-        { value: '2', label: '预算' },
-        { value: '3', label: '收款计划' },
+        { value: 1, label: '概算' },
+        { value: 2, label: '预算' },
+        { value: 3, label: '收款计划' },
       ],
       // 会计属性选项
       accountingAttributes: [
-        { value: '1', label: '经营' },
-        { value: '2', label: '建设类型' },
+        { value: 1, label: '经营' },
+        { value: 2, label: '建设类型' },
       ],
       // 期中支付类型
       interimPayment: [
-        { value: '1', label: '采购' },
-        { value: '2', label: '建设' },
-        { value: '3', label: '其他' },
+        { value: 1, label: '采购' },
+        { value: 2, label: '建设' },
+        { value: 3, label: '其他' },
       ],
       // 校验提示实例
       notify: null,
     }
   },
   computed: {
-    // ...mapState({
-    //   statusDict: (state) => state.baseInfo.statusDict,
-    // }),
     // 当前状态 可选值 add adjust detail
     type() {
       return this.$route.query.type || 'detail'
@@ -362,107 +395,85 @@ export default {
           {
             type: 'label',
             label: '分类名称',
-            field: 'flmc',
+            field: 'classifyName',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'flmc',
+            field: 'classifyName',
             disabled: this.isDetail,
             render: () => (
-              <el-input readonly={this.isDetail} vModel={data['flmc']} />
+              <el-input
+                readonly={this.isDetail}
+                vModel={data['classifyName']}
+              />
             ),
           },
           {
             type: 'label',
             label: '分类编码',
-            field: 'flbm',
+            field: 'classifyCode',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'flbm',
+            field: 'classifyCode',
             disabled: true,
-            render: () => <el-input readonly vModel={data['flbm']} />,
+            render: () => <el-input readonly vModel={data['classifyCode']} />,
           },
         ],
-        this.isAdjust
-          ? [
-              {
-                type: 'label',
-                label: '是否停用',
-                showBg: true,
-                required: true,
-              },
-              {
-                type: 'handler',
-                field: 'enableStatus',
-                render: (data) => (
-                  <el-radio-group vModel={data['enableStatus']}>
-                    <el-radio label={0}>是</el-radio>
-                    <el-radio label={1}>否</el-radio>
-                  </el-radio-group>
-                ),
-              },
-              {
-                type: 'empty',
-              },
-              {
-                type: 'empty',
-              },
-            ]
-          : [],
         [
           {
             type: 'label',
             label: '上级节点',
-            field: 'sjjd',
+            field: 'parentNode',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'sjjd',
+            field: 'parentNode',
             disabled: this.isDetail,
             render: () => (
               <tree-select
                 style="width:100%"
                 disabled={this.isDetail}
-                vModel={data['sjjd']}
-                props={this.treeProps}
+                vModel={data['parentNode']}
+                treeProps={this.treeProps}
                 options={this.treeList}
                 placeholder=""
                 showFilter
+                onChange={this.onTreeSelectChange}
               />
             ),
           },
           {
             type: 'label',
             label: '层级',
-            field: 'cj',
+            field: 'hierarchy',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'cj',
+            field: 'hierarchy',
             disabled: true,
-            render: () => <el-input readonly vModel={data['cj']} />,
+            render: () => <el-input readonly vModel={data['hierarchy']} />,
           },
         ],
         [
           {
             type: 'label',
             label: '收支类型',
-            field: 'szlx',
+            field: 'inOutStatus',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'szlx',
+            field: 'inOutStatus',
             disabled: this.isDetail,
             render: () => (
               <el-select
                 placeholder=""
-                vModel={data['szlx']}
+                vModel={data['inOutStatus']}
                 style="width:100%"
                 disabled={this.isDetail}
               >
@@ -479,17 +490,17 @@ export default {
           {
             type: 'label',
             label: '清单类型',
-            field: 'qdlx',
+            field: 'listStatus',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'qdlx',
+            field: 'listStatus',
             disabled: this.isDetail,
             render: () => (
               <el-select
                 placeholder=""
-                vModel={data['qdlx']}
+                vModel={data['listStatus']}
                 style="width:100%"
                 disabled={this.isDetail}
               >
@@ -508,31 +519,34 @@ export default {
           {
             type: 'label',
             label: '合同编码',
-            field: 'htbm',
+            field: 'contractCode',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'htbm',
+            field: 'contractCode',
             disabled: this.isDetail,
             render: () => (
-              <el-input readonly={this.isDetail} vModel={data['htbm']} />
+              <el-input
+                readonly={this.isDetail}
+                vModel={data['contractCode']}
+              />
             ),
           },
           {
             type: 'label',
             label: '会计属性',
-            field: 'kjsx',
+            field: 'accountAttributes',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'kjsx',
+            field: 'accountAttributes',
             disabled: this.isDetail,
             render: () => (
               <el-select
                 placeholder=""
-                vModel={data['kjsx']}
+                vModel={data['accountAttributes']}
                 style="width:100%"
                 disabled={this.isDetail}
               >
@@ -551,18 +565,18 @@ export default {
           {
             type: 'label',
             label: '期中支付类型',
-            field: 'qzzflx',
+            field: 'paymentType',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'qzzflx',
+            field: 'paymentType',
             disabled: this.isDetail,
             colspan: '3',
             render: () => (
               <el-select
                 placeholder=""
-                vModel={data['qzzflx']}
+                vModel={data['paymentType']}
                 style="width:100%"
                 disabled={this.isDetail}
               >
@@ -581,122 +595,48 @@ export default {
           {
             type: 'label',
             label: '备注',
-            field: 'bz',
+            field: 'remarks',
             showBg: true,
           },
           {
             type: 'handler',
-            field: 'bz',
+            field: 'remarks',
             disabled: this.isDetail,
             colspan: '3',
             render: () => (
               <el-input
                 readonly={this.isDetail}
                 type="textarea"
-                vModel={data['bz']}
+                vModel={data['remarks']}
               />
             ),
           },
         ],
-        ...(this.isAdjust
-          ? [
-              [
-                {
-                  type: 'label',
-                  label: '调整原因',
-                  showBg: true,
-                  required: true,
-                },
-                {
-                  type: 'handler',
-                  field: 'adjustReason',
-                  colspan: '3',
-                  render: (data) => (
-                    <el-input type="textarea" vModel={data['adjustReason']} />
-                  ),
-                },
-              ],
-              [
-                {
-                  type: 'label',
-                  label: '调整说明',
-                  showBg: true,
-                },
-                {
-                  type: 'handler',
-                  field: 'adjustExplain',
-                  colspan: '3',
-                  render: (data) => (
-                    <el-input type="textarea" vModel={data['adjustExplain']} />
-                  ),
-                },
-              ],
-            ]
-          : []),
       ]
     },
     // 获取左侧树
-    getTreeList() {
+    async getTreeList() {
+      const res = await fetchList()
       this.treeList = [
         {
-          id: '1',
-          label: '分类1',
-          children: [
-            {
-              id: '1-1',
-              label: '分类1-1',
-            },
-            {
-              id: '1-2',
-              label: '分类1-2',
-            },
-            {
-              id: '1-3',
-              label: '分类1-3',
-            },
-          ],
-        },
-        {
-          id: '2',
-          label: '分类2',
-          children: [
-            {
-              id: '2-1',
-              label: '分类1',
-            },
-            {
-              id: '2-2',
-              label: '分类2',
-            },
-            {
-              id: '2-3',
-              label: '分类3',
-            },
-          ],
+          id: '-1',
+          classifyName: '合同分类',
+          childrenCategoryList: res && res.data ? res.data : [],
+          hierarchy: 0,
         },
       ]
     },
     // 初始化
     init() {
-      setTimeout(this.getTreeList, 2000)
+      this.getTreeList()
     },
-    getList() {
-      this.list = [
-        {
-          id: '1-1',
-          flmc: '土建',
-          flbm: '0123',
-          jsjd: '施工合同',
-          cj: '3',
-          szlx: '1',
-          qdlx: '1',
-          htbm: '01',
-          kjsx: '1',
-          qzzflx: '1',
-          bz: '',
-          sjjd: '1-1',
-        },
-      ]
+    // 获取查询列表（分页）
+    async getList() {
+      this.listLoading = true
+      const res = await fetchListByPage(this.listQuery)
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
     },
     onSearch() {
       this.listQuery.page = 1
@@ -718,38 +658,24 @@ export default {
       }
       this.list = []
     },
-    onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
-      this.$refs.treeNode.setCurrentKey(data[this.rowKey])
+    async onTreeNodeClick(data) {
+      if (+data.id === -1) return
+      this.$refs['gridForm'].$refs['form'].resetFields()
+      const id = data[this.rowKey]
+      this.currentKey = id
+      this.$refs.treeNode.setCurrentKey(id)
       this.$router.replace(`${this.basePath}/list`)
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        id: '1-1',
-        flmc: '土建',
-        flbm: '0123',
-        jsjd: '施工合同',
-        cj: '3',
-        szlx: '1',
-        qdlx: '1',
-        htbm: '01',
-        kjsx: '1',
-        qzzflx: '1',
-        bz: '',
-        sjjd: '1-1',
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
+      // 获取详情
+      const res = await fetchDetail({ id })
+      this.detail = res.data || {}
+      this.systemData = res.data || {}
     },
     onSelect(row) {
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
     onResetInfo() {
+      this.$refs['gridForm'].$refs['form'].resetFields()
       this.detail = {}
       this.systemData = {}
       this.$refs.treeNode.setCurrentKey()
@@ -767,11 +693,27 @@ export default {
       this.currentKey = null
       this.$router.replace(`${this.basePath}/list?type=adjust`)
     },
-    onSave() {
-      this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
+    // 点击提交
+    onSubmit() {
+      this.$refs['gridForm'].$refs['form'].validate(async (valid, err) => {
         this.notify && this.notify.close()
         if (valid) {
-          console.log('form', this.detail)
+          let payload = {
+            ...this.detail,
+            saveType: 2,
+          }
+          const res = await addConstractType(payload)
+          if (res && res.status === 200) {
+            this.$notify({
+              title: '成功',
+              message: '操作成功',
+              type: 'success',
+              duration: 2000,
+            })
+            this.onResetInfo()
+            this.$router.replace(`${this.basePath}/list`)
+            this.getTreeList()
+          }
         } else {
           const msg = Object.entries(err)
             .map((item) => item[1].map((val) => val.message).join('，'))
@@ -787,6 +729,38 @@ export default {
           })
         }
       })
+    },
+    // 点击删除
+    handleDelete() {
+      if (this.currentKey) {
+        this.$confirm('是否确定删除该数据？', '提示', { type: 'warning' }).then(
+          async () => {
+            const res = await deleteConstractType({ id: this.currentKey })
+            if (res && res.status === 200) {
+              this.$notify({
+                title: '成功',
+                message: '操作成功',
+                type: 'success',
+                duration: 2000,
+              })
+              this.onResetInfo()
+              this.getTreeList()
+            }
+          }
+        )
+      } else {
+        this.$message({
+          message: '请选中想要删除的数据',
+          type: 'warning',
+        })
+      }
+    },
+    // 上级节点改变，同步层级的数据
+    onTreeSelectChange(value, node) {
+      this.detail = {
+        ...this.detail,
+        hierarchy: node ? +node.hierarchy + 1 : null,
+      }
     },
   },
 }

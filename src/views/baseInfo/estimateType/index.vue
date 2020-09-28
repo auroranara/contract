@@ -9,11 +9,23 @@
         >查询</el-button
       >
       <el-button plain type="primary" @click="onClickAdd">新增</el-button>
-      <el-button plain type="primary" @click="onSave">保存</el-button>
-      <el-button plain type="primary">提交</el-button>
-      <el-button plain type="primary" @click="onClickAdjust">调整</el-button>
-      <el-button plain type="primary">审核</el-button>
-      <el-button plain type="primary">删除</el-button>
+      <el-button
+        :disabled="!(isDetail && currentKey)"
+        plain
+        type="primary"
+        @click="onClickAdjust"
+        >修改</el-button
+      >
+      <el-button :disabled="isDetail" plain type="primary" @click="onSubmit"
+        >提交</el-button
+      >
+      <el-button
+        :disabled="!isDetail || !currentKey"
+        @click="handleDelete"
+        plain
+        type="primary"
+        >删除</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -26,6 +38,7 @@
             :props="treeProps"
             @node-click="onTreeNodeClick"
             :node-key="rowKey"
+            :expand-on-click-node="false"
           ></el-tree>
         </el-card>
       </el-col>
@@ -130,12 +143,13 @@ import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import TreeSelect from '@/components/TreeSelect'
-import { mapState } from 'vuex'
+// import { mapState } from 'vuex'
 import {
   fetchListByPage,
   fetchList,
   fetchDetail,
-  addValueSet,
+  addEstimateType,
+  deleteEstimateType,
 } from '@/api/baseInfo/estimateType'
 
 export default {
@@ -195,8 +209,9 @@ export default {
       // 系统信息
       systemData: {},
       treeProps: {
-        children: 'children',
+        children: 'childEstimateTypeList',
         label: 'estimateName',
+        value: 'id',
       },
       // 左侧树
       treeList: [],
@@ -216,21 +231,12 @@ export default {
         parentId: [
           { required: true, message: '请选择上级节点', trigger: 'blur' },
         ],
-        isDisabled: [
-          { required: true, message: '请选择是否停用', trigger: 'blur' },
-        ],
-        adjustReason: [
-          { required: true, message: '请输入调整原因', trigger: 'blur' },
-        ],
       },
       // 当前校验提示实例
       notify: null,
     }
   },
   computed: {
-    ...mapState({
-      statusDict: (state) => state.baseInfo.statusDict,
-    }),
     // 当前状态 可选值 add adjust detail
     type() {
       return this.$route.query.type || 'detail'
@@ -328,8 +334,9 @@ export default {
                 style="width:100%"
                 disabled={this.isDetail}
                 vModel={data['parentId']}
-                props={this.treeProps}
+                treeProps={this.treeProps}
                 options={this.treeList}
+                showFilter
                 placeholder=""
               />
             ),
@@ -340,7 +347,13 @@ export default {
     // 获取左侧树
     async getTreeList() {
       const res = await fetchList()
-      this.treeList = res.data || []
+      this.treeList = [
+        {
+          id: '-1',
+          estimateName: '概算类型',
+          childEstimateTypeList: res && res.data ? res.data : [],
+        },
+      ]
     },
     // 初始化
     init() {
@@ -375,6 +388,8 @@ export default {
       this.list = []
     },
     async onTreeNodeClick(data) {
+      if (+data.id === -1) return
+      this.$refs['gridForm'].$refs['form'].resetFields()
       const id = data[this.rowKey]
       this.currentKey = id
       this.$refs.treeNode.setCurrentKey(id)
@@ -388,11 +403,27 @@ export default {
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
-    onSave() {
-      this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
+    // 点击提交
+    onSubmit() {
+      this.$refs['gridForm'].$refs['form'].validate(async (valid, err) => {
         this.notify && this.notify.close()
         if (valid) {
-          console.log('form', this.detail)
+          let payload = {
+            ...this.detail,
+            saveType: 2,
+          }
+          const res = await addEstimateType(payload)
+          if (res && res.status === 200) {
+            this.$notify({
+              title: '成功',
+              message: '操作成功',
+              type: 'success',
+              duration: 2000,
+            })
+            this.onResetInfo()
+            this.$router.replace(`${this.basePath}/list`)
+            this.getTreeList()
+          }
         } else {
           const msg = Object.entries(err)
             .map((item) => item[1].map((val) => val.message).join('，'))
@@ -410,6 +441,7 @@ export default {
       })
     },
     onResetInfo() {
+      this.$refs['gridForm'].$refs['form'].resetFields()
       this.detail = {}
       this.systemData = {}
       this.$refs.treeNode.setCurrentKey()
@@ -426,6 +458,31 @@ export default {
       this.$refs.treeNode.setCurrentKey()
       this.currentKey = null
       this.$router.replace(`${this.basePath}/list?type=adjust`)
+    },
+    // 点击删除
+    handleDelete() {
+      if (this.currentKey) {
+        this.$confirm('是否确定删除该数据？', '提示', { type: 'warning' }).then(
+          async () => {
+            const res = await deleteEstimateType({ id: this.currentKey })
+            if (res && res.status === 200) {
+              this.$notify({
+                title: '成功',
+                message: '操作成功',
+                type: 'success',
+                duration: 2000,
+              })
+              this.onResetInfo()
+              this.getTreeList()
+            }
+          }
+        )
+      } else {
+        this.$message({
+          message: '请选中想要删除的数据',
+          type: 'warning',
+        })
+      }
     },
   },
 }
