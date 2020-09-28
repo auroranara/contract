@@ -65,7 +65,7 @@
           <el-table-column
             align="center"
             label="单位名称"
-            prop="dwmc"
+            prop="unitName"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
@@ -107,6 +107,7 @@ import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
+import { fetchListByPage, fetchList } from '@/api/baseInfo/unit'
 
 export default {
   name: 'organization',
@@ -133,11 +134,11 @@ export default {
       queryDialogVisible: false,
       fields: [
         {
-          field: 'dwmc',
+          field: 'unitName',
           alwaysShow: true,
           label: '单位名称',
           render: (data) => (
-            <el-input placeholder="单位名称" vModel={data['dwmc']} />
+            <el-input placeholder="单位名称" vModel={data['unitName']} />
           ),
         },
       ],
@@ -171,7 +172,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.dwmc,
+            render: () => data.unitName,
           },
           {
             type: 'label',
@@ -207,42 +208,21 @@ export default {
       ]
     },
     // 获取左侧树
-    getTreeList() {
-      this.treeList = [
-        {
-          id: '1',
-          label: '单位',
-          children: [
-            {
-              id: '1-1',
-              label: '单位1',
-            },
-            {
-              id: '1-2',
-              label: '单位2',
-            },
-            {
-              id: '1-3',
-              label: '单位3',
-            },
-          ],
-        },
-      ]
+    async getTreeList() {
+      const res = await fetchList()
+      this.treeList = res.data || []
     },
     // 初始化
     init() {
       this.getTreeList()
     },
-    getList() {
-      this.list = [
-        {
-          id: '1-1',
-          label: '单位名称1',
-          dwmc: '单位名称1',
-          unitCode: '001',
-          convertRelationship: '50%',
-        },
-      ]
+    // 获取查询列表（分页）
+    async getList() {
+      this.listLoading = true
+      const res = await fetchListByPage(this.listQuery)
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
     },
     onSearch() {
       this.listQuery.page = 1
@@ -265,24 +245,12 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        id: '1-1',
-        dwmc: '单位名称1',
-        unitCode: '001',
-        convertRelationship: '50%',
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
+      const id = data[this.rowKey]
+      this.$refs.treeNode.setCurrentKey(id)
+      this.detail = data
+      this.systemData = data
     },
     onSelect(row) {
-      this.$refs.treeNode.setCurrentKey(row[this.rowKey])
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },

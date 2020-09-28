@@ -131,9 +131,15 @@ import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import TreeSelect from '@/components/TreeSelect'
 import { mapState } from 'vuex'
+import {
+  fetchListByPage,
+  fetchList,
+  fetchDetail,
+  addValueSet,
+} from '@/api/baseInfo/estimateType'
 
 export default {
-  name: 'bidStage',
+  name: 'estimateType',
   components: {
     ExpandFilter,
     GridForm,
@@ -190,7 +196,7 @@ export default {
       systemData: {},
       treeProps: {
         children: 'children',
-        label: 'label',
+        label: 'estimateName',
       },
       // 左侧树
       treeList: [],
@@ -209,6 +215,12 @@ export default {
         ],
         parentId: [
           { required: true, message: '请选择上级节点', trigger: 'blur' },
+        ],
+        isDisabled: [
+          { required: true, message: '请选择是否停用', trigger: 'blur' },
+        ],
+        adjustReason: [
+          { required: true, message: '请输入调整原因', trigger: 'blur' },
         ],
       },
       // 当前校验提示实例
@@ -326,64 +338,21 @@ export default {
       ]
     },
     // 获取左侧树
-    getTreeList() {
-      this.treeList = [
-        {
-          id: '1',
-          label: '概算1',
-          children: [
-            {
-              id: '1-1',
-              label: '概算1-1',
-            },
-            {
-              id: '1-2',
-              label: '概算1-2',
-            },
-            {
-              id: '1-3',
-              label: '概算1-3',
-            },
-          ],
-        },
-        {
-          id: '2',
-          label: '概算2',
-          children: [
-            {
-              id: '2-1',
-              label: '概算2-1',
-            },
-            {
-              id: '2-2',
-              label: '概算2-2',
-            },
-            {
-              id: '2-3',
-              label: '概算2-3',
-            },
-          ],
-        },
-        {
-          id: '3',
-          label: '概算3',
-        },
-      ]
+    async getTreeList() {
+      const res = await fetchList()
+      this.treeList = res.data || []
     },
     // 初始化
     init() {
       this.getTreeList()
     },
-    getList() {
-      this.list = [
-        {
-          id: '1-1',
-          estimateCode: 'G',
-          estimateName: '工程费用',
-          estimateUnit: 'm2',
-          parentId: '1',
-        },
-      ]
+    // 获取查询列表（分页）
+    async getList() {
+      this.listLoading = true
+      const res = await fetchListByPage(this.listQuery)
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
     },
     onSearch() {
       this.listQuery.page = 1
@@ -405,25 +374,15 @@ export default {
       }
       this.list = []
     },
-    onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
-      this.$refs.treeNode.setCurrentKey(data[this.rowKey])
+    async onTreeNodeClick(data) {
+      const id = data[this.rowKey]
+      this.currentKey = id
+      this.$refs.treeNode.setCurrentKey(id)
       this.$router.replace(`${this.basePath}/list`)
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        id: '1-1',
-        estimateCode: 'G',
-        estimateName: '工程费用',
-        estimateUnit: 'm2',
-        parentId: '1',
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
+      // 获取详情
+      const res = await fetchDetail({ id })
+      this.detail = res.data || {}
+      this.systemData = res.data || {}
     },
     onSelect(row) {
       this.onTreeNodeClick(row)

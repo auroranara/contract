@@ -122,9 +122,14 @@ import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import { judgeFilter } from '@/utils/filters'
+import {
+  fetchListByPage,
+  fetchList,
+  fetchDetail,
+} from '@/api/baseInfo/administrativeRegions'
 
 export default {
-  name: 'organization',
+  name: 'administrativeRegions',
   components: {
     ExpandFilter,
     GridForm,
@@ -170,7 +175,7 @@ export default {
       systemData: {},
       treeProps: {
         children: 'children',
-        label: 'label',
+        label: 'name',
       },
       // 左侧树
       treeList: [],
@@ -232,47 +237,28 @@ export default {
       ]
     },
     // 获取左侧树
-    getTreeList() {
-      this.treeList = [
-        {
-          id: '1',
-          label: '行政区域',
-          children: [
-            {
-              id: '1-1',
-              label: '行政区域1',
-            },
-            {
-              id: '1-2',
-              label: '行政区域2',
-            },
-            {
-              id: '1-3',
-              label: '行政区域3',
-            },
-          ],
-        },
-      ]
+    async getTreeList() {
+      const res = await fetchList()
+      this.treeList = res.data || []
     },
     // 初始化
     init() {
       this.getTreeList()
     },
-    getList() {
-      this.list = [
-        {
-          id: '1-1',
-          name: '河北市',
-          code: '110000',
-          isValue: 1,
-          isCancel: 1,
-        },
-      ]
+    // 获取查询列表（分页）
+    async getList() {
+      this.listLoading = true
+      const res = await fetchListByPage(this.listQuery)
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
     },
+    // 查询弹窗查询
     onSearch() {
       this.listQuery.page = 1
       this.getList()
     },
+    // 查询弹窗点击重置数据
     onReset() {
       this.listQuery = {
         page: 1,
@@ -289,24 +275,15 @@ export default {
       }
       this.list = []
     },
-    onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        key: '1-1',
-        label: '河北市',
-        name: '河北市',
-        code: '110000',
-        isValue: 1,
-        isCancel: 1,
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
+    // 点击左侧树节点
+    async onTreeNodeClick(data) {
+      const id = data[this.rowKey]
+      this.currentKey = id
+      this.$refs.treeNode.setCurrentKey(id)
+      // 获取详情
+      const res = await fetchDetail({ id })
+      this.detail = res && res.data ? res.data : {}
+      this.systemData = res && res.data ? res.data : {}
     },
     onSelect(row) {
       this.$refs.treeNode.setCurrentKey(row[this.rowKey])

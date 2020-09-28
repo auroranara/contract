@@ -9,11 +9,19 @@
         >查询</el-button
       >
       <el-button plain type="primary" @click="onClickAdd">新增</el-button>
-      <el-button plain type="primary" @click="onSave">保存</el-button>
-      <el-button plain type="primary">提交</el-button>
-      <el-button plain type="primary" @click="onClickAdjust">调整</el-button>
+      <!-- <el-button plain type="primary" @click="onSave">保存</el-button> -->
+      <el-button :disabled="isDetail" plain type="primary" @click="onSubmit"
+        >提交</el-button
+      >
+      <el-button
+        :disabled="!(isDetail && currentKey)"
+        plain
+        type="primary"
+        @click="onClickAdjust"
+        >调整</el-button
+      >
       <el-button plain type="primary">审核</el-button>
-      <el-button plain type="primary">删除</el-button>
+      <el-button :disabled="!isDetail" plain type="primary">删除</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -78,6 +86,7 @@
                 <template slot-scope="scope">
                   <el-checkbox
                     :value="!!scope.row.isPrimaryAccount"
+                    @change="onIsPrimaryChange(scope.$index)"
                   ></el-checkbox>
                 </template>
               </el-table-column>
@@ -85,7 +94,7 @@
                 width="150"
                 prop="headOfficeName"
                 label="总行信息"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
                 align="center"
               >
                 <template slot-scope="scope">
@@ -100,7 +109,7 @@
                 width="150"
                 prop="openBank"
                 label="开户行"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
                 align="center"
               >
                 <template slot-scope="scope">
@@ -115,7 +124,7 @@
                 width="100"
                 prop="province"
                 label="省"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
                 align="center"
               >
                 <template slot-scope="scope">
@@ -130,7 +139,7 @@
                 width="100"
                 prop="city"
                 label="市"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
                 align="center"
               >
                 <template slot-scope="scope">
@@ -145,7 +154,7 @@
                 width="150"
                 prop="branchOfficeName"
                 label="分行名称"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
                 align="center"
               >
                 <template slot-scope="scope">
@@ -160,7 +169,7 @@
                 width="150"
                 prop="correspondentNo"
                 label="联行号"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
                 align="center"
               >
                 <template slot-scope="scope">
@@ -175,7 +184,7 @@
                 width="100"
                 prop="accountHolder"
                 label="开户人"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
                 align="center"
               >
                 <template slot-scope="scope">
@@ -190,7 +199,7 @@
                 width="150"
                 prop="esignature"
                 label="电子签章"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
                 align="center"
               >
                 <template slot-scope="scope">
@@ -206,13 +215,16 @@
                 prop="isReceiveTicket"
                 label="是否接受电子银票"
                 align="center"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
               >
                 <template slot-scope="scope">
-                  <el-input
+                  <el-radio-group
                     v-if="!isDetail"
                     v-model="customerBankList[scope.$index].isReceiveTicket"
-                  ></el-input>
+                  >
+                    <el-radio :label="1">是</el-radio>
+                    <el-radio :label="0">否</el-radio>
+                  </el-radio-group>
                   <span v-else>{{ scope.row.isReceiveTicket }}</span>
                 </template>
               </el-table-column>
@@ -220,7 +232,7 @@
                 width="150"
                 prop="remarks"
                 label="备注"
-                :show-overflow-tooltip="true"
+                :show-overflow-tooltip="isDetail"
                 align="center"
               >
                 <template slot-scope="scope">
@@ -304,7 +316,12 @@ import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import { mapState } from 'vuex'
-import { fetchList } from '@/api/baseInfo/client'
+import {
+  fetchList,
+  fetchListByPage,
+  fetchDetail,
+  addClient,
+} from '@/api/baseInfo/client'
 
 export default {
   name: 'client',
@@ -338,7 +355,7 @@ export default {
       queryDialogVisible: false,
       treeProps: {
         children: 'children',
-        label: 'label',
+        label: 'customerName',
       },
       // 左侧树
       treeList: [],
@@ -355,6 +372,33 @@ export default {
         isRelationship: [
           { required: true, message: '请输入是否关联方', trigger: 'blur' },
         ],
+        isTaxpayer: [
+          { required: true, message: '请选择是否一般纳税人', trigger: 'blur' },
+        ],
+        invoiceTitle: [
+          { required: true, message: '请输入开票抬头', trigger: 'blur' },
+        ],
+        socialCreditCode: [
+          {
+            required: true,
+            message: '请输入统一社会信用代码',
+            trigger: 'blur',
+          },
+        ],
+        country: [{ required: true, message: '请选择国家', trigger: 'blur' }],
+        province: [
+          { required: true, message: '请选择省/自治区', trigger: 'blur' },
+        ],
+        city: [{ required: true, message: '请选择市', trigger: 'blur' }],
+        addressPhone: [
+          { required: true, message: '请输入地址、电话', trigger: 'blur' },
+        ],
+        isDisabled: [
+          { required: true, message: '请选择是否停用', trigger: 'blur' },
+        ],
+        adjustReason: [
+          { required: true, message: '请输入调整原因', trigger: 'blur' },
+        ],
       },
       fields: [
         {
@@ -370,7 +414,7 @@ export default {
           label: '状态',
           alwaysShow: true,
           render: (data) => (
-            <el-select vModel={data['status']}>
+            <el-select placeholder="状态" vModel={data['status']}>
               {this.statusDict.map(({ value, label }) => (
                 <el-option key={value} value={value} label={label}></el-option>
               ))}
@@ -410,8 +454,8 @@ export default {
           {
             type: 'label',
             label: '客户名称',
+            field: 'customerName',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
@@ -427,8 +471,8 @@ export default {
           {
             type: 'label',
             label: '客户编码',
+            field: 'customerCode',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
@@ -444,8 +488,8 @@ export default {
               {
                 type: 'label',
                 label: '是否停用',
+                field: 'isDisabled',
                 showBg: true,
-                required: true,
               },
               {
                 type: 'handler',
@@ -469,8 +513,8 @@ export default {
           {
             type: 'label',
             label: '是否关联方',
+            field: 'isRelationship',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
@@ -489,8 +533,8 @@ export default {
           {
             type: 'label',
             label: '是否一般纳税人',
+            field: 'isTaxpayer',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
@@ -511,8 +555,8 @@ export default {
           {
             type: 'label',
             label: '开票抬头',
+            field: 'invoiceTitle',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
@@ -528,8 +572,8 @@ export default {
           {
             type: 'label',
             label: '统一社会信用代码',
+            field: 'socialCreditCode',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
@@ -547,39 +591,29 @@ export default {
           {
             type: 'label',
             label: '国家',
+            field: 'country',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
             field: 'country',
             disabled: this.isDetail,
             render: (data) => (
-              <el-select
-                disabled={this.isDetail}
-                placeholder=""
-                vModel={data['country']}
-                style="width:100%"
-              ></el-select>
+              <el-input readonly={this.isDetail} vModel={data['country']} />
             ),
           },
           {
             type: 'label',
             label: '省/自治区',
+            field: 'province',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
             field: 'province',
             disabled: this.isDetail,
             render: (data) => (
-              <el-select
-                disabled={this.isDetail}
-                placeholder=""
-                vModel={data['province']}
-                style="width:100%"
-              ></el-select>
+              <el-input readonly={this.isDetail} vModel={data['province']} />
             ),
           },
         ],
@@ -587,27 +621,22 @@ export default {
           {
             type: 'label',
             label: '市',
+            field: 'city',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
             field: 'city',
             disabled: this.isDetail,
             render: (data) => (
-              <el-select
-                disabled={this.isDetail}
-                placeholder=""
-                vModel={data['city']}
-                style="width:100%"
-              ></el-select>
+              <el-input readonly={this.isDetail} vModel={data['city']} />
             ),
           },
           {
             type: 'label',
             label: '地址、电话',
+            field: 'addressPhone',
             showBg: true,
-            required: true,
           },
           {
             type: 'handler',
@@ -627,8 +656,8 @@ export default {
                 {
                   type: 'label',
                   label: '调整原因',
+                  field: 'adjustReason',
                   showBg: true,
-                  required: true,
                 },
                 {
                   type: 'handler',
@@ -643,6 +672,7 @@ export default {
                 {
                   type: 'label',
                   label: '调整说明',
+                  field: 'adjustExplain',
                   showBg: true,
                 },
                 {
@@ -662,46 +692,27 @@ export default {
     async getTreeList() {
       this.treeLoading = true
       const res = await fetchList()
-      console.log('res', res)
       this.treeLoading = false
-      this.treeList = [
-        {
-          id: '1',
-          label: '客户',
-          children: [
-            {
-              id: '1-1',
-              label: '客户1',
-            },
-            {
-              id: '1-2',
-              label: '客户2',
-            },
-            {
-              id: '1-3',
-              label: '客户3',
-            },
-          ],
-        },
-      ]
+      this.treeList = res.data || []
     },
     // 初始化
     init() {
       this.getTreeList()
     },
-    getList() {
-      this.list = [
-        {
-          key: '1',
-          customerName: '江苏普信土地房地产资产评估测绘有限公司',
-          status: '审批完成',
-        },
-      ]
+    // 获取查询列表（分页）
+    async getList() {
+      this.listLoading = true
+      const res = await fetchListByPage(this.listQuery)
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
     },
+    // 查询弹窗查询
     onSearch() {
       this.listQuery.page = 1
       this.getList()
     },
+    // 查询弹窗点击重置数据
     onReset() {
       this.listQuery = {
         page: 1,
@@ -710,12 +721,15 @@ export default {
       this.getList()
     },
     onResetInfo() {
+      this.$refs['gridForm'].$refs['form'].resetFields()
       this.detail = {}
       this.systemData = {}
       this.customerBankList = []
+      this.selectedBank = []
       this.$refs.treeNode.setCurrentKey()
       this.currentKey = null
     },
+    // 点击打开查询弹窗
     handleViewSearch() {
       this.queryDialogVisible = true
       this.listQuery = {
@@ -724,61 +738,37 @@ export default {
       }
       this.list = []
     },
-    onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
+    // 点击左侧树节点
+    async onTreeNodeClick(data) {
+      this.$refs['gridForm'].$refs['form'].resetFields()
+      const id = data[this.rowKey]
+      this.currentKey = id
+      this.$refs.treeNode.setCurrentKey(id)
       this.$router.replace(`${this.basePath}/list`)
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        customerName: '无锡普信土地资产评估测绘有限公司',
-        customerCode: 'JS0099156',
-        isRelationship: 1,
-        isTaxpayer: 1,
-        invoiceTitle: '江苏普信土地房地产资产评估测绘有限公司',
-        socialCreditCode: '912000123213F',
-        country: '中国',
-        province: '江苏',
-        city: '无锡',
-        addressPhone: '无锡新区旺庄路52-2101232',
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
-      this.customerBankList = [
-        {
-          id: '1',
-          isPrimaryAccount: 1,
-          headOfficeName: '交通银行',
-          openBank: '交通银行青山支行',
-          province: '江苏省',
-          city: '无锡市',
-          branchOfficeName: '交通银行股份有限公司',
-          yhzh: '6058182298765512',
-          correspondentNo: '103120230',
-        },
-      ]
+      // 获取详情
+      const res = await fetchDetail({ id })
+      this.detail = res && res.data ? res.data : {}
+      this.systemData = res && res.data ? res.data : {}
+      this.customerBankList =
+        res && res.data && res.data.customerBankList
+          ? res.data.customerBankList
+          : []
+      this.selectedBank = []
     },
     // 查询中选中信息
     onSelect(row) {
-      this.$refs.treeNode.setCurrentKey(row[this.rowKey])
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
-    onSave() {
-      console.log('customerBankList', this.customerBankList)
+    onSubmit() {
       this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
         this.notify && this.notify.close()
-        if (valid) {
-          console.log('form', this.detail)
-        } else {
+        if (!valid) {
           const msg = Object.entries(err)
             .map((item) => item[1].map((val) => val.message).join('，'))
             .join('\n')
           this.$notify.error({
-            title: '校验错误信息',
+            title: '基础信息校验错误',
             message: this.$createElement(
               'div',
               { style: 'white-space:pre-wrap' },
@@ -786,8 +776,31 @@ export default {
             ),
             duration: 20000,
           })
+        } else if (this.isAdd) {
+          this.handleAdd()
         }
       })
+    },
+    // 新增调用
+    async handleAdd() {
+      const payload = {
+        ...this.detail,
+        customerBankList: this.customerBankList.map(
+          ({ tempId, ...resValues }) => resValues
+        ),
+      }
+      const res = await addClient(payload)
+      if (res && res.status === 200) {
+        this.$notify({
+          title: '成功',
+          message: '操作成功',
+          type: 'success',
+          duration: 2000,
+        })
+        this.onResetInfo()
+        this.$router.replace(`${this.basePath}/list`)
+        this.getTreeList()
+      }
     },
     // 点击新增
     onClickAdd() {
@@ -806,12 +819,15 @@ export default {
     },
     // 新增银行
     addBank() {
-      this.customerBankList = [...this.customerBankList, { id: Date.now() }]
+      this.customerBankList = [...this.customerBankList, { tempId: Date.now() }]
     },
     deleteBank() {
       if (Array.isArray(this.selectedBank) && this.selectedBank.length) {
         this.customerBankList = this.customerBankList.filter(
-          (item) => !this.selectedBank.some((val) => val.id === item.id)
+          (item) =>
+            !this.selectedBank.some(
+              (val) => (val.id || val.tempId) === (item.id || item.tempId)
+            )
         )
       } else {
         this.$message({
@@ -819,6 +835,13 @@ export default {
           type: 'warning',
         })
       }
+    },
+    // 点击银行信息是否主账户
+    onIsPrimaryChange(index) {
+      this.customerBankList = this.customerBankList.map((item, i) => ({
+        ...item,
+        isPrimaryAccount: i === index ? 1 : 0,
+      }))
     },
   },
 }

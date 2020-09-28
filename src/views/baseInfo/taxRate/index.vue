@@ -113,9 +113,10 @@ import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
+import { fetchListByPage, fetchList, fetchDetail } from '@/api/baseInfo/taxRate'
 
 export default {
-  name: 'organization',
+  name: 'taxRate',
   components: {
     ExpandFilter,
     GridForm,
@@ -161,7 +162,7 @@ export default {
       systemData: {},
       treeProps: {
         children: 'children',
-        label: 'label',
+        label: 'taxRateName',
       },
       // 左侧树
       treeList: [],
@@ -223,43 +224,21 @@ export default {
       ]
     },
     // 获取左侧树
-    getTreeList() {
-      this.treeList = [
-        {
-          id: '1',
-          label: '税率',
-          children: [
-            {
-              id: '1-1',
-              label: '税率1',
-            },
-            {
-              id: '1-2',
-              label: '税率2',
-            },
-            {
-              id: '1-3',
-              label: '税率3',
-            },
-          ],
-        },
-      ]
+    async getTreeList() {
+      const res = await fetchList()
+      this.treeList = res.data || []
     },
     // 初始化
     init() {
       this.getTreeList()
     },
-    getList() {
-      this.list = [
-        {
-          id: '1-1',
-          label: '税率1',
-          taxRateName: '税率1',
-          taxRateCode: 'SDSADSAFASF',
-          effectiveTo: '2019/9/1',
-          effectiveFrom: '2025/4/6',
-        },
-      ]
+    // 获取查询列表（分页）
+    async getList() {
+      this.listLoading = true
+      const res = await fetchListByPage(this.listQuery)
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
     },
     onSearch() {
       this.listQuery.page = 1
@@ -281,27 +260,15 @@ export default {
       }
       this.list = []
     },
-    onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        id: '1-1',
-        label: '税率1',
-        taxRateName: '税率1',
-        taxRateCode: 'SDSADSAFASF',
-        effectiveTo: '2019/9/1',
-        effectiveFrom: '2025/4/6',
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
+    // 点击左侧树
+    async onTreeNodeClick(data) {
+      const id = data[this.rowKey]
+      this.$refs.treeNode.setCurrentKey(id)
+      const res = await fetchDetail({ id })
+      this.detail = res && res.data ? res.data : {}
+      this.systemData = res && res.data ? res.data : {}
     },
     onSelect(row) {
-      this.$refs.treeNode.setCurrentKey(row[this.rowKey])
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },

@@ -140,6 +140,7 @@ import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import { judgeFilter } from '@/utils/filters'
+import { fetchListByPage, fetchList } from '@/api/baseInfo/supplier'
 
 export default {
   name: 'supplier',
@@ -178,7 +179,10 @@ export default {
           alwaysShow: true,
           label: '供应商类型',
           render: (data) => (
-            <el-input placeholder="供应商类型" vModel={data['type']} />
+            <el-select
+              placeholder="供应商类型"
+              vModel={data['type']}
+            ></el-select>
           ),
         },
         {
@@ -186,7 +190,10 @@ export default {
           label: '供应商类别',
           alwaysShow: true,
           render: (data) => (
-            <el-input placeholder="供应商类别" vModel={data['category']} />
+            <el-select
+              placeholder="供应商类别"
+              vModel={data['category']}
+            ></el-select>
           ),
         },
       ],
@@ -196,7 +203,7 @@ export default {
       systemData: {},
       treeProps: {
         children: 'children',
-        label: 'label',
+        label: 'name',
       },
       // 左侧树
       treeList: [],
@@ -369,52 +376,21 @@ export default {
       ]
     },
     // 获取左侧树
-    getTreeList() {
-      this.treeList = [
-        {
-          id: '1',
-          label: '供应商',
-          children: [
-            {
-              id: '1-1',
-              label: '供应商1',
-            },
-            {
-              id: '1-2',
-              label: '供应商2',
-            },
-            {
-              id: '1-3',
-              label: '供应商3',
-            },
-          ],
-        },
-      ]
+    async getTreeList() {
+      const res = await fetchList()
+      this.treeList = res.data || []
     },
     // 初始化
     init() {
       this.getTreeList()
     },
-    getList() {
-      this.list = [
-        {
-          id: '1-1',
-          label: '供应商1',
-          name: '无锡广大汽车租赁有限公司',
-          code: 'GYS000000002',
-          logo: '201901121012-F5D3-1C6',
-          category: '监理',
-          type: '工程类',
-          isRelevance: 1,
-          socialCreditCode: '9121123213213123123',
-          country: 'CN',
-          province: '江苏',
-          city: '无锡',
-          isDisabled: 0,
-          enableTime: '2020-02-12',
-          disableTime: '2025-02-12',
-        },
-      ]
+    // 获取查询列表（分页）
+    async getList() {
+      this.listLoading = true
+      const res = await fetchListByPage(this.listQuery)
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
     },
     onSearch() {
       this.listQuery.page = 1
@@ -437,42 +413,12 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
-      this.$refs.treeNode.setCurrentKey(data[this.rowKey])
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        id: '1-1',
-        name: '无锡广大汽车租赁有限公司',
-        code: 'GYS000000002',
-        logo: '201901121012-F5D3-1C6',
-        category: '监理',
-        type: '工程类',
-        isRelevance: 1,
-        socialCreditCode: '9121123213213123123',
-        country: 'CN',
-        province: '江苏',
-        city: '无锡',
-        isDisabled: 0,
-        enableTime: '2020-02-12',
-        disableTime: '2025-02-12',
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
-      this.customerBankList = [
-        {
-          id: '1',
-          isPrimaryAccount: 1,
-          name: '交通银行',
-          branchBankName: '交通银行青山支行',
-          bankAccount: '6058182298765512',
-          relevanceBankNumber: '103120230',
-        },
-      ]
+      const id = data[this.rowKey]
+      this.currentKey = id
+      this.$refs.treeNode.setCurrentKey(id)
+      this.detail = data
+      this.systemData = data
+      this.customerBankList = data.customerBankList || []
     },
     onSelect(row) {
       this.onTreeNodeClick(row)

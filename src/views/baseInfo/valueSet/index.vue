@@ -14,7 +14,7 @@
         >提交</el-button
       >
       <el-button
-        :disabled="!isDetail"
+        :disabled="!(isDetail && currentKey)"
         plain
         type="primary"
         @click="onClickAdjust"
@@ -42,7 +42,7 @@
       <!-- 右侧内容 -->
       <el-col :span="18">
         <el-tabs type="border-card" v-model="tabKey">
-          <el-tab-pane name="jcxx" label="供应商信息">
+          <el-tab-pane name="jcxx" label="值集信息">
             <!-- 基础信息 -->
             <block-title title="基础信息" />
             <grid-form
@@ -138,7 +138,7 @@
                       :label="label"
                     ></el-option>
                   </el-select>
-                  <span v-else>{{ scope.row.listStatus }}</span>
+                  <span v-else>{{ scope.row.listStatus | statusFilter }}</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -192,7 +192,11 @@
             label="状态"
             prop="enableStatus"
             :show-overflow-tooltip="true"
-          ></el-table-column>
+          >
+            <template slot-scope="scope">
+              {{ scope.row.enableStatus | statusFilter }}
+            </template>
+          </el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
               <el-button @click="onSelect(scope.row)" type="text"
@@ -267,7 +271,7 @@ export default {
           alwaysShow: true,
           label: '值集编码',
           render: (data) => (
-            <el-input placeholder="供应商类型" vModel={data['code']} />
+            <el-input placeholder="值集编码" vModel={data['code']} />
           ),
         },
         {
@@ -308,6 +312,12 @@ export default {
         enableStatus: [
           { required: true, message: '请选择状态', trigger: 'blur' },
         ],
+        isDisabled: [
+          { required: true, message: '请选择是否停用', trigger: 'blur' },
+        ],
+        adjustReason: [
+          { required: true, message: '请输入调整原因', trigger: 'blur' },
+        ],
       },
       // 值集状态
       statusOptions: [
@@ -339,8 +349,7 @@ export default {
   filters: {
     // 状态
     statusFilter(value) {
-      const target = this.statusOptions.find((item) => item.value === value)
-      return target ? target.label : ''
+      return (value === 1 && '已启用') || (value === 0 && '已停用') || ''
     },
   },
   created() {
@@ -387,11 +396,11 @@ export default {
               },
               {
                 type: 'handler',
-                field: 'enableStatus',
+                field: 'isDisabled',
                 render: (data) => (
-                  <el-radio-group vModel={data['enableStatus']}>
-                    <el-radio label={0}>是</el-radio>
-                    <el-radio label={1}>否</el-radio>
+                  <el-radio-group vModel={data['isDisabled']}>
+                    <el-radio label={1}>是</el-radio>
+                    <el-radio label={0}>否</el-radio>
                   </el-radio-group>
                 ),
               },
@@ -497,23 +506,20 @@ export default {
     init() {
       this.getTreeList()
     },
+    // 获取查询列表（分页）
     async getList() {
+      this.listLoading = true
       const res = await fetchListByPage(this.listQuery)
-      console.log('res', res)
-      this.list = [
-        {
-          key: '1-1',
-          name: '招标方式',
-          code: '0202',
-          enableTime: new Date(),
-          status: '审批完成',
-        },
-      ]
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
     },
+    // 查询弹窗查询
     onSearch() {
       this.listQuery.page = 1
       this.getList()
     },
+    // 查询弹窗重置
     onReset() {
       this.listQuery = {
         page: 1,
@@ -532,6 +538,7 @@ export default {
     },
     // 点击左侧树
     async onTreeNodeClick(data) {
+      this.$refs['gridForm'].$refs['form'].resetFields()
       const id = data[this.rowKey]
       this.currentKey = id
       this.$refs.treeNode.setCurrentKey(id)
@@ -543,11 +550,13 @@ export default {
       this.paramsList = res.data && res.data.unitLists ? res.data.unitLists : []
       this.selectedParams = []
     },
+    // 查询弹窗选择
     onSelect(row) {
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
     onResetInfo() {
+      this.$refs['gridForm'].$refs['form'].resetFields()
       this.detail = {}
       this.systemData = {}
       this.paramsList = []
@@ -567,14 +576,11 @@ export default {
       this.currentKey = null
       this.$router.replace(`${this.basePath}/list?type=adjust`)
     },
+    // 点击提交
     onSubmit() {
       this.$refs['gridForm'].$refs['form'].validate(async (valid, err) => {
         this.notify && this.notify.close()
-        if (valid) {
-          if (this.isAdd) {
-            this.handleAdd()
-          }
-        } else {
+        if (!valid) {
           const msg = Object.entries(err)
             .map((item) => item[1].map((val) => val.message).join('，'))
             .join('\n')
@@ -587,10 +593,14 @@ export default {
             ),
             duration: 20000,
           })
+        } else if (this.isAdd) {
+          this.handleAdd()
+        } else if (this.isAdjust) {
+          this.handleAdjust()
         }
       })
     },
-    // 新增
+    // 新增调用
     async handleAdd() {
       const payload = {
         ...this.detail,
@@ -609,20 +619,26 @@ export default {
         this.getTreeList()
       }
     },
-    // validateParam() {
-    //   const valid =
-    //     this.paramsList &&
-    //     this.paramsList.length > 0 &&
-    //     this.paramsList.every((item) => item.listName && item.listCode)
-    //   if (valid) {
-    //     return true
-    //   } else {
-    //     this.$notify.error({
-    //       title: '参数列表校验错误',
-    //       message: '请完善必填项',
-    //     })
-    //   }
-    // },
+    // 调整调用
+    async handleAdjust() {
+      const payload = {
+        ...this.detail,
+        saveType: 2,
+        unitLists: this.paramsList.map(({ tempId, ...resValues }) => resValues),
+      }
+      const res = await addValueSet(payload)
+      if (res && res.status === 200) {
+        this.$notify({
+          title: '成功',
+          message: '操作成功',
+          type: 'success',
+          duration: 2000,
+        })
+        this.onResetInfo()
+        this.$router.replace(`${this.basePath}/list`)
+        this.getTreeList()
+      }
+    },
     // 点击新增参数列表
     handleAddParams() {
       if (
