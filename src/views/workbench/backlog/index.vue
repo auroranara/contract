@@ -24,45 +24,56 @@
         <el-table-column
           align="center"
           label="工作阶段"
-          prop="gzjd"
+          prop="workStage"
           :show-overflow-tooltip="true"
         ></el-table-column>
         <el-table-column
           align="center"
           label="待办任务"
-          prop="dbrw"
+          prop="toDoTask"
           :show-overflow-tooltip="true"
         >
-          <template slot-scope="scope">
-            <el-link type="primary" :underline="false">{{
-              scope.row.dbrw
-            }}</el-link>
-          </template>
         </el-table-column>
         <el-table-column
           align="center"
           label="单据类型"
-          prop="djlx"
+          prop="ticketType"
           :show-overflow-tooltip="true"
         ></el-table-column>
         <el-table-column
           align="center"
           label="单据名称"
-          prop="djmc"
+          prop="ticketName"
           :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
+        >
+          <template slot-scope="scope">
+            <el-link
+              @click="handleView(scope.row)"
+              type="primary"
+              :underline="false"
+              >{{ scope.row.ticketName }}</el-link
+            >
+          </template>
+        </el-table-column>
+        <!-- <el-table-column
           align="center"
           label="创建时间"
-          prop="cjsj"
+          prop="createTime"
           :show-overflow-tooltip="true"
-        ></el-table-column>
+        ></el-table-column> -->
         <el-table-column
           align="center"
           label="备注"
-          prop="bz"
+          prop="remarks"
           :show-overflow-tooltip="true"
         ></el-table-column>
+        <el-table-column align="center" label="操作">
+          <template slot-scope="scope">
+            <el-button @click="handleView(scope.row)" type="text"
+              >查看</el-button
+            >
+          </template>
+        </el-table-column>
       </el-table>
 
       <!--分页组件-->
@@ -80,6 +91,8 @@
 import ExpandFilter from '@/components/ExpandFilter'
 import Pagination from '@/components/Pagination'
 import moment from 'moment'
+import { fetchTaskFlowList } from '@/api/workbench'
+import jump from '@/utils/jump'
 
 export default {
   name: 'backlog',
@@ -93,48 +106,48 @@ export default {
       listQuery: {
         page: 1,
         limit: 10,
+        dealType: 1,
       },
       total: 0,
       list: [],
       fields: [
         {
-          field: 'gzjd',
-          alwaysShow: true,
-          label: '工作阶段',
-          render: (data) => (
-            <el-input placeholder="工作阶段" vModel={data['gzjd']} />
-          ),
-        },
-        {
-          field: 'dbrw',
+          field: 'toDoTask',
           alwaysShow: true,
           label: '待办任务',
           render: (data) => (
-            <el-input placeholder="待办任务" vModel={data['dbrw']} />
+            <el-input placeholder="待办任务" vModel={data['toDoTask']} />
           ),
         },
         {
-          field: 'djlx',
+          field: 'ticketName',
+          label: '单据名称',
           alwaysShow: true,
+          render: (data) => (
+            <el-input placeholder="单据名称" vModel={data['ticketName']} />
+          ),
+        },
+        {
+          field: 'workStage',
+          label: '工作阶段',
+          render: (data) => (
+            <el-input placeholder="工作阶段" vModel={data['workStage']} />
+          ),
+        },
+        {
+          field: 'ticketType',
           label: '单据类型',
           render: (data) => (
-            <el-input placeholder="单据类型" vModel={data['djlx']} />
+            <el-input placeholder="单据类型" vModel={data['ticketType']} />
           ),
         },
         {
-          field: 'djmc',
-          label: '单据名称',
-          render: (data) => (
-            <el-input placeholder="单据名称" vModel={data['djmc']} />
-          ),
-        },
-        {
-          field: 'cjsj',
+          field: 'createTime',
           label: '创建时间',
           render: (data) => (
             <el-date-picker
               style="width:100%"
-              vModel={data['cjsj']}
+              vModel={data['createTime']}
               type="daterange"
               unlink-panels
               range-separator="-"
@@ -170,21 +183,15 @@ export default {
     this.getList()
   },
   methods: {
-    getList() {
-      this.list = [
-        {
-          gzjd: '招标阶段',
-          dbrw: '控制价清单审核',
-          djlx: '招标控制价',
-          djmc: '无锡地铁具区路车辆段基础工程',
-          cjsj: '2020-07-06 13:23:12',
-          bz: '',
-        },
-      ]
+    async getList() {
+      this.listLoading = true
+      const res = await fetchTaskFlowList(this.listQuery)
+      this.list = res.data || []
+      this.total = res.total || 0
+      this.listLoading = false
     },
     // 点击新增
     onSearch() {
-      console.log('listQuery', this.listQuery)
       this.listQuery.page = 1
       this.getList()
     },
@@ -195,6 +202,10 @@ export default {
         limit: 10,
       }
       this.getList()
+    },
+    // 点击查看
+    handleView(data) {
+      jump(data)
     },
   },
 }

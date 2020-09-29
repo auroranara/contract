@@ -14,7 +14,7 @@
         plain
         type="primary"
         @click="onClickAdjust"
-        >修改</el-button
+        >调整</el-button
       >
       <el-button :disabled="isDetail" plain type="primary" @click="onSubmit"
         >提交</el-button

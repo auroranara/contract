@@ -34,7 +34,6 @@
               ref="gridForm"
               :settings="baseSettings(this.detail)"
               :model="detail"
-              :rules="rules"
             ></grid-form>
             <block-title title="银行信息" />
             <el-table style="margin-top: 10px" :data="customerBankList" border>
@@ -210,6 +209,11 @@ import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
 import { mapState } from 'vuex'
+import {
+  fetchAdjustList,
+  fetchAdjustListByPage,
+  fetchAdjustDetail,
+} from '@/api/baseInfo/client'
 
 export default {
   name: 'client',
@@ -250,16 +254,6 @@ export default {
       list: [],
       currentKey: null,
       customerBankList: [],
-      // 银行信息中选中的对象
-      selectedBank: [],
-      rules: {
-        customerName: [
-          { required: true, message: '请输入客户名称', trigger: 'blur' },
-        ],
-        isRelationship: [
-          { required: true, message: '请输入是否关联方', trigger: 'blur' },
-        ],
-      },
       fields: [
         {
           field: 'customerName',
@@ -547,40 +541,21 @@ export default {
       ]
     },
     // 获取左侧树
-    getTreeList() {
-      this.treeList = [
-        {
-          id: '1',
-          label: '客户',
-          children: [
-            {
-              id: '1-1',
-              label: '客户1',
-            },
-            {
-              id: '1-2',
-              label: '客户2',
-            },
-            {
-              id: '1-3',
-              label: '客户3',
-            },
-          ],
-        },
-      ]
+    async getTreeList() {
+      const res = await fetchAdjustList()
+      this.treeList = res.data || []
     },
     // 初始化
     init() {
       this.getTreeList()
     },
-    getList() {
-      this.list = [
-        {
-          key: '1',
-          customerName: '江苏普信土地房地产资产评估测绘有限公司',
-          status: '审批完成',
-        },
-      ]
+    // 获取查询列表（分页）
+    async getList() {
+      this.listLoading = true
+      const res = await fetchAdjustList(this.listQuery)
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
     },
     onSearch() {
       this.listQuery.page = 1
@@ -609,40 +584,22 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        customerName: '无锡普信土地资产评估测绘有限公司',
-        customerCode: 'JS0099156',
-        isRelationship: 1,
-        isTaxpayer: 1,
-        invoiceTitle: '江苏普信土地房地产资产评估测绘有限公司',
-        socialCreditCode: '912000123213F',
-        country: '中国',
-        province: '江苏',
-        city: '无锡',
-        addressPhone: '无锡新区旺庄路52-2101232',
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
-      this.customerBankList = [
-        {
-          id: '1',
-          isPrimaryAccount: 1,
-          headOfficeName: '交通银行',
-          openBank: '交通银行青山支行',
-          province: '江苏省',
-          city: '无锡市',
-          branchOfficeName: '交通银行股份有限公司',
-          yhzh: '6058182298765512',
-          correspondentNo: '103120230',
-        },
-      ]
+      const id = data[this.rowKey]
+      this.currentKey = id
+      this.$refs.treeNode.setCurrentKey(id)
+      this.$router.replace(`${this.basePath}/adjust`)
+      // 获取详情
+      this.fetchDetail({ id })
+    },
+    // 获取详情
+    async fetchDetail(query) {
+      const res = await fetchAdjustDetail(query)
+      this.detail = res && res.data ? res.data : {}
+      this.systemData = res && res.data ? res.data : {}
+      this.customerBankList =
+        res && res.data && res.data.customerBankList
+          ? res.data.customerBankList
+          : []
     },
     // 查询中选中信息
     onSelect(row) {

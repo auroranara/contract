@@ -9,19 +9,34 @@
         >查询</el-button
       >
       <el-button plain type="primary" @click="onClickAdd">新增</el-button>
-      <!-- <el-button plain type="primary" @click="onSave">保存</el-button> -->
-      <el-button :disabled="isDetail" plain type="primary" @click="onSubmit"
-        >提交</el-button
-      >
+      <el-button :disabled="!saveAuth" plain type="primary" @click="onSave">
+        保存
+      </el-button>
       <el-button
-        :disabled="!(isDetail && currentKey)"
+        :disabled="!adjustAuth"
         plain
         type="primary"
         @click="onClickAdjust"
-        >调整</el-button
       >
-      <el-button plain type="primary">审核</el-button>
-      <el-button :disabled="!isDetail" plain type="primary">删除</el-button>
+        调整
+      </el-button>
+      <el-button :disabled="!submitAuth" plain type="primary" @click="onSubmit">
+        提交
+      </el-button>
+      <el-button
+        :disabled="!checkAuth"
+        plain
+        type="primary"
+        @click="handleViewCheck"
+        >审核</el-button
+      >
+      <el-button
+        :disabled="!deleteAuth"
+        @click="handleDelete"
+        plain
+        type="primary"
+        >删除</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -52,14 +67,14 @@
             ></grid-form>
             <block-title title="银行信息" />
             <el-button
-              v-if="!isDetail"
+              v-if="!saveAuth"
               size="small"
               type="primary"
               @click="addBank"
               >新增</el-button
             >
             <el-button
-              v-if="!isDetail"
+              v-if="!saveAuth"
               size="small"
               type="danger"
               :disabled="!(selectedBank && selectedBank.length)"
@@ -252,6 +267,7 @@
       </el-col>
     </el-row>
 
+    <!-- 查询弹窗 -->
     <el-dialog width="70%" title="查询" :visible.sync="queryDialogVisible">
       <div class="dialog-content">
         <expand-Filter
@@ -287,7 +303,11 @@
             label="状态"
             prop="status"
             :show-overflow-tooltip="true"
-          ></el-table-column>
+          >
+            <template slot-scope="scope">
+              {{ scope.row.status | statusFilter }}
+            </template>
+          </el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
               <el-button @click="onSelect(scope.row)" type="text"
@@ -307,6 +327,38 @@
         />
       </div>
     </el-dialog>
+
+    <!-- 审核弹窗 -->
+    <el-dialog
+      title="审核"
+      label-width="100px"
+      :visible.sync="checkDialogVisible"
+    >
+      <el-form
+        ref="checkForm"
+        :model="checkInfo"
+        :rules="checkRules"
+        label-width="100px"
+      >
+        <el-form-item label="是否同意" prop="isAgree">
+          <el-radio-group v-model="checkInfo.isAgree">
+            <el-radio :label="1">是</el-radio>
+            <el-radio :label="0">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="审核意见" prop="rejectReason">
+          <el-input
+            v-model="checkInfo.rejectReason"
+            placeholder="审核意见"
+            type="textarea"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="checkDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleSubmitCheck">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -321,6 +373,8 @@ import {
   fetchListByPage,
   fetchDetail,
   addClient,
+  deleteClient,
+  approveClient,
 } from '@/api/baseInfo/client'
 
 export default {
@@ -351,8 +405,12 @@ export default {
       detail: {},
       // 系统信息
       systemData: {},
+      // 审核信息
+      checkInfo: {},
       // 查询弹窗是否可见
       queryDialogVisible: false,
+      // 审核弹窗是否可见
+      checkDialogVisible: false,
       treeProps: {
         children: 'children',
         label: 'customerName',
@@ -424,6 +482,14 @@ export default {
       ],
       // 校验提示实例
       notify: null,
+      checkRules: {
+        isAgree: [
+          { required: true, message: '请选择是否同意', trigger: 'blur' },
+        ],
+        rejectReason: [
+          { required: true, message: '请输入审核意见', trigger: 'blur' },
+        ],
+      },
     }
   },
   computed: {
@@ -443,6 +509,30 @@ export default {
     isAdjust() {
       return this.type === 'adjust'
     },
+    // 调整权限 status 1 初始 2审批中 3审批完成 4已停用
+    adjustAuth() {
+      return +this.detail.status === 3
+    },
+    // 审核权限
+    checkAuth() {
+      return +this.detail.status === 2
+    },
+    // 删除权限
+    deleteAuth() {
+      return +this.detail.status === 1
+    },
+    // 保存权限
+    saveAuth() {
+      return this.isAdd || +this.detail.status === 1 || this.isAdjust
+    },
+    // 提交权限
+    submitAuth() {
+      return this.isAdd || +this.detail.status === 1 || this.isAdjust
+    },
+    // 是否可操作
+    canOperate() {
+      return this.isAdd || +this.detail.status === 1 || this.isAdjust
+    },
   },
   created() {
     this.init()
@@ -460,10 +550,10 @@ export default {
           {
             type: 'handler',
             field: 'customerName',
-            disabled: this.isDetail,
+            disabled: !this.canOperate,
             render: (data) => (
               <el-input
-                readonly={this.isDetail}
+                readonly={!this.canOperate}
                 vModel={data['customerName']}
               />
             ),
@@ -519,10 +609,10 @@ export default {
           {
             type: 'handler',
             field: 'isRelationship',
-            disabled: this.isDetail,
+            disabled: !this.canOperate,
             render: (data) => (
               <el-radio-group
-                disabled={this.isDetail}
+                disabled={!this.canOperate}
                 vModel={data['isRelationship']}
               >
                 <el-radio label={1}>是</el-radio>
@@ -539,10 +629,10 @@ export default {
           {
             type: 'handler',
             field: 'isTaxpayer',
-            disabled: this.isDetail,
+            disabled: !this.canOperate,
             render: (data) => (
               <el-radio-group
-                disabled={this.isDetail}
+                disabled={!this.canOperate}
                 vModel={data['isTaxpayer']}
               >
                 <el-radio label={1}>是</el-radio>
@@ -561,10 +651,10 @@ export default {
           {
             type: 'handler',
             field: 'invoiceTitle',
-            disabled: this.isDetail,
+            disabled: !this.canOperate,
             render: (data) => (
               <el-input
-                readonly={this.isDetail}
+                readonly={!this.canOperate}
                 vModel={data['invoiceTitle']}
               />
             ),
@@ -578,10 +668,10 @@ export default {
           {
             type: 'handler',
             field: 'socialCreditCode',
-            disabled: this.isDetail,
+            disabled: !this.canOperate,
             render: (data) => (
               <el-input
-                readonly={this.isDetail}
+                readonly={!this.canOperate}
                 vModel={data['socialCreditCode']}
               />
             ),
@@ -597,9 +687,9 @@ export default {
           {
             type: 'handler',
             field: 'country',
-            disabled: this.isDetail,
+            disabled: !this.canOperate,
             render: (data) => (
-              <el-input readonly={this.isDetail} vModel={data['country']} />
+              <el-input readonly={!this.canOperate} vModel={data['country']} />
             ),
           },
           {
@@ -611,9 +701,9 @@ export default {
           {
             type: 'handler',
             field: 'province',
-            disabled: this.isDetail,
+            disabled: !this.canOperate,
             render: (data) => (
-              <el-input readonly={this.isDetail} vModel={data['province']} />
+              <el-input readonly={!this.canOperate} vModel={data['province']} />
             ),
           },
         ],
@@ -627,9 +717,9 @@ export default {
           {
             type: 'handler',
             field: 'city',
-            disabled: this.isDetail,
+            disabled: !this.canOperate,
             render: (data) => (
-              <el-input readonly={this.isDetail} vModel={data['city']} />
+              <el-input readonly={!this.canOperate} vModel={data['city']} />
             ),
           },
           {
@@ -641,10 +731,10 @@ export default {
           {
             type: 'handler',
             field: 'addressPhone',
-            disabled: this.isDetail,
+            disabled: !this.canOperate,
             render: (data) => (
               <el-input
-                readonly={this.isDetail}
+                readonly={!this.canOperate}
                 vModel={data['addressPhone']}
               />
             ),
@@ -696,8 +786,14 @@ export default {
       this.treeList = res.data || []
     },
     // 初始化
-    init() {
-      this.getTreeList()
+    async init() {
+      await this.getTreeList()
+      const { id, submitStatus } = this.$route.query || {}
+      if (id) {
+        this.fetchDetail({ id })
+        this.currentKey = id
+        this.$refs.treeNode.setCurrentKey(id)
+      }
     },
     // 获取查询列表（分页）
     async getList() {
@@ -746,7 +842,11 @@ export default {
       this.$refs.treeNode.setCurrentKey(id)
       this.$router.replace(`${this.basePath}/list`)
       // 获取详情
-      const res = await fetchDetail({ id })
+      this.fetchDetail({ id })
+    },
+    // 获取详情
+    async fetchDetail(query) {
+      const res = await fetchDetail(query)
       this.detail = res && res.data ? res.data : {}
       this.systemData = res && res.data ? res.data : {}
       this.customerBankList =
@@ -760,8 +860,9 @@ export default {
       this.onTreeNodeClick(row)
       this.queryDialogVisible = false
     },
+    // 点击提交
     onSubmit() {
-      this.$refs['gridForm'].$refs['form'].validate((valid, err) => {
+      this.$refs['gridForm'].$refs['form'].validate(async (valid, err) => {
         this.notify && this.notify.close()
         if (!valid) {
           const msg = Object.entries(err)
@@ -776,31 +877,74 @@ export default {
             ),
             duration: 20000,
           })
-        } else if (this.isAdd) {
-          this.handleAdd()
+        } else {
+          // submitStatus  --  提交状态  0新增-保存  1新增-提交  2调整-保存  3调整-提交
+          const payload = {
+            ...this.detail,
+            saveType: this.isAdjust ? 2 : undefined,
+            isAdjust: Number(this.isAdjust),
+            customerBankList: this.customerBankList.map(
+              ({ tempId, ...resValues }) => resValues
+            ),
+            submitStatus: this.isAdjust ? 3 : 1,
+          }
+          const res = await addClient(payload)
+          if (res && res.status === 200) {
+            this.$notify({
+              title: '成功',
+              message: '操作成功',
+              type: 'success',
+              duration: 2000,
+            })
+            this.onResetInfo()
+            this.$router.replace(`${this.basePath}/list`)
+            this.getTreeList()
+          }
         }
       })
     },
-    // 新增调用
-    async handleAdd() {
-      const payload = {
-        ...this.detail,
-        customerBankList: this.customerBankList.map(
-          ({ tempId, ...resValues }) => resValues
-        ),
-      }
-      const res = await addClient(payload)
-      if (res && res.status === 200) {
-        this.$notify({
-          title: '成功',
-          message: '操作成功',
-          type: 'success',
-          duration: 2000,
-        })
-        this.onResetInfo()
-        this.$router.replace(`${this.basePath}/list`)
-        this.getTreeList()
-      }
+    // 点击保存
+    onSave() {
+      this.$refs['gridForm'].$refs['form'].validate(async (valid, err) => {
+        this.notify && this.notify.close()
+        if (!valid) {
+          const msg = Object.entries(err)
+            .map((item) => item[1].map((val) => val.message).join('，'))
+            .join('\n')
+          this.$notify.error({
+            title: '基础信息校验错误',
+            message: this.$createElement(
+              'div',
+              { style: 'white-space:pre-wrap' },
+              msg
+            ),
+            duration: 20000,
+          })
+        } else {
+          // submitStatus  --  提交状态  0新增-保存  1新增-提交  2调整-保存  3调整-提交
+          const payload = {
+            ...this.detail,
+            saveType: 1,
+            isAdjust: Number(this.isAdjust),
+            customerBankList: this.customerBankList.map(
+              ({ tempId, ...resValues }) => resValues
+            ),
+            submitStatus: this.isAdjust ? 2 : 0,
+          }
+          const res = await addClient(payload)
+          if (res && res.status === 200) {
+            this.$notify({
+              title: '成功',
+              message: '操作成功',
+              type: 'success',
+              duration: 2000,
+            })
+            this.onResetInfo()
+            this.$router.replace(`${this.basePath}/list`)
+            this.getTreeList()
+          }
+        }
+      })
     },
     // 点击新增
     onClickAdd() {
@@ -842,6 +986,56 @@ export default {
         ...item,
         isPrimaryAccount: i === index ? 1 : 0,
       }))
+    },
+    // 点击删除值集
+    handleDelete() {
+      if (this.currentKey) {
+        this.$confirm('是否确定删除该数据？', '提示', { type: 'warning' }).then(
+          async () => {
+            const res = await deleteClient({ id: this.currentKey })
+            if (res && res.status === 200) {
+              this.$notify({
+                title: '成功',
+                message: '操作成功',
+                type: 'success',
+                duration: 2000,
+              })
+              this.onResetInfo()
+              this.getTreeList()
+            }
+          }
+        )
+      } else {
+        this.$message({
+          message: '请选中想要删除的数据',
+          type: 'warning',
+        })
+      }
+    },
+    // 点击打开审核弹窗
+    handleViewCheck() {
+      if (!this.currentKey) return
+      this.checkDialogVisible = true
+    },
+    // 提交审核
+    handleSubmitCheck() {
+      this.$refs['gridForm'].$refs['form'].validate(async (valid, error) => {
+        if (!valid) return
+        const payload = {
+          ...this.checkInfo,
+          billId: this.currentKey,
+        }
+        const res = await approveClient(payload)
+        if (res && res.status === 200) {
+          this.$notify({
+            title: '成功',
+            message: '操作成功',
+            type: 'success',
+            duration: 2000,
+          })
+          this.checkDialogVisible = false
+        }
+      })
     },
   },
 }

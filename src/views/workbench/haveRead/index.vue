@@ -1,14 +1,14 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-card>
-        <expand-Filter :fields="fields" :model="listQuery" :layout="{md:8,sm:24}">
-          <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">筛选</el-button>
-            <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
-          </template>
-        </expand-Filter>
-      </el-card>
+      <expand-Filter :fields="fields" :model="listQuery" type="inline">
+        <template v-slot:operations>
+          <el-button type="primary" icon="el-icon-search" @click="onSearch"
+            >筛选</el-button
+          >
+          <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
+        </template>
+      </expand-Filter>
     </div>
     <el-card>
       <el-table
@@ -16,21 +16,48 @@
         :data="list"
         border
         highlight-current-row
-        style="width: 100%;"
+        style="width: 100%"
       >
         <el-table-column align="center" label="序号" width="80">
-          <template slot-scope="scope">{{scope.$index+1}}</template>
+          <template slot-scope="scope">{{ scope.$index + 1 }}</template>
         </el-table-column>
-        <el-table-column align="center" label="工作阶段" prop="gzjd" :show-overflow-tooltip="true"></el-table-column>
-        <el-table-column align="center" label="已阅事项" prop="yysx" :show-overflow-tooltip="true">
+        <el-table-column
+          align="center"
+          label="工作阶段"
+          prop="workStage"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="已阅事项"
+          prop="toDoTask"
+          :show-overflow-tooltip="true"
+        >
           <template slot-scope="scope">
-            <el-link type="primary" :underline="false">{{scope.row.yysx}}</el-link>
+            <el-link type="primary" :underline="false">{{
+              scope.row.toDoTask
+            }}</el-link>
           </template>
         </el-table-column>
-        <el-table-column align="center" label="单据类型" prop="djlx" :show-overflow-tooltip="true"></el-table-column>
-        <el-table-column align="center" label="单据名称" prop="djmc" :show-overflow-tooltip="true"></el-table-column>
-        <el-table-column align="center" label="结束时间" prop="jssj" :show-overflow-tooltip="true"></el-table-column>
-        <el-table-column align="center" label="备注" prop="bz" :show-overflow-tooltip="true"></el-table-column>
+        <el-table-column
+          align="center"
+          label="单据类型"
+          prop="ticketType"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="单据名称"
+          prop="ticketName"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <!-- <el-table-column align="center" label="结束时间" prop="jssj" :show-overflow-tooltip="true"></el-table-column> -->
+        <el-table-column
+          align="center"
+          label="备注"
+          prop="remarks"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
       </el-table>
 
       <!--分页组件-->
@@ -48,6 +75,7 @@
 import ExpandFilter from '@/components/ExpandFilter'
 import Pagination from '@/components/Pagination'
 import moment from 'moment'
+import { fetchTaskFlowList } from '@/api/workbench'
 
 export default {
   name: 'toBeRead',
@@ -61,56 +89,56 @@ export default {
       listQuery: {
         page: 1,
         limit: 10,
+        dealType: 4,
       },
       total: 0,
       list: [],
       fields: [
         {
-          field: 'gzjd',
-          alwaysShow: true,
-          label: '工作阶段',
-          render: (data) => (
-            <el-input placeholder="工作阶段" vModel={data['gzjd']} />
-          ),
-        },
-        {
-          field: 'yysx',
+          field: 'toDoTask',
           alwaysShow: true,
           label: '已阅事项',
           render: (data) => (
-            <el-input placeholder="已阅事项" vModel={data['yysx']} />
+            <el-input placeholder="已阅事项" vModel={data['toDoTask']} />
           ),
         },
         {
-          field: 'djlx',
+          field: 'ticketName',
+          label: '单据名称',
           alwaysShow: true,
+          render: (data) => (
+            <el-input placeholder="单据名称" vModel={data['ticketName']} />
+          ),
+        },
+        {
+          field: 'workStage',
+          label: '工作阶段',
+          render: (data) => (
+            <el-input placeholder="工作阶段" vModel={data['workStage']} />
+          ),
+        },
+        {
+          field: 'ticketType',
           label: '单据类型',
           render: (data) => (
-            <el-input placeholder="单据类型" vModel={data['djlx']} />
+            <el-input placeholder="单据类型" vModel={data['ticketType']} />
           ),
         },
-        {
-          field: 'djmc',
-          label: '单据名称',
-          render: (data) => (
-            <el-input placeholder="单据名称" vModel={data['djmc']} />
-          ),
-        },
-        {
-          field: 'jssj',
-          label: '结束时间',
-          render: (data) => (
-            <el-date-picker
-              style="width:100%"
-              vModel={data['jssj']}
-              type="daterange"
-              unlink-panels
-              range-separator="-"
-              picker-options={this.pickerOptions}
-              default-time={['00:00:00', '23:59:59']}
-            ></el-date-picker>
-          ),
-        },
+        // {
+        //   field: 'jssj',
+        //   label: '结束时间',
+        //   render: (data) => (
+        //     <el-date-picker
+        //       style="width:100%"
+        //       vModel={data['jssj']}
+        //       type="daterange"
+        //       unlink-panels
+        //       range-separator="-"
+        //       picker-options={this.pickerOptions}
+        //       default-time={['00:00:00', '23:59:59']}
+        //     ></el-date-picker>
+        //   ),
+        // },
       ],
       pickerOptions: {
         shortcuts: [
@@ -138,17 +166,10 @@ export default {
     this.getList()
   },
   methods: {
-    getList() {
-      this.list = [
-        {
-          gzjd: '招标阶段',
-          yysx: '控制价清单审核',
-          djlx: '招标控制价',
-          djmc: '无锡地铁具区路车辆段基础工程',
-          jssj: '2020-07-06 13:23:12',
-          bz: '',
-        },
-      ]
+    async getList() {
+      const res = await fetchTaskFlowList(this.listQuery)
+      this.list = res.data || []
+      this.total = res.total || 0
     },
     // 点击新增
     onSearch() {

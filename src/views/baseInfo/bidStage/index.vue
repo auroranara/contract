@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button plain type="primary" icon="el-icon-search" @click="handleViewSearch">查询</el-button>
+      <el-button
+        plain
+        type="primary"
+        icon="el-icon-search"
+        @click="handleViewSearch"
+        >查询</el-button
+      >
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -21,56 +27,84 @@
       <!-- 右侧内容 -->
       <el-col :span="18">
         <el-tabs type="border-card" v-model="tabKey">
-          <el-tab-pane name="jcxx" label="标段信息">
+          <el-tab-pane name="bdxx" label="标段信息">
             <block-title title="基础信息" />
             <grid-form :settings="baseSettings(this.detail)"></grid-form>
 
-            <block-title title="单项工程" class="mt15" />
-            <el-table :data="singleProjectList" border>
-              <el-table-column
-                align="center"
-                label="单项工程名称"
-                prop="dxgcmc"
-                :show-overflow-tooltip="true"
-              ></el-table-column>
-              <el-table-column
-                align="center"
-                label="子单位工程名称"
-                prop="zdwgcmc"
-                :show-overflow-tooltip="true"
-              ></el-table-column>
-              <el-table-column align="center" label="备注" prop="bz" :show-overflow-tooltip="true"></el-table-column>
-            </el-table>
-
-            <block-title title="子单位工程" class="mt15" />
-            <el-table :data="subUnitProjctList" border>
-              <el-table-column
-                align="center"
-                label="单项工程名称"
-                prop="dxgcmc"
-                :show-overflow-tooltip="true"
-              ></el-table-column>
-              <el-table-column
-                align="center"
-                label="子单位工程名称"
-                prop="zdwgcmc"
-                :show-overflow-tooltip="true"
-              ></el-table-column>
-              <el-table-column align="center" label="规费" prop="gf" :show-overflow-tooltip="true"></el-table-column>
-              <el-table-column align="center" label="备注" prop="bz" :show-overflow-tooltip="true"></el-table-column>
-            </el-table>
-
-            <block-title title="规费" class="mt15" />
-            <el-table :data="feesList" border>
-              <el-table-column
-                align="center"
-                label="子单位工程名称"
-                prop="zdwgcmc"
-                :show-overflow-tooltip="true"
-              ></el-table-column>
-              <el-table-column align="center" label="规费" prop="gf" :show-overflow-tooltip="true"></el-table-column>
-              <el-table-column align="center" label="备注" prop="bz" :show-overflow-tooltip="true"></el-table-column>
-            </el-table>
+            <el-tabs>
+              <el-tab-pane label="规费">
+                <el-table :data="singleProjectList" border>
+                  <el-table-column
+                    align="center"
+                    label="子单位工程名称"
+                    prop="childSingleProName"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                  <el-table-column
+                    align="center"
+                    label="规费"
+                    prop="charges"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                  <el-table-column
+                    align="center"
+                    label="备注"
+                    prop="chargesRemark"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                </el-table>
+              </el-tab-pane>
+              <el-tab-pane label="子单位工程">
+                <el-table :data="singleProjectList" border>
+                  <el-table-column
+                    align="center"
+                    label="单项工程名称"
+                    prop="singleProName"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                  <el-table-column
+                    align="center"
+                    label="子单位工程名称"
+                    prop="childSingleProName"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                  <el-table-column
+                    align="center"
+                    label="规费"
+                    prop="charges"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                  <el-table-column
+                    align="center"
+                    label="备注"
+                    prop="childSingleRemark"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                </el-table>
+              </el-tab-pane>
+              <el-tab-pane label="单项工程">
+                <el-table :data="singleProjectList" border>
+                  <el-table-column
+                    align="center"
+                    label="单项工程名称"
+                    prop="singleProName"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                  <el-table-column
+                    align="center"
+                    label="子单位工程名称"
+                    prop="childSingleProName"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                  <el-table-column
+                    align="center"
+                    label="备注"
+                    prop="singleRemark"
+                    :show-overflow-tooltip="true"
+                  ></el-table-column>
+                </el-table>
+              </el-tab-pane>
+            </el-tabs>
           </el-tab-pane>
           <el-tab-pane name="xtxx" label="系统信息">
             <system-info :data="systemData" />
@@ -82,9 +116,16 @@
     <!-- 查询弹窗 -->
     <el-dialog width="70%" title="查询" :visible.sync="queryDialogVisible">
       <div class="dialog-content">
-        <expand-Filter :fields="fields" :model="listQuery" type="inline" :showLabel="false">
+        <expand-Filter
+          :fields="fields"
+          :model="listQuery"
+          type="inline"
+          :showLabel="false"
+        >
           <template v-slot:operations>
-            <el-button type="primary" icon="el-icon-search" @click="onSearch">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="onSearch"
+              >查询</el-button
+            >
             <el-button icon="el-icon-refresh" @click="onReset">重置</el-button>
           </template>
         </expand-Filter>
@@ -96,68 +137,73 @@
           style="width: 100%"
           @row-click="onSelect"
         >
-          <el-table-column width="80" align="center" label="序号" type="index"></el-table-column>
+          <el-table-column
+            width="80"
+            align="center"
+            label="序号"
+            type="index"
+          ></el-table-column>
           <el-table-column
             width="100"
             align="center"
             label="标段名称"
-            prop="bdmc"
+            prop="sectionName"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             width="100"
             align="center"
             label="合同分类"
-            prop="htfl"
+            prop="classifyName"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             width="100"
             align="center"
             label="线路"
-            prop="xl"
+            prop="line"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             width="150"
             align="center"
             label="是否材料标段"
-            prop="sfclbd"
+            prop="isMaterialSection"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             width="100"
             align="center"
             label="建设单位"
-            prop="jsdw"
+            prop="constructionUnit"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             width="100"
             align="center"
             label="主管部门"
-            prop="zgbm"
+            prop="competentDept"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             width="100"
             align="center"
             label="施工单位"
-            prop="sgdw"
+            prop="workUnit"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             width="100"
             align="center"
             label="监理单位"
-            prop="jldw"
+            prop="supervisionUnit"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
             width="150"
             align="center"
             label="计量支付比率"
-            prop="jlzfbl"
+            prop="meteringRate"
             :show-overflow-tooltip="true"
           ></el-table-column>
           <el-table-column
@@ -167,9 +213,16 @@
             prop="zt"
             :show-overflow-tooltip="true"
           ></el-table-column>
-          <el-table-column width="100" fixed="right" align="center" label="操作">
+          <el-table-column
+            width="100"
+            fixed="right"
+            align="center"
+            label="操作"
+          >
             <template slot-scope="scope">
-              <el-button @click="onSelect(scope.row)" type="text">选择</el-button>
+              <el-button @click="onSelect(scope.row)" type="text"
+                >选择</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -192,7 +245,15 @@ import GridForm from '@/components/GridForm'
 import BlockTitle from '@/components/BlockTitle'
 import Pagination from '@/components/Pagination'
 import SystemInfo from '@/components/SystemInfo'
+import TreeSelect from '@/components/TreeSelect'
 import { mapState } from 'vuex'
+import { judgeFilter } from '@/utils/filters'
+import {
+  fetchListByPage,
+  fetchList,
+  fetchDetail,
+} from '@/api/baseInfo/bidStage'
+import { fetchList as fetchConstractTypes } from '@/api/baseInfo/constractType'
 
 export default {
   name: 'bidStage',
@@ -202,13 +263,14 @@ export default {
     BlockTitle,
     Pagination,
     SystemInfo,
+    TreeSelect,
   },
   data() {
     return {
       // 列表数据的键值
       rowKey: 'id',
       // 当前tab的key
-      tabKey: 'jcxx',
+      tabKey: 'bdxx',
       listLoading: false,
       // 查询query信息
       listQuery: {
@@ -220,25 +282,33 @@ export default {
       queryDialogVisible: false,
       fields: [
         {
-          field: 'bdmc',
+          field: 'sectionName',
           alwaysShow: true,
           label: '标段名称',
           render: (data) => (
-            <el-input placeholder="标段名称" vModel={data['bdmc']} />
+            <el-input placeholder="标段名称" vModel={data['sectionName']} />
           ),
         },
         {
-          field: 'htfl',
+          field: 'classifyId',
           alwaysShow: true,
           label: '合同分类',
           render: (data) => (
-            <el-input placeholder="合同分类" vModel={data['htfl']} />
+            <tree-select
+              vModel={data['classifyId']}
+              treeProps={this.constractTreeProps}
+              options={this.constractTypeList}
+              placeholder="合同分类"
+              showFilter
+            />
           ),
         },
         {
-          field: 'xl',
+          field: 'line',
           label: '线路',
-          render: (data) => <el-input placeholder="线路" vModel={data['xl']} />,
+          render: (data) => (
+            <el-input placeholder="线路" vModel={data['line']} />
+          ),
         },
         {
           field: 'status',
@@ -256,21 +326,23 @@ export default {
       detail: {},
       // 系统信息
       systemData: {},
-      // 单项工程列表
       singleProjectList: [],
-      // 子单位工程列表
-      subUnitProjctList: [],
-      // 规费列表
-      feesList: [],
       treeProps: {
         children: 'children',
-        label: 'label',
+        label: 'sectionName',
       },
       // 左侧树
       treeList: [],
       // 弹窗查询列表
       list: [],
       currentKey: null,
+      // 合同分类树
+      constractTypeList: [],
+      constractTreeProps: {
+        children: 'childrenCategoryList',
+        label: 'classifyName',
+        value: 'id',
+      },
     }
   },
   computed: {
@@ -296,7 +368,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.bdmc,
+            render: () => data.sectionName,
           },
           {
             type: 'label',
@@ -309,7 +381,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.dmbm,
+            render: () => data.sectionCode,
           },
         ],
         [
@@ -321,7 +393,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.htbh,
+            render: () => data.contractCode,
           },
           {
             type: 'label',
@@ -331,7 +403,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.htfl,
+            render: () => data.classifyName,
           },
         ],
         [
@@ -343,7 +415,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.xl,
+            render: () => data.line,
           },
           {
             type: 'label',
@@ -353,7 +425,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => this.generateJudge(data.sfclbd),
+            render: () => judgeFilter(data.isMaterialSection),
           },
         ],
         [
@@ -365,7 +437,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.jsdw,
+            render: () => data.constructionUnit,
           },
           {
             type: 'label',
@@ -375,7 +447,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.jsdwfzr,
+            render: () => data.cuPrincipal,
           },
         ],
         [
@@ -387,7 +459,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.zgbm,
+            render: () => data.competentDept,
           },
           {
             type: 'label',
@@ -397,7 +469,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.xmfzr,
+            render: () => data.principal,
           },
         ],
         [
@@ -409,7 +481,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.sgdw,
+            render: () => data.workUnit,
           },
           {
             type: 'label',
@@ -419,7 +491,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.sgdwfzr,
+            render: () => data.wuPrincipal,
           },
         ],
         [
@@ -431,7 +503,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.jldw,
+            render: () => data.supervisionUnit,
           },
           {
             type: 'label',
@@ -441,7 +513,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.jldwfzr,
+            render: () => data.suPrincipal,
           },
         ],
         [
@@ -453,7 +525,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.ysgcs,
+            render: () => data.budgeEnginner,
           },
           {
             type: 'empty',
@@ -470,17 +542,17 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.gsze,
+            render: () => data.estimateTotal,
           },
           {
             type: 'label',
-            label: '计量支付比率',
+            label: '计量支付比率（%）',
             showBg: true,
           },
           {
             type: 'handler',
             disabled: true,
-            render: () => data.jlzfbl,
+            render: () => data.meteringRate,
           },
         ],
         [
@@ -492,7 +564,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.kgrq,
+            render: () => data.startDate,
           },
           {
             type: 'label',
@@ -502,7 +574,7 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.jgrq,
+            render: () => data.completedDate,
           },
         ],
         [
@@ -514,59 +586,34 @@ export default {
           {
             type: 'handler',
             disabled: true,
-            render: () => data.bz,
+            render: () => data.remarks,
             colspan: '3',
           },
         ],
       ]
     },
     // 获取左侧树
-    getTreeList() {
-      this.treeList = [
-        {
-          id: '1',
-          label: '标段',
-          children: [
-            {
-              id: '1-1',
-              label: '标段1',
-            },
-            {
-              id: '1-2',
-              label: '标段2',
-            },
-            {
-              id: '1-3',
-              label: '标段3',
-            },
-          ],
-        },
-      ]
+    async getTreeList() {
+      const res = await fetchList()
+      this.treeList = res.data || []
     },
     // 初始化
     init() {
       this.getTreeList()
+      this.fetchConstractTypes()
     },
-    getList() {
-      this.list = [
-        {
-          id: '1-1',
-          bdmc: '无锡地铁4号线一期工程机电、装修安装工程',
-          bdbm: '400123',
-          htbh: 'DSADFFAS',
-          htfl: '工程类',
-          xl: '4号线',
-          sfclbd: 0,
-          jsdw: '无锡地铁集团有限公司',
-          jsdwfzr: '徐峥',
-          zgbm: '系统设备部',
-          xmfzr: '李文正',
-          sgdw: '中铁一局集团电务工程有限公司',
-          sgdwfzr: '李四',
-          bz:
-            '撒旦撒旦实打实水水水水水水水水水水水水撒旦撒旦实打实水水水水水水水水水水水水撒旦撒旦实打实水水水水水水水水水水水水撒旦撒旦实打实水水水水水水水水水水水水',
-        },
-      ]
+    // 获取查询列表（分页）
+    async getList() {
+      this.listLoading = true
+      const res = await fetchListByPage(this.listQuery)
+      this.list = res && res.data ? res.data : []
+      this.total = res ? res.total : 0
+      this.listLoading = false
+    },
+    // 获取合同分类树
+    async fetchConstractTypes() {
+      const res = await fetchConstractTypes()
+      this.constractTypeList = res.data || []
     },
     onSearch() {
       this.listQuery.page = 1
@@ -579,13 +626,6 @@ export default {
       }
       this.getList()
     },
-    generateJudge(value) {
-      return (
-        (['1', 1].includes(value) && '是') ||
-        (['0', 0].includes(value) && '否') ||
-        ''
-      )
-    },
     // 点击打开查询弹窗
     handleViewSearch() {
       this.queryDialogVisible = true
@@ -595,47 +635,15 @@ export default {
       }
       this.list = []
     },
-    onTreeNodeClick(data) {
-      this.currentKey = data[this.rowKey]
-      this.$refs.treeNode.setCurrentKey(data[this.rowKey])
-      // TODO 点击设置右侧显示参数
-      this.detail = {
-        id: '1-1',
-        bdmc: '无锡地铁4号线一期工程机电、装修安装工程',
-        bdbm: '400123',
-        htbh: 'DSADFFAS',
-        htfl: '工程类',
-        xl: '4号线',
-        sfclbd: 0,
-        jsdw: '无锡地铁集团有限公司',
-        jsdwfzr: '徐峥',
-        zgbm: '系统设备部',
-        xmfzr: '李文正',
-        sgdw: '中铁一局集团电务工程有限公司',
-        sgdwfzr: '李四',
-        bz:
-          '撒旦撒旦实打实水水水水水水水水水水水水撒旦撒旦实打实水水水水水水水水水水水水撒旦撒旦实打实水水水水水水水水水水水水撒旦撒旦实打实水水水水水水水水水水水水',
-      }
-      this.systemData = {
-        status: '审批完成',
-        createTime: '2019/02/02 18:10',
-        createPerson: '张三',
-        modifyTime: '2019/02/02 18:10',
-        modifyPerson: '张三',
-      }
-      this.singleProjectList = [
-        { id: '1', dxgcmc: '具区路车辆段', zdwgcmc: '一层盖板', bz: '' },
-      ]
-      this.subUnitProjctList = [
-        {
-          id: '1',
-          dxgcmc: '具区路车辆段',
-          zdwgcmc: '一层盖板',
-          gf: '3.74',
-          bz: '',
-        },
-      ]
-      this.feesList = [{ id: '1', zdwgcmc: '一层盖板', gf: '3.64', bz: '' }]
+    async onTreeNodeClick(data) {
+      const id = data[this.rowKey]
+      this.currentKey = id
+      this.$refs.treeNode.setCurrentKey(id)
+      // 获取详情
+      const res = await fetchDetail({ id })
+      this.detail = res.data || {}
+      this.systemData = res.data || {}
+      this.singleProjectList = res.singleProjectList || []
     },
     onSelect(row) {
       this.onTreeNodeClick(row)
