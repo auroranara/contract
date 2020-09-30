@@ -1,28 +1,35 @@
 <template>
   <div class="app-container">
     <div class="head-container">
-      <el-button
+      <!-- <el-button
         plain
         type="primary"
         icon="el-icon-search"
         @click="handleViewSearch"
         >查询</el-button
-      >
+      > -->
+      <el-button :disabled="!saveAuth" plain type="primary" @click="onSave">
+        保存
+      </el-button>
+      <el-button :disabled="!submitAuth" plain type="primary" @click="onSubmit">
+        提交
+      </el-button>
       <el-button plain type="primary">审核</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
       <el-col :span="6">
-        <el-card>
-          <el-tree
-            ref="treeNode"
-            :highlight-current="true"
-            :data="treeList"
-            :props="treeProps"
-            :default-expand-all="true"
-            @node-click="onTreeNodeClick"
-            :node-key="rowKey"
-          ></el-tree>
+        <el-card class="tree-select-wrapper">
+          <el-scrollbar wrap-class="scrollbar-wrapper">
+            <el-tree
+              ref="treeNode"
+              :highlight-current="true"
+              :data="treeList"
+              :props="treeProps"
+              @node-click="onTreeNodeClick"
+              :node-key="rowKey"
+            ></el-tree>
+          </el-scrollbar>
         </el-card>
       </el-col>
       <!-- 右侧内容 -->
@@ -216,7 +223,7 @@ import {
 } from '@/api/baseInfo/client'
 
 export default {
-  name: 'client',
+  name: 'clientAdjust',
   components: {
     ExpandFilter,
     GridForm,
@@ -254,6 +261,8 @@ export default {
       list: [],
       currentKey: null,
       customerBankList: [],
+      // 树筛选内容
+      treeSearch: '',
       fields: [
         {
           field: 'customerName',
@@ -282,15 +291,22 @@ export default {
     ...mapState({
       statusDict: (state) => state.baseInfo.statusDict,
     }),
-    // 当前状态 可选值 add adjust detail
-    type() {
-      return this.$route.query.type || 'detail'
+    // 保存权限
+    saveAuth() {
+      return +this.detail.status === 1 && !!this.detail.isDisabled
     },
-    isAdd() {
-      return this.type === 'add'
+    // 提交权限
+    submitAuth() {
+      return +this.detail.status === 1 && !!this.detail.isDisabled
     },
-    isAdjust() {
-      return this.type === 'adjust'
+    // 是否可操作
+    canOperate() {
+      return +this.detail.status === 1 && !!this.detail.isDisabled
+    },
+  },
+  watch: {
+    treeSearch(value) {
+      this.$refs.treeNode.filter(value)
     },
   },
   created() {
@@ -433,14 +449,7 @@ export default {
             type: 'handler',
             field: 'country',
             disabled: true,
-            render: (data) => (
-              <el-select
-                disabled
-                placeholder=""
-                vModel={data['country']}
-                style="width:100%"
-              ></el-select>
-            ),
+            render: (data) => <el-input vModel={data['country']} />,
           },
           {
             type: 'label',
@@ -452,14 +461,7 @@ export default {
             type: 'handler',
             field: 'province',
             disabled: true,
-            render: (data) => (
-              <el-select
-                disabled
-                placeholder=""
-                vModel={data['province']}
-                style="width:100%"
-              ></el-select>
-            ),
+            render: (data) => <el-input vModel={data['province']} />,
           },
         ],
         [
@@ -473,14 +475,7 @@ export default {
             type: 'handler',
             field: 'city',
             disabled: true,
-            render: (data) => (
-              <el-select
-                disabled
-                placeholder=""
-                vModel={data['city']}
-                style="width:100%"
-              ></el-select>
-            ),
+            render: (data) => <el-input vModel={data['city']} />,
           },
           {
             type: 'label',
@@ -543,16 +538,39 @@ export default {
     // 获取左侧树
     async getTreeList() {
       const res = await fetchAdjustList()
-      this.treeList = res.data || []
+      this.treeList = res.data.map(
+        ({ customerId, customerName, versionList, ...resItems }) => ({
+          ...resItems,
+          id: customerId,
+          label: customerName,
+          isCustomer: true,
+          children: this.generateNode(versionList),
+        })
+      )
+    },
+    generateNode(child) {
+      return Array.isArray(child) && child.length
+        ? child.map(({ id, version }, index) => ({
+            id,
+            label: version,
+            isLatest: child.length - 1 === index,
+          }))
+        : []
     },
     // 初始化
-    init() {
-      this.getTreeList()
+    async init() {
+      await this.getTreeList()
+      const { id } = this.$route.query || {}
+      if (id) {
+        this.fetchDetail({ id })
+        this.currentKey = id
+        this.$refs.treeNode.setCurrentKey(id)
+      }
     },
     // 获取查询列表（分页）
     async getList() {
       this.listLoading = true
-      const res = await fetchAdjustList(this.listQuery)
+      const res = await fetchAdjustListByPage(this.listQuery)
       this.list = res && res.data ? res.data : []
       this.total = res ? res.total : 0
       this.listLoading = false
@@ -569,6 +587,7 @@ export default {
       this.getList()
     },
     onResetInfo() {
+      this.$refs['gridForm'].$refs['form'].resetFields()
       this.detail = {}
       this.systemData = {}
       this.customerBankList = []
@@ -584,6 +603,8 @@ export default {
       this.list = []
     },
     onTreeNodeClick(data) {
+      if (data.isCustomer) return
+      this.$refs['gridForm'].$refs['form'].resetFields()
       const id = data[this.rowKey]
       this.currentKey = id
       this.$refs.treeNode.setCurrentKey(id)
@@ -603,15 +624,36 @@ export default {
     },
     // 查询中选中信息
     onSelect(row) {
-      this.$refs.treeNode.setCurrentKey(row[this.rowKey])
-      this.onTreeNodeClick(row)
+      const id = data[this.rowKey]
+      this.$refs.treeNode.setCurrentKey(id)
+      this.$refs['gridForm'].$refs['form'].resetFields()
+      this.currentKey = id
+      this.$refs.treeNode.setCurrentKey(id)
+      this.$router.replace(`${this.basePath}/adjust`)
+      // 获取详情
+      this.fetchDetail({ id })
       this.queryDialogVisible = false
     },
+    // 树筛选函数 默认对label筛选
+    filterTree(value, data) {
+      if (!value) return true
+      return data[this.treeProps.label].indexOf(value) !== -1
+    },
+    onSave() {},
+    onSubmit() {},
   },
 }
 </script>
-<style lang="scss" scoped>
-.dialog-content {
-  min-height: 350px;
+<style lang="scss">
+// .dialog-content {
+//   min-height: 350px;
+// }
+.tree-select-wrapper {
+  .scrollbar-wrapper {
+    max-height: 475px;
+  }
+  .el-card__body {
+    padding: 20px 10px;
+  }
 }
 </style>

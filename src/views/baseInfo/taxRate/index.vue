@@ -12,16 +12,18 @@
     <el-row :gutter="10">
       <!-- 左侧树 -->
       <el-col :span="6">
-        <el-card>
-          <el-tree
-            ref="treeNode"
-            :highlight-current="true"
-            :data="treeList"
-            :props="treeProps"
-            :default-expand-all="true"
-            @node-click="onTreeNodeClick"
-            :node-key="rowKey"
-          ></el-tree>
+        <el-card class="tree-select-wrapper">
+          <el-scrollbar wrap-class="scrollbar-wrapper">
+            <el-tree
+              ref="treeNode"
+              :highlight-current="true"
+              :data="treeList"
+              :props="treeProps"
+              :default-expand-all="true"
+              @node-click="onTreeNodeClick"
+              :node-key="rowKey"
+            ></el-tree>
+          </el-scrollbar>
         </el-card>
       </el-col>
       <!-- 右侧内容 -->
@@ -275,8 +277,3 @@ export default {
   },
 }
 </script>
-<style lang="scss" scoped>
-.dialog-content {
-  min-height: 350px;
-}
-</style>

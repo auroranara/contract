@@ -41,17 +41,18 @@
     <el-row :gutter="10">
       <!-- 左侧树 -->
       <el-col :span="6">
-        <el-card>
-          <el-tree
-            v-loading="treeLoading"
-            ref="treeNode"
-            :highlight-current="true"
-            :data="treeList"
-            :props="treeProps"
-            :default-expand-all="true"
-            @node-click="onTreeNodeClick"
-            :node-key="rowKey"
-          ></el-tree>
+        <el-card class="tree-select-wrapper">
+          <el-scrollbar wrap-class="scrollbar-wrapper">
+            <el-tree
+              v-loading="treeLoading"
+              ref="treeNode"
+              :highlight-current="true"
+              :data="treeList"
+              :props="treeProps"
+              @node-click="onTreeNodeClick"
+              :node-key="rowKey"
+            ></el-tree>
+          </el-scrollbar>
         </el-card>
       </el-col>
       <!-- 右侧内容 -->
@@ -788,7 +789,7 @@ export default {
     // 初始化
     async init() {
       await this.getTreeList()
-      const { id, submitStatus } = this.$route.query || {}
+      const { id } = this.$route.query || {}
       if (id) {
         this.fetchDetail({ id })
         this.currentKey = id
@@ -881,7 +882,7 @@ export default {
           // submitStatus  --  提交状态  0新增-保存  1新增-提交  2调整-保存  3调整-提交
           const payload = {
             ...this.detail,
-            saveType: this.isAdjust ? 2 : undefined,
+            saveType: 2,
             isAdjust: Number(this.isAdjust),
             customerBankList: this.customerBankList.map(
               ({ tempId, ...resValues }) => resValues
@@ -953,10 +954,10 @@ export default {
     },
     // 点击调整
     onClickAdjust() {
-      // TODO：重修获取数据
-      this.$refs.treeNode.setCurrentKey()
-      this.currentKey = null
-      this.$router.replace(`${this.basePath}/list?type=adjust`)
+      this.$router.replace({
+        path: `${this.basePath}/list`,
+        query: { type: 'adjust', id: this.currentKey },
+      })
     },
     handleBankChange(val) {
       this.selectedBank = val
@@ -1033,6 +1034,7 @@ export default {
             type: 'success',
             duration: 2000,
           })
+          this.fetchDetail({ id: this.currentKey })
           this.checkDialogVisible = false
         }
       })
@@ -1040,8 +1042,3 @@ export default {
   },
 }
 </script>
-<style lang="scss" scoped>
-.dialog-content {
-  min-height: 350px;
-}
-</style>

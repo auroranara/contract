@@ -70,7 +70,7 @@ export function fetchAdjustDetail(params) {
 // 客户审核 参数billId
 export function approveClient(data) {
   return request({
-    url: '/api/customer/approval',
+    url: `/api/customer/approval/${data.billId}`,
     method: 'post',
     data
   })

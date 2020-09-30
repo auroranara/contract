@@ -619,20 +619,9 @@ export default {
 }
 </script>
 <style lang="scss">
-.dialog-content {
-  min-height: 350px;
-}
 .required-header > div:before {
   content: '*';
   color: #f56c6c;
   margin-right: 4px;
-}
-.tree-select-wrapper {
-  .scrollbar-wrapper {
-    max-height: 475px;
-  }
-  .el-card__body {
-    padding: 20px 10px;
-  }
 }
 </style>

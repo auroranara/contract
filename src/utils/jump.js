@@ -13,12 +13,16 @@ export default function jump({ billCode, billId, submitStatus }) {
           path: '/baseInfo/client/list',
           query: { type: 'add', id: billId }
         })
-      // case 1:
-      //   this.$router.push({
-      //     pathname:'/baseInfo/client/list',
-      //     query:{billId,currentKey:billId},
-      //   })
-      // case 2:
+      case 1:
+        router.push({
+          path: '/baseInfo/client/list',
+          query: { id: billId }
+        })
+      case 2:
+        router.push({
+          path: '/baseInfo/client/adjust',
+          query: { id: billId }
+        })
     }
   }
 }

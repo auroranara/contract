@@ -101,3 +101,14 @@
   font-family: Courier New, serif;
   font-size: 12px;
 }
+.tree-select-wrapper {
+  .scrollbar-wrapper {
+    max-height: 475px;
+  }
+  .el-card__body {
+    padding: 20px 10px;
+  }
+}
+.dialog-content {
+  min-height: 350px;
+}
