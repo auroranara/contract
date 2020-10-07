@@ -14,7 +14,7 @@
       <el-button :disabled="!submitAuth" plain type="primary" @click="onSubmit">
         提交
       </el-button>
-      <el-button plain type="primary">审核</el-button>
+      <el-button :disabled="!checkAuth" plain type="primary">审核</el-button>
     </div>
     <el-row :gutter="10">
       <!-- 左侧树 -->
@@ -293,15 +293,31 @@ export default {
     }),
     // 保存权限
     saveAuth() {
-      return +this.detail.status === 1 && !!this.detail.isDisabled
+      return (
+        +this.detail.status === 1 &&
+        !!this.detail.isDisabled &&
+        !this.detail.version === 'V0.0.0'
+      )
     },
     // 提交权限
     submitAuth() {
-      return +this.detail.status === 1 && !!this.detail.isDisabled
+      return (
+        +this.detail.status === 1 &&
+        !!this.detail.isDisabled &&
+        !this.detail.version === 'V0.0.0'
+      )
+    },
+    // 审核权限
+    checkAuth() {
+      return +this.detail.status === 2 && !this.detail.version === 'V0.0.0'
     },
     // 是否可操作
     canOperate() {
-      return +this.detail.status === 1 && !!this.detail.isDisabled
+      return (
+        +this.detail.status === 1 &&
+        !!this.detail.isDisabled &&
+        !this.detail.version === 'V0.0.0'
+      )
     },
   },
   watch: {
@@ -325,10 +341,7 @@ export default {
           {
             type: 'handler',
             field: 'customerName',
-            disabled: true,
-            render: (data) => (
-              <el-input readonly vModel={data['customerName']} />
-            ),
+            render: (data) => <el-input vModel={data['customerName']} />,
           },
           {
             type: 'label',
@@ -355,9 +368,8 @@ export default {
           {
             type: 'handler',
             field: 'isDisabled',
-            disabled: true,
             render: (data) => (
-              <el-radio-group disabled vModel={data['isDisabled']}>
+              <el-radio-group vModel={data['isDisabled']}>
                 <el-radio label={1}>是</el-radio>
                 <el-radio label={0}>否</el-radio>
               </el-radio-group>
@@ -369,7 +381,6 @@ export default {
           },
           {
             type: 'empty',
-            disabled: true,
           },
         ],
         [
@@ -382,9 +393,8 @@ export default {
           {
             type: 'handler',
             field: 'isRelationship',
-            disabled: true,
             render: (data) => (
-              <el-radio-group disabled vModel={data['isRelationship']}>
+              <el-radio-group vModel={data['isRelationship']}>
                 <el-radio label={1}>是</el-radio>
                 <el-radio label={0}>否</el-radio>
               </el-radio-group>
@@ -399,9 +409,8 @@ export default {
           {
             type: 'handler',
             field: 'isTaxpayer',
-            disabled: true,
             render: (data) => (
-              <el-radio-group disabled vModel={data['isTaxpayer']}>
+              <el-radio-group vModel={data['isTaxpayer']}>
                 <el-radio label={1}>是</el-radio>
                 <el-radio label={0}>否</el-radio>
               </el-radio-group>
@@ -418,10 +427,7 @@ export default {
           {
             type: 'handler',
             field: 'invoiceTitle',
-            disabled: true,
-            render: (data) => (
-              <el-input readonly vModel={data['invoiceTitle']} />
-            ),
+            render: (data) => <el-input vModel={data['invoiceTitle']} />,
           },
           {
             type: 'label',
@@ -432,10 +438,7 @@ export default {
           {
             type: 'handler',
             field: 'socialCreditCode',
-            disabled: true,
-            render: (data) => (
-              <el-input readonly vModel={data['socialCreditCode']} />
-            ),
+            render: (data) => <el-input vModel={data['socialCreditCode']} />,
           },
         ],
         [
@@ -448,7 +451,6 @@ export default {
           {
             type: 'handler',
             field: 'country',
-            disabled: true,
             render: (data) => <el-input vModel={data['country']} />,
           },
           {
@@ -460,7 +462,6 @@ export default {
           {
             type: 'handler',
             field: 'province',
-            disabled: true,
             render: (data) => <el-input vModel={data['province']} />,
           },
         ],
@@ -474,7 +475,6 @@ export default {
           {
             type: 'handler',
             field: 'city',
-            disabled: true,
             render: (data) => <el-input vModel={data['city']} />,
           },
           {
@@ -486,10 +486,7 @@ export default {
           {
             type: 'handler',
             field: 'addressPhone',
-            disabled: true,
-            render: (data) => (
-              <el-input readonly vModel={data['addressPhone']} />
-            ),
+            render: (data) => <el-input vModel={data['addressPhone']} />,
           },
         ],
         [
@@ -503,13 +500,8 @@ export default {
             type: 'handler',
             field: 'adjustReason',
             colspan: '3',
-            disabled: true,
             render: (data) => (
-              <el-input
-                readonly
-                type="textarea"
-                vModel={data['adjustReason']}
-              />
+              <el-input type="textarea" vModel={data['adjustReason']} />
             ),
           },
         ],
@@ -523,13 +515,8 @@ export default {
             type: 'handler',
             field: 'adjustExplain',
             colspan: '3',
-            disabled: true,
             render: (data) => (
-              <el-input
-                readonly
-                type="textarea"
-                vModel={data['adjustExplain']}
-              />
+              <el-input type="textarea" vModel={data['adjustExplain']} />
             ),
           },
         ],
@@ -639,8 +626,91 @@ export default {
       if (!value) return true
       return data[this.treeProps.label].indexOf(value) !== -1
     },
-    onSave() {},
-    onSubmit() {},
+    // 点击保存
+    onSave() {
+      this.$refs['gridForm'].$refs['form'].validate(async (valid, err) => {
+        this.notify && this.notify.close()
+        if (!valid) {
+          const msg = Object.entries(err)
+            .map((item) => item[1].map((val) => val.message).join('，'))
+            .join('\n')
+          this.$notify.error({
+            title: '基础信息校验错误',
+            message: this.$createElement(
+              'div',
+              { style: 'white-space:pre-wrap' },
+              msg
+            ),
+            duration: 20000,
+          })
+        } else {
+          // saveType 1保存 2提交
+          // submitStatus  --  提交状态  0新增-保存  1新增-提交  2调整-保存  3调整-提交
+          const payload = {
+            ...this.detail,
+            saveType: 1,
+            isAdjust: Number(this.isAdjust),
+            customerBankList: this.customerBankList.map(
+              ({ tempId, ...resValues }) => resValues
+            ),
+            submitStatus: 2,
+          }
+          const res = await addClient(payload)
+          if (res && res.status === 200) {
+            this.$notify({
+              title: '成功',
+              message: '操作成功',
+              type: 'success',
+              duration: 2000,
+            })
+            this.onResetInfo()
+            this.getTreeList()
+          }
+        }
+      })
+    },
+    // 点击提交
+    onSubmit() {
+      this.$refs['gridForm'].$refs['form'].validate(async (valid, err) => {
+        this.notify && this.notify.close()
+        if (!valid) {
+          const msg = Object.entries(err)
+            .map((item) => item[1].map((val) => val.message).join('，'))
+            .join('\n')
+          this.$notify.error({
+            title: '基础信息校验错误',
+            message: this.$createElement(
+              'div',
+              { style: 'white-space:pre-wrap' },
+              msg
+            ),
+            duration: 20000,
+          })
+        } else {
+          // submitStatus  --  提交状态  0新增-保存  1新增-提交  2调整-保存  3调整-提交
+          const payload = {
+            ...this.detail,
+            saveType: 2,
+            isAdjust: Number(this.isAdjust),
+            customerBankList: this.customerBankList.map(
+              ({ tempId, ...resValues }) => resValues
+            ),
+            submitStatus: 3,
+          }
+          const res = await addClient(payload)
+          if (res && res.status === 200) {
+            this.$notify({
+              title: '成功',
+              message: '操作成功',
+              type: 'success',
+              duration: 2000,
+            })
+            this.onResetInfo()
+            this.getTreeList()
+          }
+        }
+      })
+    },
   },
 }
 </script>
