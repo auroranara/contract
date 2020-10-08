@@ -9,7 +9,11 @@
   >
     <el-form-item label="个人技能" prop="skill">
       <el-checkbox-group v-model="staff.skill">
-        <el-checkbox v-for="skill in skillOptions" :label="skill.value" :key="skill.value">{{skill.label}}</el-checkbox>
+        <el-checkbox
+          v-for="skill in skillOptions"
+          :label="skill.value"
+          :key="skill.value"
+        >{{skill.label}}</el-checkbox>
       </el-checkbox-group>
     </el-form-item>
     <el-form-item label="培训结果" prop="train">
@@ -48,17 +52,17 @@ export default {
   props: ['staff', 'skillOptions', 'trainOptions'],
   data() {
     return {
-      action: '/end/file/upload/ftp',
+      action: '/api/file/upload/ftp',
       rules: {
-        skill: [{ required: true, message: '请选择技能', trigger: 'blur' }]
-      }
+        skill: [{ required: true, message: '请选择技能', trigger: 'blur' }],
+      },
     }
   },
-  created: function() {},
+  created: function () {},
   methods: {
-    formValid: function() {
+    formValid: function () {
       let result = true
-      this.$refs['form'].validate(valid => {
+      this.$refs['form'].validate((valid) => {
         if (!valid) {
           result = false
         }
@@ -76,10 +80,10 @@ export default {
       downloadWorkSiteFile(file.name, file.path)
     },
     handleRemove(file, fileList) {
-      this.staff.acc = fileList.map(item => {
+      this.staff.acc = fileList.map((item) => {
         return {
           name: item.name,
-          path: item.response ? item.response.data : ''
+          path: item.response ? item.response.data : '',
         }
       })
     },
@@ -87,14 +91,14 @@ export default {
       return this.$confirm(`确定移除 ${file.name}？`)
     },
     handleAvatarSuccess(res, file, fileList) {
-      this.staff.acc = fileList.map(item => {
+      this.staff.acc = fileList.map((item) => {
         return {
           name: item.name,
-          path: item.response ? item.response.data : ''
+          path: item.response ? item.response.data : '',
         }
       })
-    }
-  }
+    },
+  },
 }
 </script>
 

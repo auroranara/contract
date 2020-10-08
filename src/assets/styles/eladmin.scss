@@ -1,5 +1,5 @@
 .head-container {
-  padding-bottom: 10px;
+  margin-bottom: 10px;
   .filter-item {
     display: inline-block;
     vertical-align: middle;
@@ -9,10 +9,10 @@
       line-height: 30.5px;
     }
   }
-  .el-button+.el-button {
+  .el-button + .el-button {
     margin-left: 0 !important;
   }
-  .el-select__caret.el-input__icon.el-icon-arrow-up{
+  .el-select__caret.el-input__icon.el-icon-arrow-up {
     line-height: 30.5px;
   }
   .date-item {
@@ -38,10 +38,10 @@
   border-radius: 16px;
 }
 
-.logo-con{
+.logo-con {
   height: 60px;
   padding: 13px 0 0;
-  img{
+  img {
     height: 32px;
     width: 135px;
     display: block;
@@ -84,20 +84,31 @@
   line-height: 45px;
   width: 368px;
 }
-.my-blockquote{
+.my-blockquote {
   margin: 0 0 10px;
   padding: 15px;
   line-height: 22px;
-  border-left: 5px solid #00437B;
+  border-left: 5px solid #00437b;
   border-radius: 0 2px 2px 0;
   background-color: #f2f2f2;
 }
-.my-code{
+.my-code {
   position: relative;
   padding: 15px;
   line-height: 20px;
   border-left: 5px solid #ddd;
   color: #333;
   font-family: Courier New, serif;
-  font-size: 12px
+  font-size: 12px;
+}
+.tree-select-wrapper {
+  .scrollbar-wrapper {
+    max-height: 475px;
+  }
+  .el-card__body {
+    padding: 20px 10px;
+  }
+}
+.dialog-content {
+  min-height: 350px;
 }

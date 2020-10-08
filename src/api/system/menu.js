@@ -2,21 +2,21 @@ import request from '@/utils/request'
 
 export function getMenusTree() {
   return request({
-    url: '/end/menus/tree',
+    url: '/api/menus/tree',
     method: 'get'
   })
 }
 
 export function buildMenus() {
   return request({
-    url: '/end/menus/build',
+    url: '/api/menus/build',
     method: 'get'
   })
 }
 
 export function add(data) {
   return request({
-    url: '/end/menus',
+    url: '/api/menus',
     method: 'post',
     data
   })
@@ -24,7 +24,7 @@ export function add(data) {
 
 export function del(ids) {
   return request({
-    url: '/end/menus',
+    url: '/api/menus',
     method: 'delete',
     data: ids
   })
@@ -32,7 +32,7 @@ export function del(ids) {
 
 export function edit(data) {
   return request({
-    url: '/end/menus',
+    url: '/api/menus',
     method: 'put',
     data
   })

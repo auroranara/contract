@@ -2,15 +2,15 @@ import request from '@/utils/request'
 
 export function getDicts(data) {
   return request({
-    url: '/end/dicts',
+    url: '/api/dicts',
     method: 'get',
-    params: { 'name': data.name, 'page': data.page, 'limit': data.limit }
+    params: { name: data.name, page: data.page, limit: data.limit }
   })
 }
 
 export function addDict(data) {
   return request({
-    url: '/end/dicts',
+    url: '/api/dicts',
     method: 'post',
     data
   })
@@ -18,14 +18,14 @@ export function addDict(data) {
 
 export function delDict(id) {
   return request({
-    url: '/end/dicts/' + id,
+    url: '/api/dicts/' + id,
     method: 'get'
   })
 }
 
 export function editDict(data) {
   return request({
-    url: '/end/dicts/dict',
+    url: '/api/dicts/dict',
     method: 'post',
     data
   })

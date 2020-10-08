@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getDictDetails(dictId) {
   return request({
-    url: '/end/dicts/' + dictId + '/detail',
+    url: '/api/dicts/' + dictId + '/detail',
     method: 'get'
   })
 }
@@ -14,7 +14,7 @@ export function getDictMap(dictName) {
     size: 9999
   }
   return request({
-    url: '/end/dictDetail/map',
+    url: '/api/dictDetail/map',
     method: 'get',
     params
   })
@@ -22,7 +22,7 @@ export function getDictMap(dictName) {
 
 export function add(data) {
   return request({
-    url: '/end/dicts/detail',
+    url: '/api/dicts/detail',
     method: 'post',
     data
   })
@@ -30,14 +30,14 @@ export function add(data) {
 
 export function del(id) {
   return request({
-    url: '/end/dicts/detail/' + id,
+    url: '/api/dicts/detail/' + id,
     method: 'get'
   })
 }
 
 export function edit(data) {
   return request({
-    url: '/end/dicts/dict/' + data.id,
+    url: '/api/dicts/dict/' + data.id,
     method: 'post',
     data
   })
@@ -45,7 +45,7 @@ export function edit(data) {
 
 export function getDictRedis(name) {
   return request({
-    url: '/end/dicts/detail/redis',
+    url: '/api/dicts/detail/redis',
     method: 'get',
     params: { name: name }
   })

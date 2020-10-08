@@ -134,42 +134,42 @@ export default {
   data() {
     return {
       headers: undefined,
-      action: '/end/file/upload/ftp',
+      action: '/api/file/upload/ftp',
       rules: {
         name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         sex: [{ required: true, message: '请选择性别', trigger: 'blur' }],
         birthday: [
-          { required: true, message: '请输入出生日期', trigger: 'blur' }
+          { required: true, message: '请输入出生日期', trigger: 'blur' },
         ],
         credentialsType: [
-          { required: true, message: '请选择证件类型', trigger: 'blur' }
+          { required: true, message: '请选择证件类型', trigger: 'blur' },
         ],
         credentialsNo: [
-          { required: true, message: '请输入证件号', trigger: 'blur' }
-        ]
-      }
+          { required: true, message: '请输入证件号', trigger: 'blur' },
+        ],
+      },
     }
   },
   computed: {
-    photoFrontFile: function() {
+    photoFrontFile: function () {
       if (this.staff.photoFront) {
         return [{ name: '证件正面', url: this.staff.photoFront }]
       } else {
         return []
       }
     },
-    photoBackFile: function() {
+    photoBackFile: function () {
       if (this.staff.photoBack) {
         return [{ name: '证件反面', url: this.staff.photoBack }]
       } else {
         return []
       }
     },
-    files: function() {
-      return (this.staff.acc || []).map(file => {
+    files: function () {
+      return (this.staff.acc || []).map((file) => {
         return { name: file.name, url: file.response.data }
       })
-    }
+    },
   },
   methods: {
     deleteFrontImg() {
@@ -213,14 +213,14 @@ export default {
     },
     formValid() {
       let result = true
-      this.$refs['form'].validate(valid => {
+      this.$refs['form'].validate((valid) => {
         if (!valid) {
           result = false
         }
       })
       return result
-    }
-  }
+    },
+  },
 }
 </script>
 

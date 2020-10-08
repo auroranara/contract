@@ -7,7 +7,7 @@
     </transition>
     <div v-if="$store.state.settings.showFooter" id="el-main-footer">
       <span v-html="$store.state.settings.footerTxt" />
-      <span> ⋅ </span>
+      <span>⋅</span>
       <a href="http://www.beian.miit.gov.cn" target="_blank">{{ $store.state.settings.caseNumber }}</a>
     </div>
   </section>
@@ -22,8 +22,8 @@ export default {
     },
     key() {
       return this.$route.path
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -36,18 +36,18 @@ export default {
   overflow: hidden;
 }
 
-.fixed-header+.app-main {
-  padding-top: 50px;
+.fixed-header + .app-main {
+  padding-top: 90px;
 }
 
 .hasTagsView {
   .app-main {
-    /* 84 = navbar + tags-view = 50 + 34 */
-    min-height: calc(100vh - 84px);
+    /* 84 = navbar + tags-view + top-sidbar = 50 + 34 +41 */
+    min-height: calc(100vh - 125px);
   }
 
-  .fixed-header+.app-main {
-    padding-top: 84px;
+  .fixed-header + .app-main {
+    padding-top: 125px;
   }
 }
 </style>

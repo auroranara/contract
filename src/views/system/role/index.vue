@@ -63,7 +63,12 @@
       </el-col>
     </el-row>
 
-    <el-dialog append-to-body :close-on-click-modal="false" :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+    <el-dialog
+      append-to-body
+      :close-on-click-modal="false"
+      :title="textMap[dialogStatus]"
+      :visible.sync="dialogFormVisible"
+    >
       <el-form
         ref="dataForm"
         :rules="rules"
@@ -103,7 +108,13 @@
 </template>
 
 <script>
-import { getAll, getResourceIdsByRoleId, saveRoleResource, add, edit } from '@/api/system/role'
+import {
+  getAll,
+  getResourceIdsByRoleId,
+  saveRoleResource,
+  add,
+  edit,
+} from '@/api/system/role'
 import { queryResources } from '@/api/system/resource'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 export default {
@@ -114,41 +125,45 @@ export default {
         children: 'children',
         label: 'title',
         roleCode: '',
-        status: ''
+        status: '',
       },
       temp: {
         id: undefined,
         name: '',
         code: '',
-        status: ''
+        status: '',
       },
       dialogStatus: '',
       defaultResourceProps: {
         children: 'children',
-        label: 'label'
+        label: 'label',
       },
       dialogFormVisible: false,
 
       rules: {
         name: [{ required: true, message: '请填写角色名称', trigger: 'blur' }],
-        code: [{ required: true, message: '请填写角色编码', trigger: 'blur' }]
+        code: [{ required: true, message: '请填写角色编码', trigger: 'blur' }],
       },
       statusOptions: [
         { text: '启用', value: '0' },
-        { text: '禁用', value: '1' }
+        { text: '禁用', value: '1' },
       ],
       textMap: {
         update: '编辑',
-        create: '创建'
+        create: '创建',
       },
-      currentId: 0, menuLoading: false, showButton: false,
-      menus: [], menuIds: [], depts: [],
+      currentId: 0,
+      menuLoading: false,
+      showButton: false,
+      menus: [],
+      menuIds: [],
+      depts: [],
       roleList: [],
       permission: {
         // add: ['admin', 'roles:add'],
         // edit: ['admin', 'roles:edit'],
         // del: ['admin', 'roles:del']
-      }
+      },
     }
   },
   created() {
@@ -160,12 +175,12 @@ export default {
   },
   methods: {
     getMenus() {
-      queryResources().then(res => {
+      queryResources().then((res) => {
         this.menus = res.data
       })
     },
     getRoleList() {
-      getAll().then(res => {
+      getAll().then((res) => {
         this.roleList = res.data
       })
     },
@@ -178,39 +193,35 @@ export default {
     },
     updateData() {
       // 更新角色
-      this.$refs['dataForm'].validate(valid => {
+      this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          edit(this.temp).then(
-            () => {
-              this.dialogFormVisible = false
-              this.$notify({
-                title: '成功',
-                message: '更新成功',
-                type: 'success',
-                duration: 2000
-              })
-              this.getRoleList()
-            }
-          )
+          edit(this.temp).then(() => {
+            this.dialogFormVisible = false
+            this.$notify({
+              title: '成功',
+              message: '更新成功',
+              type: 'success',
+              duration: 2000,
+            })
+            this.getRoleList()
+          })
         }
       })
     },
     createData() {
       // 创建角色
-      this.$refs['dataForm'].validate(valid => {
+      this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          add(this.temp).then(
-            () => {
-              this.dialogFormVisible = false
-              this.$notify({
-                title: '成功',
-                message: '创建成功',
-                type: 'success',
-                duration: 2000
-              })
-              this.getRoleList()
-            }
-          )
+          add(this.temp).then(() => {
+            this.dialogFormVisible = false
+            this.$notify({
+              title: '成功',
+              message: '创建成功',
+              type: 'success',
+              duration: 2000,
+            })
+            this.getRoleList()
+          })
         }
       })
     },
@@ -219,7 +230,7 @@ export default {
         id: undefined,
         name: '',
         code: '',
-        status: '0'
+        status: '0',
       }
     },
     editRole() {
@@ -241,12 +252,12 @@ export default {
     },
     handleRoleNodeChange(data, checked, indeterminat) {
       if (checked) {
-        getResourceIdsByRoleId(data.key).then(res => {
+        getResourceIdsByRoleId(data.key).then((res) => {
           if (res.data != null) {
             const checkedNodes = res.data.split(',')
             var resultCheckNodes = []
 
-            checkedNodes.forEach(node => {
+            checkedNodes.forEach((node) => {
               resultCheckNodes.push(node)
             })
             this.$refs.resourceTree.setCheckedKeys(resultCheckNodes)
@@ -269,30 +280,31 @@ export default {
       resourceKeys = resourceKeys.concat(halfCheckedKeys)
       var data = {
         roleId: roleKeys[0],
-        resources: resourceKeys
+        resources: resourceKeys,
       }
       saveRoleResource(data).then(() => {
         this.$notify({
           title: '成功',
           message: '更新成功',
           type: 'success',
-          duration: 2000
+          duration: 2000,
         })
       })
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style rel="stylesheet/scss" lang="scss">
-  .role-span {
-    font-weight: bold;color: #303133;
-    font-size: 15px;
-  }
+.role-span {
+  font-weight: bold;
+  color: #303133;
+  font-size: 15px;
+}
 </style>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-  /deep/ .el-input-number .el-input__inner {
-    text-align: left;
-  }
+/deep/ .el-input-number .el-input__inner {
+  text-align: left;
+}
 </style>

@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getSubjectByName(name) {
   return request({
-    url: '/end/resSubject/subjects',
+    url: '/api/resSubject/subjects',
     method: 'get',
     params: {
       name: name
@@ -11,28 +11,28 @@ export function getSubjectByName(name) {
 }
 export function getEnableSubject() {
   return request({
-    url: '/end/resSubject/subjects/enable',
+    url: '/api/resSubject/subjects/enable',
     method: 'get'
   })
 }
 
 export function getEnableLine() {
   return request({
-    url: '/end/resSubject/line/enable',
+    url: '/api/resSubject/line/enable',
     method: 'get'
   })
 }
 
 export function getAllLineAndStation() {
   return request({
-    url: '/end/resSubject/line/all',
+    url: '/api/resSubject/line/all',
     method: 'get'
   })
 }
 
 export function getAuthSubject(psnId) {
   return request({
-    url: '/end/resSubject/subjects/auth',
+    url: '/api/resSubject/subjects/auth',
     method: 'get',
     params: {
       psnId: psnId
@@ -41,21 +41,21 @@ export function getAuthSubject(psnId) {
 }
 export function add(data) {
   return request({
-    url: '/end/resSubject/add',
+    url: '/api/resSubject/add',
     method: 'post',
     data
   })
 }
 export function edit(data) {
   return request({
-    url: '/end/resSubject/edit',
+    url: '/api/resSubject/edit',
     method: 'post',
     data
   })
 }
 export function changeStatus(data) {
   return request({
-    url: '/end/resSubject/status',
+    url: '/api/resSubject/status',
     method: 'post',
     params: {
       id: data.id,
@@ -65,26 +65,26 @@ export function changeStatus(data) {
 }
 export function getLines() {
   return request({
-    url: '/end/resSubject/line',
+    url: '/api/resSubject/line',
     method: 'get'
   })
 }
 export function getAllStation() {
   return request({
-    url: '/end/resSubject/stations',
+    url: '/api/resSubject/stations',
     method: 'get'
   })
 }
 export function getStations(lineId) {
   return request({
-    url: '/end/resSubject/station/' + lineId,
+    url: '/api/resSubject/station/' + lineId,
     method: 'get'
   })
 }
 
 export function findConstructionCompany(lineId) {
   return request({
-    url: '/end/resSubject/station/'+lineId+'/construction',
+    url: '/api/resSubject/station/' + lineId + '/construction',
     method: 'get'
   })
 }

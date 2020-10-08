@@ -2,6 +2,7 @@ import store from '@/store'
 
 const { body } = document
 const WIDTH = 992 // refer to Bootstrap's responsive design
+const CLOSE_WIDTH = 1205
 
 export default {
   watch: {
@@ -31,12 +32,17 @@ export default {
       const rect = body.getBoundingClientRect()
       return rect.width - 1 < WIDTH
     },
+    $_needClose() {
+      const rect = body.getBoundingClientRect()
+      return rect.width - 1 < CLOSE_WIDTH
+    },
     $_resizeHandler() {
       if (!document.hidden) {
         const isMobile = this.$_isMobile()
+        const needClose = this.$_needClose()
         store.dispatch('app/toggleDevice', isMobile ? 'mobile' : 'desktop')
 
-        if (isMobile) {
+        if (needClose) {
           store.dispatch('app/closeSideBar', { withoutAnimation: true })
         }
       }
